@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OppTrack | Moderation Queue</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body{background:#0a1628;color:#f5f0e8;font-family:'DM Sans',sans-serif;padding:30px;max-width:800px;margin:0 auto}
+  h2{color:#c9a84c;margin-bottom:5px}
+  .card{background:#112240;border:1px solid rgba(201,168,76,.3);padding:20px;margin-bottom:15px;border-radius:12px}
+  .card h3{margin-top:0}
+  button{padding:10px 16px;cursor:pointer;border:none;border-radius:8px;font-weight:600;margin-right:10px;transition:all 0.2s}
+  .approve{background:#c9a84c;color:#0a1628}
+  .approve:hover{background:#e8c96d}
+  .reject{background:transparent;border:1px solid #e05c5c;color:#e05c5c}
+</style>
+</head>
+<body>
+<h2>Admin Moderation Queue</h2>
+<p style="color:rgba(245,240,232,0.55);margin-bottom:30px">Review user-submitted opportunities before they go live on the global feed.</p>
+<div id="auth-status" style="margin-bottom:20px">Checking authorization...</div>
+<div id="queue"></div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, collection, query, where, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js';
+
+  // Requires config initialization
+  const firebaseConfig = { /* Populate to match index.html */ };
+  let app, auth, db, functions;
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth();
+    db = getFirestore();
+    functions = getFunctions(app, 'europe-west1');
+  } catch(e) {}
+
+  if(auth) {
+    onAuthStateChanged(auth, user => {
+      if(!user) {
+        document.getElementById('auth-status').innerHTML = `<button class="approve" onclick="signIn()">Sign in to moderate</button>`;
+      } else {
+        document.getElementById('auth-status').innerHTML = `<span style="font-size:14px">Logged in as <b>${user.email}</b></span> <button style="padding:4px 8px;font-size:12px;margin-left:10px" onclick="window._fbsignOut()">Logout</button>`;
+        loadQueue();
+      }
+    });
+    window.signIn = () => signInWithPopup(auth, new GoogleAuthProvider());
+    window._fbsignOut = () => auth.signOut();
+  }
+
+  function loadQueue() {
+    document.getElementById('queue').innerHTML = '<i>Loading queue streams...</i>';
+    const q = query(collection(db, 'opportunities'), where('is_approved', '==', false));
+    onSnapshot(q, snap => {
+      let h = '';
+      if(snap.empty) { h = '<p style="color:#4caf7d">Queue is entirely clear! Excellent work.</p>'; }
+      snap.forEach(d => {
+        const o = d.data();
+        h += `<div class="card" id="card-${d.id}">
+          <h3>${o.title}</h3>
+          <p style="font-size:13px;color:#c9a84c;margin-bottom:6px">${o.org}</p>
+          <p style="font-size:12px;margin-bottom:15px"><a href="${o.link}" target="_blank" style="color:lightblue">${o.link}</a></p>
+          <button class="approve" onclick="processReq('${d.id}', 'approve')">Approve & Publish</button>
+          <button class="reject" onclick="processReq('${d.id}', 'reject')">Delete</button>
+        </div>`;
+      });
+      document.getElementById('queue').innerHTML = h;
+    });
+  }
+
+  window.processReq = async (id, action) => {
+    try {
+      await httpsCallable(functions, 'adminProcess')({ oppId: id, action });
+      document.getElementById('card-'+id).style.opacity = '0.5';
+    } catch(e) { alert("Authorization Denied or Error Context: " + e.message); }
+  }
+</script>
+</body>
+</html>

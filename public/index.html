@@ -347,7 +347,7 @@ input[type="file"]{display:none}
     <div class="modal-sub">Choose how and when you want to be notified</div>
     <div class="modal-section-label">CHANNELS</div>
     <div class="toggle-row"><div><div class="toggle-label">🔔 Push Notifications</div><div class="toggle-sublabel">In-app &amp; phone alerts</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-    <div class="toggle-row"><div><div class="toggle-label">💬 WhatsApp</div><div class="toggle-sublabel">Reminders to your number</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="toggle-row"><div><div class="toggle-label">💬 WhatsApp Digest</div><input id="wa-num" style="background:transparent;border:none;border-bottom:1px solid var(--gold);color:white;outline:none;font-size:12px;margin-top:4px" placeholder="e.g. +23490..."></div><button class="toggle on" id="t-wa" onclick="this.classList.toggle('on')"></button></div>
     <div class="toggle-row"><div><div class="toggle-label">📧 Email</div><div class="toggle-sublabel">Daily digest to inbox</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
     <div class="modal-section-label">DEFAULT ALERTS</div>
     <div class="toggle-row"><div><div class="toggle-label">7-day reminder</div><div class="toggle-sublabel">A week before deadline</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
@@ -460,12 +460,15 @@ input[type="file"]{display:none}
       <div class="section-title">My Tracker</div>
       <div class="section-link" onclick="openModal()">⏰ Reminders</div>
     </div>
-    <div class="tracker-tabs">
-      <button class="tab active" onclick="filterTracker('all',this)">All</button>
-      <button class="tab" onclick="filterTracker('saved',this)">Saved</button>
-      <button class="tab" onclick="filterTracker('applied',this)">Applied</button>
-      <button class="tab" onclick="filterTracker('pending',this)">Awaiting</button>
-      <button class="tab" onclick="filterTracker('offer',this)">Offer</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0 14px">
+      <div class="tracker-tabs" style="padding:0">
+        <button class="tab active" onclick="filterTracker('all',this)">All</button>
+        <button class="tab" onclick="filterTracker('saved',this)">Saved</button>
+        <button class="tab" onclick="filterTracker('applied',this)">Applied</button>
+        <button class="tab" onclick="filterTracker('pending',this)">Awaiting</button>
+        <button class="tab" onclick="filterTracker('offer',this)">Offer</button>
+      </div>
+      <button onclick="shareTracker()" style="padding:5px 10px;background:var(--navy-light);color:var(--gold);border:1px solid var(--gold);border-radius:6px;font-size:11px;cursor:pointer">Share 📤</button>
     </div>
     <div id="tracker-list" style="padding-bottom:8px"></div>
   </div>
@@ -574,13 +577,21 @@ function setupApp() {
     if (user) {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app').classList.add('visible');
-      // Load user prefs
       const { db, doc, getDoc } = window._fb;
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const prefs   = userDoc.exists() ? userDoc.data().prefs : null;
-      if (!prefs) document.getElementById('onboarding').style.display = 'block';
-      else subscribeOpportunities(prefs);
-      subscribeTracked(user.uid);
+      const urlParams = new URLSearchParams(window.location.search);
+      const shareUid = urlParams.get('share');
+      
+      if(shareUid) {
+        showToast("Viewing Read-Only Shared Tracker");
+        subscribeTracked(shareUid);
+      } else {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const prefs   = userDoc.exists() ? userDoc.data().prefs : null;
+        if(userDoc.exists() && userDoc.data().whatsapp_number) document.getElementById('wa-num').value = userDoc.data().whatsapp_number;
+        if (!prefs) document.getElementById('onboarding').style.display = 'block';
+        else subscribeOpportunities(prefs);
+        subscribeTracked(user.uid);
+      }
     } else {
       document.getElementById('app').classList.remove('visible');
       document.getElementById('auth-screen').style.display = 'flex';
@@ -800,6 +811,8 @@ function renderTracker(){
         <div class="docs-title">DOCUMENTS (${chk}/${tl} ready)</div>
         <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
         ${(t.docs||[]).map((d,i)=>`<div class="doc-item"><div class="doc-check ${d.checked?'checked':''}" onclick="togDoc('${o.id}',${i})">${d.checked?'✓':''}</div><span class="doc-label ${d.checked?'checked':''}">${d.name}</span></div>`).join('')}
+        <textarea class="notes-area" id="notes-${o.id}" placeholder="Scratchpad for brainstorming...">${t.notes?.text || ''}</textarea>
+        <button onclick="callEssayAssist('${o.id}')" style="margin-top:8px;padding:8px;width:100%;font-size:12px;font-weight:bold;background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:var(--navy);border-radius:6px;border:none;cursor:pointer">✨ AI Essay Assistant</button>
       </div>`;
     c.appendChild(card);
     buildPipe(o.id,t);
@@ -849,7 +862,7 @@ async function togDoc(id,i){
 
 // UPLOAD / AI
 async function parseOpp(){
-  const { functions, httpsCallable } = window._fb;
+  const { functions, httpsCallable, db, collection, doc, setDoc, Timestamp } = window._fb;
   const txt = document.getElementById('oppText').value;
   const url = document.getElementById('oppLink').value;
   if(!txt&&!url){showToast('Please add text or a link first');return}
@@ -866,7 +879,12 @@ async function parseOpp(){
     document.getElementById('res-deadline').textContent=p.deadline?fmtDate(p.deadline):'—';
     document.getElementById('res-title').textContent=p.title||'—';
     document.getElementById('res-req').textContent=p.requirements||'—';
-    ld.classList.remove('show');rs.classList.add('show');showToast('AI extracted successfully ✦');
+
+    const payload = { ...p, link: url||'', is_active: false, is_approved: false, source: 'user', discovered_at: Timestamp.now() };
+    if (p.deadline && p.deadline !== 'rolling') payload.deadline_timestamp = Timestamp.fromDate(new Date(p.deadline));
+    await setDoc(doc(collection(db, 'opportunities')), payload);
+
+    ld.classList.remove('show');rs.classList.add('show');showToast('Sent to Admin Moderation Queue ✦');
   }catch(e){
     ld.classList.remove('show');
     showToast('Failed to parse: ' + e.message);
@@ -918,6 +936,34 @@ function showPage(name){
 function showToast(msg){
   const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;
   t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+function shareTracker() {
+  if(!authUser) return showToast("Log in to share");
+  window._fb.setDoc(window._fb.doc(window._fb.db, 'users', authUser.uid), { is_public: true }, { merge: true });
+  const url = window.location.origin + window.location.pathname + '?share=' + authUser.uid;
+  if(navigator.clipboard) navigator.clipboard.writeText(url);
+  showToast('Public Link copied to clipboard 📤');
+}
+
+async function callEssayAssist(oppId) {
+  const notes = document.getElementById('notes-' + oppId)?.value || '';
+  try {
+     showToast("Claude is writing your draft... ✨");
+     const rs = await window._fb.httpsCallable(window._fb.functions, 'essayAssist')({ oppId, notes });
+     alert(rs.data.draft); 
+  } catch(e) { showToast("Assistant Error: " + e.message); }
+}
+
+const oldSave = window.saveReminders || function(){};
+window.saveReminders = async () => {
+  oldSave();
+  if(!authUser) return;
+  const num = document.getElementById('wa-num').value;
+  const tWa = document.getElementById('t-wa').classList.contains('on');
+  let channels = ['push']; if(tWa) channels.push('whatsapp');
+  await window._fb.setDoc(window._fb.doc(window._fb.db, 'users', authUser.uid), 
+    { whatsapp_number: num, 'prefs.notify_channels': channels }, { merge: true });
 }
 </script>
 </body>

@@ -107,6 +107,7 @@ exports.scout = onSchedule({
       source:          opp.source,
       source_name:     opp.source_name,
       is_active:       true,
+      is_approved:     true,
       analyst_done:    false,
       discovered_at:   Timestamp.now(),
       analyst_version: 0,
