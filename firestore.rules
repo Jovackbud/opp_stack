@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Public opportunities — anyone can read, only functions can write
+    match /opportunities/{oppId} {
+      allow read: if true;
+      allow write: if false; // Cloud Functions use Admin SDK (bypasses rules)
+    }
+
+    // User profile — only the owner
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      // Applications sub-collection — only the owner
+      match /applications/{oppId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+      
+      // Matches sub-collection
+      match /matches/{oppId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+  }
+}

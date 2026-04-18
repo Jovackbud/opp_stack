@@ -1,0 +1,22 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "opportunities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "is_active",          "order": "ASCENDING" },
+        { "fieldPath": "deadline_timestamp", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "opportunities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "is_active",     "order": "ASCENDING" },
+        { "fieldPath": "category",      "order": "ASCENDING" },
+        { "fieldPath": "target_regions","order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

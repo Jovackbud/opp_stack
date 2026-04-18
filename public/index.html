@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a1628">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="OppTrack">
+<title>OppTrack — Never Miss An Opportunity</title>
+<link rel="manifest" href="/manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0a1628;--navy-mid:#112240;--navy-light:#1a3456;--gold:#c9a84c;--gold-light:#e8c96d;--gold-dim:#8a6f2e;--white:#f5f0e8;--white-dim:rgba(245,240,232,0.55);--white-faint:rgba(245,240,232,0.08);--red:#e05c5c;--green:#4caf7d;--radius:16px;--radius-sm:10px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+#splash{position:fixed;inset:0;z-index:999;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-logo{font-family:'Playfair Display',serif;font-size:42px;color:var(--gold);animation:fadeUp .6s ease .2s both}
+.splash-sub{font-size:12px;color:var(--white-dim);letter-spacing:3px;text-transform:uppercase;animation:fadeUp .6s ease .5s both}
+.splash-bar{width:120px;height:2px;background:var(--navy-light);border-radius:2px;margin-top:24px;animation:fadeUp .6s ease .7s both;overflow:hidden}
+.splash-fill{height:100%;width:0;background:var(--gold);border-radius:2px;animation:fillBar 1.4s ease .8s forwards}
+@keyframes fillBar{to{width:100%}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+#app{display:none;flex-direction:column;min-height:100vh}
+#app.visible{display:flex}
+.topbar{padding:14px 18px 10px;background:var(--navy);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--white-faint);display:flex;align-items:center;justify-content:space-between}
+.topbar-logo{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold)}
+.topbar-right{display:flex;gap:10px;align-items:center}
+.icon-btn{width:34px;height:34px;border-radius:50%;background:var(--white-faint);border:none;color:var(--white);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:background .2s}
+.icon-btn:hover{background:rgba(201,168,76,.15)}
+.notif-dot{width:7px;height:7px;background:var(--gold);border-radius:50%;position:absolute;top:4px;right:4px;border:2px solid var(--navy)}
+.page{display:none;flex:1;overflow-y:auto;padding-bottom:80px}
+.page.active{display:block}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--navy-mid);border-top:1px solid var(--white-faint);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;cursor:pointer;gap:3px;border:none;background:none;color:var(--white-dim);font-family:'DM Sans',sans-serif;transition:color .2s}
+.nav-item.active{color:var(--gold)}
+.nav-item svg{width:20px;height:20px}
+.nav-label{font-size:10px}
+/* HOME */
+.home-hero{padding:20px 18px 14px;background:linear-gradient(160deg,var(--navy-mid) 0%,var(--navy) 100%);position:relative;overflow:hidden}
+.home-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.1) 0%,transparent 70%)}
+.hero-greeting{font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:3px}
+.hero-title{font-family:'Playfair Display',serif;font-size:24px;line-height:1.3;margin-bottom:14px}
+.hero-title span{color:var(--gold)}
+.stats-row{display:flex;gap:10px}
+.stat-card{flex:1;background:var(--white-faint);border:1px solid rgba(201,168,76,.2);border-radius:var(--radius-sm);padding:10px;text-align:center}
+.stat-num{font-family:'Playfair Display',serif;font-size:26px;color:var(--gold)}
+.stat-label{font-size:9px;color:var(--white-dim);letter-spacing:.5px;margin-top:1px}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 10px}
+.section-title{font-family:'Playfair Display',serif;font-size:17px}
+.section-actions{display:flex;gap:8px;align-items:center}
+.section-link{font-size:12px;color:var(--gold);cursor:pointer}
+.view-toggle{display:flex;background:var(--white-faint);border-radius:8px;padding:2px;gap:2px}
+.view-btn{width:28px;height:28px;border:none;background:none;color:var(--white-dim);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.view-btn.active{background:var(--gold);color:var(--navy)}
+.view-btn svg{width:14px;height:14px}
+/* LIST CARDS */
+.opp-card-list{margin:0 12px 10px;background:var(--navy-mid);border:1px solid var(--white-faint);border-radius:var(--radius);padding:14px;cursor:pointer;transition:border-color .2s,transform .15s;position:relative}
+.opp-card-list:active{transform:scale(.98)}
+.opp-card-list:hover{border-color:rgba(201,168,76,.4)}
+.opp-card-list.urgent{border-left:3px solid var(--red)}
+.opp-card-list.soon{border-left:3px solid var(--gold)}
+.opp-card-list.safe{border-left:3px solid var(--green)}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.card-org{font-size:10px;color:var(--gold);letter-spacing:.5px;text-transform:uppercase}
+.card-title{font-family:'Playfair Display',serif;font-size:14px;line-height:1.4;margin-bottom:8px}
+.card-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.card-meta-item{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--white-dim)}
+.card-actions{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--white-faint)}
+.btn-sm{padding:7px 12px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;border:none}
+.btn-track{background:var(--gold);color:var(--navy)}
+.btn-track:hover{background:var(--gold-light)}
+.btn-track.tracked{background:var(--white-faint);color:var(--white);border:1px solid var(--white-faint)}
+.btn-ghost{background:var(--white-faint);color:var(--white);border:1px solid var(--white-faint)}
+/* TILE CARDS */
+.opps-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}
+.opp-card-tile{background:var(--navy-mid);border:1px solid var(--white-faint);border-radius:var(--radius);cursor:pointer;transition:border-color .2s,transform .15s;overflow:hidden;display:flex;flex-direction:column}
+.opp-card-tile:active{transform:scale(.97)}
+.opp-card-tile.urgent{border-top:3px solid var(--red)}
+.opp-card-tile.soon{border-top:3px solid var(--gold)}
+.opp-card-tile.safe{border-top:3px solid var(--green)}
+.tile-flier{height:80px;background:linear-gradient(135deg,var(--navy-light),var(--navy-mid));display:flex;align-items:center;justify-content:center;font-size:32px}
+.tile-body{padding:10px;flex:1;display:flex;flex-direction:column;gap:4px}
+.tile-org{font-size:9px;color:var(--gold);letter-spacing:.5px;text-transform:uppercase}
+.tile-title{font-family:'Playfair Display',serif;font-size:12px;line-height:1.3}
+.tile-track{width:100%;padding:7px;background:var(--gold);color:var(--navy);border:none;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;cursor:pointer;border-top:1px solid var(--white-faint);transition:background .2s}
+.tile-track.tracked{background:var(--white-faint);color:var(--white-dim)}
+/* BADGES */
+.badge{font-size:9px;padding:2px 7px;border-radius:20px;white-space:nowrap;font-weight:500}
+.badge-fellowship{background:rgba(201,168,76,.15);color:var(--gold-light);border:1px solid rgba(201,168,76,.3)}
+.badge-internship{background:rgba(76,175,125,.15);color:#6dd4a0;border:1px solid rgba(76,175,125,.3)}
+.badge-scholarship{background:rgba(100,150,255,.15);color:#8ab4ff;border:1px solid rgba(100,150,255,.3)}
+.badge-job{background:rgba(200,100,200,.15);color:#e0a0e0;border:1px solid rgba(200,100,200,.3)}
+.badge-graduate{background:rgba(255,150,80,.15);color:#ffb380;border:1px solid rgba(255,150,80,.3)}
+.dtag{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px}
+.dtag.urgent{background:rgba(224,92,92,.15);color:var(--red);border:1px solid rgba(224,92,92,.3)}
+.dtag.soon{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+.dtag.safe{background:rgba(76,175,125,.15);color:var(--green);border:1px solid rgba(76,175,125,.3)}
+/* DETAIL OVERLAY */
+.detail-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(5,12,25,.95);overflow-y:auto}
+.detail-overlay.show{display:block}
+.detail-sheet{min-height:100vh;animation:slideInR .3s ease}
+@keyframes slideInR{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.detail-back{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--white-faint);cursor:pointer;color:var(--gold);font-size:13px;font-weight:600;background:var(--navy);position:sticky;top:0;z-index:10}
+.detail-flier{height:200px;background:linear-gradient(135deg,var(--navy-light) 0%,#0d2040 100%);display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;overflow:hidden}
+.detail-flier-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,var(--navy-mid))}
+.detail-body{padding:18px;background:var(--navy-mid)}
+.detail-org{font-size:11px;color:var(--gold);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.detail-title{font-family:'Playfair Display',serif;font-size:22px;line-height:1.3;margin-bottom:12px}
+.tags-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tag{font-size:10px;padding:3px 9px;border-radius:20px;background:var(--white-faint);border:1px solid var(--white-faint);color:var(--white-dim)}
+.dsection{margin-bottom:18px}
+.dsection-title{font-size:10px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.dsection-title::after{content:'';flex:1;height:1px;background:var(--white-faint)}
+.dpara{font-size:13px;line-height:1.75;color:var(--white-dim)}
+.doc-chip{display:inline-flex;align-items:center;gap:5px;background:var(--white-faint);border:1px solid var(--white-faint);border-radius:var(--radius-sm);padding:6px 10px;font-size:12px;margin:4px 4px 0 0}
+.link-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--navy);border-radius:var(--radius-sm);margin-bottom:8px;text-decoration:none;color:var(--white);cursor:pointer}
+.link-icon{width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.link-label{font-size:12px;font-weight:600}
+.link-sub{font-size:10px;color:var(--white-dim)}
+.time-box{background:var(--navy);border-radius:var(--radius-sm);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.time-big{font-family:'Playfair Display',serif;font-size:32px;color:var(--gold)}
+.time-label{font-size:11px;color:var(--white-dim);margin-top:2px}
+.detail-actions{display:flex;gap:10px;padding:16px 18px;border-top:1px solid var(--white-faint);background:var(--navy-mid);position:sticky;bottom:0}
+.btn-full{flex:1;padding:13px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--gold);color:var(--navy)}
+.btn-primary:hover{background:var(--gold-light)}
+.btn-secondary{background:var(--white-faint);color:var(--white);border:1px solid var(--white-faint)}
+.btn-icon-sq{width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--white-faint);background:var(--white-faint);color:var(--white);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* TRACKER */
+.tracker-tabs{display:flex;padding:14px 14px 0;gap:7px;overflow-x:auto;scrollbar-width:none}
+.tracker-tabs::-webkit-scrollbar{display:none}
+.tab{padding:7px 14px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;border:1px solid var(--white-faint);background:none;color:var(--white-dim);transition:all .2s;font-family:'DM Sans',sans-serif}
+.tab.active{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.tracked-card{margin:12px 14px 0;background:var(--navy-mid);border:1px solid var(--white-faint);border-radius:var(--radius);overflow:hidden}
+.tracked-header{padding:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;cursor:pointer}
+.tracked-title{font-family:'Playfair Display',serif;font-size:14px;flex:1}
+.tracked-body{padding:0 14px 14px}
+.pipeline-wrap{display:flex;align-items:center;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.pipeline-wrap::-webkit-scrollbar{display:none}
+.stage-node{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0}
+.stage-dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--white-faint);background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s}
+.stage-dot.done{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700}
+.stage-dot.current{background:transparent;border-color:var(--gold);color:var(--gold)}
+.stage-lbl{font-size:8px;color:var(--white-dim);text-align:center;max-width:42px;line-height:1.2;margin-top:2px}
+.stage-lbl.done{color:var(--white-dim)}
+.stage-lbl.current{color:var(--gold)}
+.pipe-line{height:2px;min-width:10px;flex:1;background:var(--white-faint);transition:background .3s;margin-bottom:20px;flex-shrink:0}
+.pipe-line.done{background:var(--gold)}
+.docs-title{font-size:10px;color:var(--white-dim);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.doc-item{display:flex;align-items:center;gap:8px;padding:5px 0}
+.doc-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--white-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s;font-size:10px}
+.doc-check.checked{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.doc-label{font-size:12px}
+.doc-label.checked{color:var(--white-dim);text-decoration:line-through}
+.progress-bar{height:3px;background:var(--white-faint);border-radius:2px;margin:8px 0;overflow:hidden}
+.progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s}
+.notes-area{width:100%;padding:10px 12px;background:var(--navy);border:1px solid var(--white-faint);border-radius:var(--radius-sm);color:var(--white);font-family:'DM Sans',sans-serif;font-size:12px;resize:vertical;min-height:68px;outline:none;transition:border-color .2s;margin-top:4px}
+.notes-area:focus{border-color:var(--gold)}
+.notes-area::placeholder{color:var(--white-dim)}
+.note-prev{margin-top:6px;background:var(--navy);border-radius:var(--radius-sm);padding:8px 10px}
+.note-prev-label{font-size:9px;color:var(--gold);margin-bottom:3px}
+.note-prev-text{font-size:11px;color:var(--white-dim)}
+/* UPLOAD */
+.upload-area{margin:16px 14px;border:2px dashed rgba(201,168,76,.3);border-radius:var(--radius);padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white-faint)}
+.upload-area:hover{border-color:var(--gold);background:rgba(201,168,76,.05)}
+.form-section{padding:0 14px 14px}
+.form-label{font-size:11px;color:var(--gold);letter-spacing:.5px;margin-bottom:5px;display:block}
+.form-input,.form-textarea{width:100%;padding:11px 13px;background:var(--navy-mid);border:1px solid var(--white-faint);border-radius:var(--radius-sm);color:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;margin-bottom:14px}
+.form-input:focus,.form-textarea:focus{border-color:var(--gold)}
+.form-textarea{resize:vertical;min-height:90px}
+.ai-parse-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dim) 100%);color:var(--navy);border:none;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.ai-parse-btn:disabled{opacity:.6;cursor:not-allowed}
+.ai-loading{display:none;margin:0 14px 14px;background:var(--navy-mid);border:1px solid rgba(201,168,76,.3);border-radius:var(--radius);padding:18px;text-align:center}
+.ai-loading.show{display:block}
+.ai-spinner{width:36px;height:36px;border:3px solid var(--white-faint);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-result{display:none;margin:0 14px 14px;background:var(--navy-mid);border:1px solid rgba(201,168,76,.4);border-radius:var(--radius);padding:14px}
+.ai-result.show{display:block}
+.ai-fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.ai-field-label{font-size:9px;color:var(--white-dim);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
+.ai-field-value{font-size:13px;font-weight:500}
+.ai-field-value.deadline{color:var(--gold);font-family:'Playfair Display',serif}
+.publish-btn{width:100%;padding:13px;background:var(--navy-light);border:1px solid var(--gold);color:var(--gold);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+/* REMINDERS MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,22,40,.85);z-index:300;align-items:flex-end;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--navy-mid);border:1px solid rgba(201,168,76,.3);border-radius:var(--radius) var(--radius) 0 0;padding:22px 18px 44px;width:100%;max-width:480px;animation:slideUp .3s ease;max-height:88vh;overflow-y:auto}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--white-faint);border-radius:2px;margin:0 auto 18px}
+.modal-title{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:3px}
+.modal-sub{font-size:12px;color:var(--white-dim);margin-bottom:18px}
+.modal-section-label{font-size:10px;color:var(--gold);letter-spacing:1px;margin:16px 0 10px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--white-faint)}
+.toggle-label{font-size:13px}
+.toggle-sublabel{font-size:10px;color:var(--white-dim)}
+.toggle{width:42px;height:23px;background:var(--white-faint);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--gold)}
+.toggle::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:white;top:3px;left:3px;transition:left .2s}
+.toggle.on::after{left:22px}
+.time-picker{margin:12px 0;display:flex;gap:10px;align-items:center}
+.time-label{font-size:12px;color:var(--white-dim)}
+.time-input{padding:9px 12px;background:var(--navy);border:1px solid rgba(201,168,76,.3);border-radius:var(--radius-sm);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;outline:none;width:110px}
+.custom-add-row{display:flex;gap:8px;margin-top:12px}
+.custom-add-row input{flex:1;padding:9px 12px;background:var(--navy);border:1px solid var(--white-faint);border-radius:var(--radius-sm);color:var(--white);font-family:'DM Sans',sans-serif;font-size:12px;outline:none}
+.custom-add-row input:focus{border-color:var(--gold)}
+.custom-add-row select{padding:9px 8px;background:var(--navy);border:1px solid var(--white-faint);border-radius:var(--radius-sm);color:var(--white);font-family:'DM Sans',sans-serif;font-size:11px;outline:none}
+.add-btn{padding:9px 14px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.custom-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.custom-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--navy);border-radius:var(--radius-sm);font-size:12px}
+.custom-remove{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0;line-height:1}
+.save-btn{width:100%;padding:13px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:18px}
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:var(--navy-mid);border:1px solid var(--gold);border-radius:var(--radius);padding:10px 18px;font-size:12px;color:var(--white);z-index:400;opacity:0;transition:opacity .3s;white-space:nowrap;display:flex;align-items:center;gap:7px;pointer-events:none}
+.toast.show{opacity:1}
+.toast-icon{color:var(--gold)}
+.empty-state{text-align:center;padding:50px 28px}
+.empty-icon{font-size:44px;margin-bottom:14px;opacity:.4}
+.empty-title{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:7px}
+.empty-sub{font-size:13px;color:var(--white-dim);line-height:1.5}
+input[type="file"]{display:none}
+.ob-chip {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--white-faint);
+  background: none;
+  color: var(--white-dim);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.ob-chip.selected {
+  background: var(--gold);
+  color: var(--navy);
+  border-color: var(--gold);
+}
+</style>
+</head>
+<body>
+<div id="splash">
+  <div class="splash-logo">OppTrack</div>
+  <div class="splash-sub">Never Miss An Opportunity</div>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+</div>
+
+<div id="auth-screen" style="display:none; position:fixed; inset:0; z-index:1000; background:var(--navy); flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:20px;">
+  <div style="font-family:'Playfair Display',serif; font-size:32px; color:var(--gold);">OppTrack</div>
+  <div style="font-size:14px; color:var(--white-dim); text-align:center;">Sign in to sync your profile and track opportunities securely.</div>
+  <button id="authBtn" style="padding:14px 24px; background:var(--white); color:var(--navy); border:none; border-radius:var(--radius); font-size:15px; font-weight:600; cursor:pointer;">Sign in with Google</button>
+</div>
+
+<div id="onboarding" style="display:none; position:fixed; inset:0; z-index:500;
+     background:var(--navy); overflow-y:auto; padding:24px 18px 44px">
+  <div style="font-family:'Playfair Display',serif; font-size:26px; margin-bottom:6px">
+    Welcome to OppTrack
+  </div>
+  <div style="font-size:13px; color:var(--white-dim); margin-bottom:28px">
+    Tell us about yourself — takes 60 seconds
+  </div>
+
+  <div style="font-size:10px;color:var(--gold);letter-spacing:1px;margin-bottom:10px">CURRENT LEVEL</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px" id="ob-level">
+    <button class="ob-chip selected" data-val="undergrad" onclick="selOb(this, 'ob-level')">Undergraduate</button>
+    <button class="ob-chip" data-val="postgrad" onclick="selOb(this, 'ob-level')">Postgraduate</button>
+    <button class="ob-chip" data-val="phd" onclick="selOb(this, 'ob-level')">PhD</button>
+    <button class="ob-chip" data-val="any" onclick="selOb(this, 'ob-level')">Other / Any</button>
+  </div>
+
+  <div style="font-size:10px;color:var(--gold);letter-spacing:1px;margin-bottom:10px">FIELDS OF INTEREST (select all that apply)</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px" id="ob-fields">
+    <button class="ob-chip" data-val="STEM" onclick="this.classList.toggle('selected')">STEM</button>
+    <button class="ob-chip" data-val="Business" onclick="this.classList.toggle('selected')">Business</button>
+    <button class="ob-chip" data-val="Health" onclick="this.classList.toggle('selected')">Health / Medicine</button>
+    <button class="ob-chip" data-val="Education" onclick="this.classList.toggle('selected')">Education</button>
+    <button class="ob-chip" data-val="Arts" onclick="this.classList.toggle('selected')">Arts / Humanities</button>
+    <button class="ob-chip" data-val="Law" onclick="this.classList.toggle('selected')">Law</button>
+    <button class="ob-chip" data-val="Agriculture" onclick="this.classList.toggle('selected')">Agriculture</button>
+    <button class="ob-chip" data-val="Technology" onclick="this.classList.toggle('selected')">Technology / ICT</button>
+  </div>
+
+  <div style="font-size:10px;color:var(--gold);letter-spacing:1px;margin-bottom:10px">OPPORTUNITY SCOPE</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px" id="ob-locs">
+    <button class="ob-chip selected" data-val="Nigeria" onclick="selOb(this, 'ob-locs')">Nigeria only</button>
+    <button class="ob-chip" data-val="Africa" onclick="selOb(this, 'ob-locs')">Africa-wide</button>
+    <button class="ob-chip" data-val="Global" onclick="selOb(this, 'ob-locs')">International / Global</button>
+  </div>
+
+  <button onclick="saveOnboarding()"
+    style="width:100%;padding:14px;background:var(--gold);color:var(--navy);
+           border:none;border-radius:16px;font-family:'DM Sans',sans-serif;
+           font-size:15px;font-weight:700;cursor:pointer">
+    Show Me Opportunities →
+  </button>
+</div>
+
+<div class="toast" id="toast"><span class="toast-icon">✦</span><span id="toast-msg"></span></div>
+
+<!-- DETAIL -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-sheet">
+    <div class="detail-back" onclick="closeDetail()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>
+      Back
+    </div>
+    <div class="detail-flier">
+      <span id="detail-emoji" style="font-size:60px;z-index:1;position:relative">🏆</span>
+      <div class="detail-flier-overlay"></div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-org" id="d-org"></div>
+      <div class="detail-title" id="d-title"></div>
+      <div class="tags-row" id="d-tags"></div>
+      <div class="dsection">
+        <div class="dsection-title">Time Remaining</div>
+        <div class="time-box">
+          <div><div class="time-big" id="d-days"></div><div class="time-label" id="d-dlabel"></div></div>
+          <div id="d-dtag"></div>
+        </div>
+      </div>
+      <div class="dsection">
+        <div class="dsection-title">About This Opportunity</div>
+        <div class="dpara" id="d-about"></div>
+      </div>
+      <div class="dsection">
+        <div class="dsection-title">Application Roadmap</div>
+        <div id="d-steps"></div>
+      </div>
+      <div class="dsection">
+        <div class="dsection-title">Required Documents</div>
+        <div id="d-docs"></div>
+      </div>
+      <div class="dsection">
+        <div class="dsection-title">Relevant Links</div>
+        <div id="d-links"></div>
+      </div>
+    </div>
+    <div style="height:80px"></div>
+    <div class="detail-actions" id="d-actions"></div>
+  </div>
+</div>
+
+<!-- REMINDERS MODAL -->
+<div class="modal-overlay" id="reminderModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Reminder Settings</div>
+    <div class="modal-sub">Choose how and when you want to be notified</div>
+    <div class="modal-section-label">CHANNELS</div>
+    <div class="toggle-row"><div><div class="toggle-label">🔔 Push Notifications</div><div class="toggle-sublabel">In-app &amp; phone alerts</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="toggle-row"><div><div class="toggle-label">💬 WhatsApp</div><div class="toggle-sublabel">Reminders to your number</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="toggle-row"><div><div class="toggle-label">📧 Email</div><div class="toggle-sublabel">Daily digest to inbox</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+    <div class="modal-section-label">DEFAULT ALERTS</div>
+    <div class="toggle-row"><div><div class="toggle-label">7-day reminder</div><div class="toggle-sublabel">A week before deadline</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="toggle-row"><div><div class="toggle-label">3-day reminder</div><div class="toggle-sublabel">Three days before deadline</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="toggle-row"><div><div class="toggle-label">24-hour reminder</div><div class="toggle-sublabel">Day before deadline</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="modal-section-label">DAILY DIGEST TIME</div>
+    <div class="time-picker"><span class="time-label">Send daily summary at:</span><input class="time-input" type="time" value="08:00"></div>
+    <div class="modal-section-label">CUSTOM REMINDERS</div>
+    <div style="font-size:11px;color:var(--white-dim);margin-bottom:10px">Add personal triggers — e.g. "Start writing essay" 14 days before</div>
+    <div class="custom-add-row">
+      <input type="text" id="cr-text" placeholder="Reminder note..." maxlength="60">
+      <select id="cr-days">
+        <option value="21">21d</option><option value="14">14d</option><option value="10">10d</option>
+        <option value="7">7d</option><option value="5">5d</option><option value="3">3d</option>
+        <option value="2">2d</option><option value="1">1d</option>
+      </select>
+      <button class="add-btn" onclick="addCR()">+ Add</button>
+    </div>
+    <div class="custom-list" id="cr-list"></div>
+    <button class="save-btn" onclick="saveReminders()">Save Settings</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">OppTrack</div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="reqNotif()" title="Enable push notifications">🔔<div class="notif-dot" id="notif-dot" style="display:none"></div></button>
+      <button class="icon-btn" onclick="openModal()">⚙️</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="home-hero">
+      <div class="hero-greeting" id="greeting">GOOD MORNING</div>
+      <div class="hero-title">Track every <span>opportunity</span> that matters.</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-label">TOTAL</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-tracked">0</div><div class="stat-label">TRACKING</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-urgent">0</div><div class="stat-label">URGENT</div></div>
+      </div>
+    </div>
+    <div class="section-header">
+      <div class="section-title">Latest Opportunities</div>
+      <div class="section-actions">
+        <div class="view-toggle">
+          <button class="view-btn active" id="h-list" onclick="setView('list')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+          <button class="view-btn" id="h-tile" onclick="setView('tile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+        </div>
+        <div class="section-link" onclick="showPage('repository')">See all →</div>
+      </div>
+    </div>
+    <div id="home-opps"></div>
+  </div>
+
+  <!-- REPOSITORY -->
+  <div class="page" id="page-repository">
+    <div class="section-header" style="padding-top:18px">
+      <div class="section-title">Repository</div>
+      <div class="section-actions">
+        <div class="view-toggle">
+          <button class="view-btn active" id="r-list" onclick="setView('list')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+          <button class="view-btn" id="r-tile" onclick="setView('tile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
+        </div>
+        <div class="section-link" onclick="showPage('upload')">+ Add</div>
+      </div>
+    </div>
+    <div id="repo-opps"></div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="page" id="page-upload">
+    <div class="section-header" style="padding-top:18px"><div class="section-title">Add Opportunity</div></div>
+    <input type="file" id="fileInput" accept=".pdf,image/*" onchange="handleFile(this)">
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+      <div style="font-size:36px;margin-bottom:10px">📎</div>
+      <div style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:6px">Upload Flier or PDF</div>
+      <div style="font-size:12px;color:var(--white-dim);line-height:1.5">AI will extract all details automatically</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><span style="font-size:9px;padding:2px 7px;background:var(--white-faint);border-radius:20px;color:var(--white-dim)">JPG</span><span style="font-size:9px;padding:2px 7px;background:var(--white-faint);border-radius:20px;color:var(--white-dim)">PNG</span><span style="font-size:9px;padding:2px 7px;background:var(--white-faint);border-radius:20px;color:var(--white-dim)">PDF</span></div>
+    </div>
+    <div class="form-section">
+      <label class="form-label">OR PASTE TEXT / DESCRIPTION</label>
+      <textarea class="form-textarea" id="oppText" placeholder="Paste opportunity description, tweet, or any text..."></textarea>
+      <label class="form-label">OR PASTE LINK</label>
+      <input class="form-input" id="oppLink" type="url" placeholder="https://...">
+      <button class="ai-parse-btn" id="parseBtn" onclick="parseOpp()">✦ Let AI Extract Details</button>
+    </div>
+    <div class="ai-loading" id="aiLoading">
+      <div class="ai-spinner"></div>
+      <div style="font-size:12px;color:var(--white-dim)">AI is reading the opportunity...</div>
+      <div style="font-size:11px;color:var(--gold);margin-top:3px" id="aiStep">Identifying deadline &amp; category</div>
+    </div>
+    <div class="ai-result" id="aiResult">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--white-faint);font-size:12px;color:var(--gold);font-weight:600"><span>✦</span><span>AI Extracted — Review &amp; (Auto Published by Firebase)</span></div>
+      <div class="ai-fields-grid">
+        <div><div class="ai-field-label">Organization</div><div class="ai-field-value" id="res-org">—</div></div>
+        <div><div class="ai-field-label">Category</div><div class="ai-field-value" id="res-cat">—</div></div>
+        <div><div class="ai-field-label">Industry</div><div class="ai-field-value" id="res-industry">—</div></div>
+        <div><div class="ai-field-label">Deadline</div><div class="ai-field-value deadline" id="res-deadline">—</div></div>
+      </div>
+      <div style="margin-bottom:10px"><div class="ai-field-label">Title</div><div class="ai-field-value" id="res-title">—</div></div>
+      <div><div class="ai-field-label">Requirements</div><div class="ai-field-value" id="res-req" style="font-size:12px;color:var(--white-dim);line-height:1.5">—</div></div>
+    </div>
+  </div>
+
+  <!-- TRACKER -->
+  <div class="page" id="page-tracker">
+    <div class="section-header" style="padding-top:18px">
+      <div class="section-title">My Tracker</div>
+      <div class="section-link" onclick="openModal()">⏰ Reminders</div>
+    </div>
+    <div class="tracker-tabs">
+      <button class="tab active" onclick="filterTracker('all',this)">All</button>
+      <button class="tab" onclick="filterTracker('saved',this)">Saved</button>
+      <button class="tab" onclick="filterTracker('applied',this)">Applied</button>
+      <button class="tab" onclick="filterTracker('pending',this)">Awaiting</button>
+      <button class="tab" onclick="filterTracker('offer',this)">Offer</button>
+    </div>
+    <div id="tracker-list" style="padding-bottom:8px"></div>
+  </div>
+
+  <nav class="bottomnav">
+    <button class="nav-item active" onclick="showPage('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-item" onclick="showPage('repository')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span class="nav-label">Repository</span>
+    </button>
+    <button class="nav-item" onclick="showPage('upload')" style="position:relative">
+      <div style="width:46px;height:46px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;position:absolute;top:-18px;border:3px solid var(--navy)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a1628" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <span class="nav-label" style="margin-top:18px">Add</span>
+    </button>
+    <button class="nav-item" onclick="showPage('tracker')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      <span class="nav-label">Tracker</span>
+    </button>
+    <button class="nav-item" onclick="window._fb.signOut(window._fb.auth)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="nav-label">Logout</span>
+    </button>
+  </nav>
+</div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+  import { initializeApp }       from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, collection, query, where, orderBy, limit, onSnapshot,
+           doc, setDoc, updateDoc, deleteDoc, getDoc, Timestamp, serverTimestamp }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  import { getMessaging, getToken, onMessage }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+  import { getFunctions, httpsCallable }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js';
+
+  // REPLACE THESE WITH YOUR OWN FIREBASE CONFIG
+  const firebaseConfig = {
+    apiKey:            "...",
+    authDomain:        "...",
+    projectId:         "...",
+    storageBucket:     "...",
+    messagingSenderId: "...",
+    appId:             "..."
+  };
+
+  const app       = initializeApp(firebaseConfig);
+  const auth      = getAuth(app);
+  const db        = getFirestore(app);
+  // Uncomment when messaging config is real
+  // const messaging = getMessaging(app);
+  const functions = getFunctions(app, 'europe-west1');
+
+  window._fb = { auth, db, messaging: null, functions, Timestamp, serverTimestamp,
+    collection, query, where, orderBy, limit, onSnapshot, doc, setDoc,
+    updateDoc, deleteDoc, getDoc, httpsCallable, signInWithPopup,
+    GoogleAuthProvider, signOut, onAuthStateChanged, getToken, onMessage };
+
+  // Trigger setup
+  setupApp();
+</script>
+
+<script>
+window.opportunities=[];
+window.tracked={};
+let currentFilter='all';
+let currentView='list';
+let customReminders=[];
+let currentDetailId=null;
+let authUser=null;
+const STAGES=[
+  {key:'application',label:'Applied',icon:'📝'},
+  {key:'assess1',label:'1st Assessment',icon:'📋'},
+  {key:'assess2',label:'2nd Assessment',icon:'📊'},
+  {key:'ac',label:'Assess. Center',icon:'🏢'},
+  {key:'interview',label:'Interview',icon:'🎤'},
+  {key:'final',label:'Final Chat',icon:'🤝'},
+  {key:'offer',label:'Offer',icon:'🎉'}
+];
+
+function daysLeft(d){
+  if(!d||d==='rolling') return 999;
+  const n=new Date();n.setHours(0,0,0,0);
+  return Math.max(0, Math.ceil((new Date(d)-n)/86400000));
+}
+function urg(days){return days<=5?'urgent':days<=14?'soon':'safe'}
+function badgeCls(c){return{scholarship:'badge-scholarship',fellowship:'badge-fellowship',internship:'badge-internship',job:'badge-job',graduate:'badge-graduate',contract:'badge-job'}[c]||'badge-fellowship'}
+function catLbl(c){return{scholarship:'Scholarship',fellowship:'Fellowship',internship:'Internship',job:'Job',graduate:'Graduate Trainee',contract:'Contract'}[c]||c}
+function fmtDate(s){return s==='rolling'||!s?'Rolling Basis':new Date(s).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'})}
+function dtag(days){if(days>900)return `<span class="dtag safe">🟢 Rolling</span>`; const u=urg(days);const t={urgent:`🔴 ${days}d left`,soon:`🟡 ${days}d left`,safe:`🟢 ${days}d left`};return`<span class="dtag ${u}">${t[u]}</span>`}
+function greet(){const h=new Date().getHours();return h<12?'GOOD MORNING':h<17?'GOOD AFTERNOON':'GOOD EVENING'}
+
+function setupApp() {
+  const { onAuthStateChanged, auth, signInWithPopup, GoogleAuthProvider } = window._fb;
+  document.getElementById('authBtn').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()));
+  
+  onAuthStateChanged(auth, async user => {
+    authUser = user;
+    if (user) {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app').classList.add('visible');
+      // Load user prefs
+      const { db, doc, getDoc } = window._fb;
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const prefs   = userDoc.exists() ? userDoc.data().prefs : null;
+      if (!prefs) document.getElementById('onboarding').style.display = 'block';
+      else subscribeOpportunities(prefs);
+      subscribeTracked(user.uid);
+    } else {
+      document.getElementById('app').classList.remove('visible');
+      document.getElementById('auth-screen').style.display = 'flex';
+      opportunities = []; tracked = {};
+      renderHome(); renderRepo(); renderTracker();
+    }
+  });
+
+  setTimeout(()=>{
+    document.getElementById('splash').classList.add('hide');
+  },1500);
+}
+
+function selOb(btn, group) {
+  document.getElementById(group).querySelectorAll('.ob-chip').forEach(c => c.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+async function saveOnboarding() {
+  const lvl = document.querySelector('#ob-level .selected')?.dataset.val || 'any';
+  const loc = document.querySelector('#ob-locs .selected')?.dataset.val || 'Global';
+  const fds = Array.from(document.querySelectorAll('#ob-fields .selected')).map(el=>el.dataset.val);
+  
+  const prefs = { level: lvl, locations: [loc], fields: fds };
+  const { db, doc, setDoc, serverTimestamp } = window._fb;
+  if(authUser) {
+    await setDoc(doc(db, 'users', authUser.uid), { prefs, email: authUser.email, created_at: serverTimestamp() }, { merge: true });
+    document.getElementById('onboarding').style.display = 'none';
+    subscribeOpportunities(prefs);
+  }
+}
+
+function subscribeOpportunities(userPrefs) {
+  const { db, collection, query, where, orderBy, limit, onSnapshot } = window._fb;
+  const q = query(collection(db, 'opportunities'), where('is_active', '==', true), orderBy('deadline_timestamp', 'asc'), limit(50));
+  return onSnapshot(q, snapshot => {
+    opportunities = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).filter(o => matchesPrefs(o, userPrefs));
+    renderHome(); renderRepo();
+  });
+}
+
+function matchesPrefs(opp, prefs) {
+  if (!prefs) return true; 
+  const fields   = (prefs.fields || []).map(f => f.toLowerCase());
+  const locs     = (prefs.locations || ['Nigeria']).map(l => l.toLowerCase());
+  const regions  = (opp.target_regions || ['Global']).map(r => r.toLowerCase());
+  const inds     = (opp.industry || []).map(i => i.toLowerCase());
+  const regionOk = regions.includes('global') || locs.some(l => regions.includes(l));
+  const fieldOk  = fields.length === 0 || fields.some(f => inds.some(i => i.includes(f)));
+  return regionOk && fieldOk;
+}
+
+function subscribeTracked(uid) {
+  const { db, collection, onSnapshot } = window._fb;
+  const q = collection(db, 'users', uid, 'applications');
+  return onSnapshot(q, snap => {
+    tracked = {};
+    snap.docs.forEach(d => tracked[d.id] = { id: d.id, ...d.data() });
+    document.getElementById('s-tracked').textContent = Object.keys(tracked).length;
+    renderHome(); renderTracker();
+  });
+}
+
+function setView(v){
+  currentView=v;
+  ['h-list','h-tile','r-list','r-tile'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const isList=id.includes('list');
+    el.classList.toggle('active',(v==='list'&&isList)||(v==='tile'&&!isList));
+  });
+  renderHome();renderRepo();
+}
+
+function renderHome(){
+  document.getElementById('greeting').textContent=greet();
+  const c=document.getElementById('home-opps');c.innerHTML='';
+  const sorted=[...opportunities].sort((a,b)=>daysLeft(a.deadline)-daysLeft(b.deadline)).slice(0,6);
+  if(currentView==='list'){sorted.forEach(o=>c.appendChild(mkList(o)))}
+  else{const g=document.createElement('div');g.className='opps-grid';sorted.forEach(o=>g.appendChild(mkTile(o)));c.appendChild(g)}
+  document.getElementById('s-total').textContent=opportunities.length;
+  document.getElementById('s-urgent').textContent=opportunities.filter(o=>daysLeft(o.deadline)<=5).length;
+}
+
+function renderRepo(){
+  const c=document.getElementById('repo-opps');c.innerHTML='';
+  const sorted=[...opportunities].sort((a,b)=>daysLeft(a.deadline)-daysLeft(b.deadline));
+  if(currentView==='list'){sorted.forEach(o=>c.appendChild(mkList(o)))}
+  else{const g=document.createElement('div');g.className='opps-grid';g.style.margin='0 12px';sorted.forEach(o=>g.appendChild(mkTile(o)));c.appendChild(g)}
+}
+
+function mkList(o){
+  const days=daysLeft(o.deadline),u=urg(days),isTr=!!tracked[o.id];
+  const el=document.createElement('div');el.className=`opp-card-list ${u}`;
+  el.innerHTML=`<div class="card-top"><div><div class="card-org">${o.org}</div></div><span class="badge ${badgeCls(o.category)}">${catLbl(o.category)}</span></div><div class="card-title">${o.title}</div><div class="card-meta"><span class="card-meta-item">🏭 ${Array.isArray(o.industry)?o.industry[0]:o.industry}</span><span class="card-meta-item">📅 ${fmtDate(o.deadline)}</span>${dtag(days)}</div><div class="card-actions"><button class="btn-sm btn-track ${isTr?'tracked':''}" onclick="event.stopPropagation();toggleTrack('${o.id}',this)">${isTr?'✓ Tracking':'+ Track This'}</button><button class="btn-sm btn-ghost" onclick="event.stopPropagation();openDetail('${o.id}')">View Details</button></div>`;
+  el.addEventListener('click',()=>openDetail(o.id));return el;
+}
+
+function mkTile(o){
+  const days=daysLeft(o.deadline),u=urg(days),isTr=!!tracked[o.id];
+  const el=document.createElement('div');el.className=`opp-card-tile ${u}`;
+  el.innerHTML=`<div class="tile-flier">${o.emoji||'🏆'}</div><div class="tile-body"><div class="tile-org">${o.org}</div><div class="tile-title">${o.title}</div><div style="margin-top:auto;padding-top:4px">${dtag(days)}</div></div><button class="tile-track ${isTr?'tracked':''}" onclick="event.stopPropagation();toggleTrack('${o.id}',this)">${isTr?'✓ Tracking':'+ Track This'}</button>`;
+  el.addEventListener('click',()=>openDetail(o.id));return el;
+}
+
+function openDetail(id){
+  const o=opportunities.find(x=>x.id===id);if(!o)return;
+  currentDetailId=id;
+  const days=daysLeft(o.deadline),u=urg(days),isTr=!!tracked[id];
+  document.getElementById('detail-emoji').textContent=o.emoji||'🏆';
+  document.getElementById('d-org').textContent=o.org;
+  document.getElementById('d-title').textContent=o.title;
+  const inds=Array.isArray(o.industry)?o.industry:[o.industry];
+  document.getElementById('d-tags').innerHTML=`<span class="badge ${badgeCls(o.category)}" style="font-size:11px;padding:4px 10px">${catLbl(o.category)}</span>${inds.map(i=>`<span class="tag">${i}</span>`).join('')}`;
+  document.getElementById('d-days').textContent=`${days>900?'∞':(days + ' day' + (days!==1?'s':''))}`;
+  document.getElementById('d-dlabel').textContent=`Deadline: ${fmtDate(o.deadline)}`;
+  document.getElementById('d-dtag').innerHTML=dtag(days);
+  document.getElementById('d-about').innerHTML=(o.about||o.requirements||'No description available.').replace(/\n\n/g,'</p><p style="margin-top:12px">').replace(/^/,'<p>').replace(/$/,'</p>');
+  
+  const stepsHtml = (o.steps || []).map(s => `
+    <div style="display:flex;gap:12px;margin-bottom:12px;align-items:flex-start">
+      <div style="min-width:26px;height:26px;border-radius:50%;background:rgba(201,168,76,.15);
+                  border:1px solid rgba(201,168,76,.4);display:flex;align-items:center;
+                  justify-content:center;font-size:10px;font-weight:700;color:var(--gold);
+                  flex-shrink:0;margin-top:1px">${s.step}</div>
+      <div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:2px">${s.title}</div>
+        <div style="font-size:12px;color:var(--white-dim);line-height:1.6">${s.description}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('d-steps').innerHTML = stepsHtml || '<div class="dpara">Steps not extracted.</div>';
+
+  document.getElementById('d-docs').innerHTML=(o.docs||[]).map(d=>`<span class="doc-chip">📄 ${d}</span>`).join('') || '<span class="doc-chip">None apparent</span>';
+  document.getElementById('d-links').innerHTML=`
+    <a class="link-item" href="${o.link||'#'}" target="_blank"><div class="link-icon">🔗</div><div><div class="link-label">Apply Now</div><div class="link-sub">Official application portal</div></div></a>`;
+  const ac=document.getElementById('d-actions');
+  if(isTr){
+    ac.innerHTML=`<button class="btn-full btn-secondary" onclick="toggleTrackDetail()">✓ Currently Tracking</button><button class="btn-icon-sq" onclick="shareOpp('${id}')">📤</button>`;
+  } else {
+    ac.innerHTML=`<button class="btn-full btn-primary" onclick="toggleTrackDetail()">+ Save &amp; Track</button><button class="btn-icon-sq" onclick="shareOpp('${id}')">📤</button><button class="btn-icon-sq" onclick="closeDetail()" style="color:var(--red);border-color:rgba(224,92,92,.3)">✕</button>`;
+  }
+  document.getElementById('detailOverlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('show');document.body.style.overflow='';currentDetailId=null;}
+function toggleTrackDetail(){if(!currentDetailId)return;const el=document.createElement('button');el.className=tracked[currentDetailId]?'tracked':'';toggleTrack(currentDetailId,el);openDetail(currentDetailId);}
+function shareOpp(id){
+  const o=opportunities.find(x=>x.id===id);if(!o)return;
+  if(navigator.share){navigator.share({title:o.title,text:`${o.title} — Deadline: ${fmtDate(o.deadline)}`,url:o.link||window.location.href})}
+  else{navigator.clipboard?.writeText(`${o.title}\nDeadline: ${fmtDate(o.deadline)}\n${o.link||''}`);showToast('Link copied to clipboard')}
+}
+
+async function toggleTrack(oppId, btn) {
+  const { db, doc, setDoc, deleteDoc, serverTimestamp } = window._fb;
+  if (!authUser) return;
+
+  const opp = opportunities.find(o => o.id === oppId);
+  if (!opp) return;
+  const appRef = doc(db, 'users', authUser.uid, 'applications', oppId);
+
+  btn.style.opacity = '0.5';
+  if (tracked[oppId]) {
+    await deleteDoc(appRef);
+    showToast('Removed from tracker');
+  } else {
+    const appData = {
+      status:        'saved',
+      current_stage: -1,
+      docs:          (opp.docs || []).map(d => ({ name: d, checked: false })),
+      steps:         (opp.steps || []).map(s => ({ ...s, completed: false })),
+      notes:         {},
+      reminders_set: true,
+      tracked_at:    serverTimestamp(),
+      updated_at:    serverTimestamp(),
+    };
+    await setDoc(appRef, appData);
+    showToast('Saved to tracker ✦ Reminders set');
+  }
+  btn.style.opacity = '1';
+}
+
+function filterTracker(f,btn){currentFilter=f;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTracker();}
+
+function renderTracker(){
+  const c=document.getElementById('tracker-list');c.innerHTML='';
+  const trOpps=opportunities.filter(o=>tracked[o.id]);
+  if(!trOpps.length){c.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Nothing tracked yet</div><div class="empty-sub">Browse the repository and tap "+ Track This" on opportunities you want to apply for.</div></div>`;return;}
+  const filtered=currentFilter==='all'?trOpps:trOpps.filter(o=>(tracked[o.id]?.status||'saved')===currentFilter);
+  if(!filtered.length){c.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">None in this stage</div><div class="empty-sub">No opportunities here yet.</div></div>`;return;}
+  filtered.forEach(o=>{
+    const t=tracked[o.id];
+    const days=daysLeft(o.deadline);
+    const chk=(t.docs||[]).filter(d=>d.checked).length;
+    const tl=(t.docs||[]).length||1;
+    const pct=Math.round(chk/tl*100);
+    const card=document.createElement('div');card.className='tracked-card';
+    card.innerHTML=`
+      <div class="tracked-header" onclick="toggleBody(this)">
+        <div class="tracked-title">${o.title}</div>
+        <div style="display:flex;gap:8px;align-items:center">${dtag(days)}<span style="color:var(--white-dim);font-size:14px">▾</span></div>
+      </div>
+      <div class="tracked-body">
+        <div style="margin-bottom:14px">
+          <div style="font-size:10px;color:var(--gold);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">APPLICATION STAGE <span style="color:var(--white-dim);font-weight:normal">(tap to update)</span></div>
+          <div class="pipeline-wrap" id="pipe-${o.id}"></div>
+        </div>
+        <div style="margin-bottom:14px">
+          <select style="width:100%;padding:8px 10px;background:var(--navy);border:1px solid var(--white-faint);border-radius:var(--radius-sm);color:var(--white);font-family:'DM Sans',sans-serif;font-size:12px;outline:none" onchange="updStatus('${o.id}',this.value)">
+            <option value="saved" ${(!t.status||t.status==='saved')?'selected':''}>💾 Saved</option>
+            <option value="applied" ${t.status==='applied'?'selected':''}>✅ Applied</option>
+            <option value="pending" ${t.status==='pending'?'selected':''}>⏳ Awaiting Response</option>
+            <option value="offer" ${t.status==='offer'?'selected':''}>🎉 Offer Received</option>
+          </select>
+        </div>
+        <div class="docs-title">DOCUMENTS (${chk}/${tl} ready)</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        ${(t.docs||[]).map((d,i)=>`<div class="doc-item"><div class="doc-check ${d.checked?'checked':''}" onclick="togDoc('${o.id}',${i})">${d.checked?'✓':''}</div><span class="doc-label ${d.checked?'checked':''}">${d.name}</span></div>`).join('')}
+      </div>`;
+    c.appendChild(card);
+    buildPipe(o.id,t);
+  });
+}
+
+function toggleBody(hdr){
+  const body=hdr.nextElementSibling;
+  const isShown=body.style.display!=='none';
+  body.style.display=isShown?'none':'block';
+  hdr.querySelector('span:last-child').style.transform=isShown?'rotate(-90deg)':'';
+}
+
+function buildPipe(id,t){
+  const el=document.getElementById(`pipe-${id}`);if(!el)return;el.innerHTML='';
+  STAGES.forEach((s,i)=>{
+    const done=t.current_stage>i,curr=t.current_stage===i;
+    const node=document.createElement('div');node.className='stage-node';
+    node.innerHTML=`<div class="stage-dot ${done?'done':curr?'current':''}">${done?'✓':curr?s.icon:i+1}</div><div class="stage-lbl ${done?'done':curr?'current':''}">${s.label}</div>`;
+    node.onclick=()=>setStage(id,i);
+    el.appendChild(node);
+    if(i<STAGES.length-1){const ln=document.createElement('div');ln.className=`pipe-line ${done?'done':''}`;el.appendChild(ln);}
+  });
+}
+
+async function setStage(id,i){
+  if(!tracked[id])return;
+  const { db, doc, updateDoc } = window._fb;
+  const ref = doc(db, 'users', authUser.uid, 'applications', id);
+  const tgt = tracked[id].current_stage === i ? i-1 : i;
+  await updateDoc(ref, { current_stage: tgt });
+  showToast(`Stage Updated!`);
+}
+async function updStatus(id,val){
+  const { db, doc, updateDoc } = window._fb;
+  const ref = doc(db, 'users', authUser.uid, 'applications', id);
+  await updateDoc(ref, { status: val });
+}
+async function togDoc(id,i){
+  if(!tracked[id])return;
+  const docs = [...tracked[id].docs];
+  docs[i].checked = !docs[i].checked;
+  const { db, doc, updateDoc } = window._fb;
+  const ref = doc(db, 'users', authUser.uid, 'applications', id);
+  await updateDoc(ref, { docs });
+}
+
+// UPLOAD / AI
+async function parseOpp(){
+  const { functions, httpsCallable } = window._fb;
+  const txt = document.getElementById('oppText').value;
+  const url = document.getElementById('oppLink').value;
+  if(!txt&&!url){showToast('Please add text or a link first');return}
+  const parseUrl = httpsCallable(functions, 'parseUrl');
+  const btn=document.getElementById('parseBtn'),ld=document.getElementById('aiLoading'),rs=document.getElementById('aiResult');
+  btn.disabled=true;rs.classList.remove('show');ld.classList.add('show');
+  
+  try{
+    const result = await parseUrl({ url, text: txt });
+    const p = result.data;
+    document.getElementById('res-org').textContent=p.org||'—';
+    document.getElementById('res-cat').textContent=catLbl(p.category)||'—';
+    document.getElementById('res-industry').textContent=Array.isArray(p.industry)?p.industry.join(', '):p.industry||'—';
+    document.getElementById('res-deadline').textContent=p.deadline?fmtDate(p.deadline):'—';
+    document.getElementById('res-title').textContent=p.title||'—';
+    document.getElementById('res-req').textContent=p.requirements||'—';
+    ld.classList.remove('show');rs.classList.add('show');showToast('AI extracted successfully ✦');
+  }catch(e){
+    ld.classList.remove('show');
+    showToast('Failed to parse: ' + e.message);
+  }
+  btn.disabled=false;
+}
+
+function handleFile(input){
+  const f=input.files[0];if(!f)return;
+  document.getElementById('uploadArea').innerHTML=`<div style="font-size:36px;margin-bottom:10px">✅</div><div style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:6px">${f.name}</div><div style="font-size:12px;color:var(--white-dim)">File ready. Tap AI Extract below.</div>`;
+  document.getElementById('oppText').value=`[File: ${f.name}] Extract opportunity details.`;
+  showToast('File attached — tap AI Extract');
+}
+
+// NOTIFICATIONS
+async function reqNotif(){
+  if(!('Notification' in window)){showToast('Notifications not supported');return;}
+  if(Notification.permission==='granted'){showToast('Push notifications enabled!');return;}
+  const p=await Notification.requestPermission();
+  if(p==='granted') showToast('Push enabled!');
+}
+
+function addCR(){
+  const txt=document.getElementById('cr-text').value.trim(),days=document.getElementById('cr-days').value;
+  if(!txt){showToast('Enter a reminder note');return}
+  customReminders.push({txt,days:parseInt(days),id:Date.now()});
+  document.getElementById('cr-text').value='';renderCR();
+}
+function renderCR(){
+  document.getElementById('cr-list').innerHTML=customReminders.map(r=>`<div class="custom-item"><span>⏰ ${r.txt} — <span style="color:var(--gold)">${r.days}d before deadline</span></span><button class="custom-remove" onclick="removeCR(${r.id})">✕</button></div>`).join('');
+}
+function removeCR(id){customReminders=customReminders.filter(r=>r.id!==id);renderCR();}
+function openModal(){document.getElementById('reminderModal').classList.add('show')}
+function saveReminders(){document.getElementById('reminderModal').classList.remove('show');showToast('Reminder settings saved ✦')}
+document.getElementById('reminderModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const nm={home:0,repository:1,upload:2,tracker:3};
+  if(nm[name]!==undefined)document.querySelectorAll('.nav-item')[nm[name]].classList.add('active');
+  if(name==='repository')renderRepo();
+  if(name==='tracker')renderTracker();
+  if(name==='home')renderHome();
+  window.scrollTo(0,0);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);
+}
+</script>
+</body>
+</html>
