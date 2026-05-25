@@ -234,6 +234,217 @@ input[type="file"]{display:none}
   color: var(--navy);
   border-color: var(--gold);
 }
+
+/* Local hybrid refresh: Figma warmth on top of the existing app engine. */
+:root{
+  --navy:#fbfaf7;
+  --navy-mid:#ffffff;
+  --navy-light:#fff1e9;
+  --gold:#ff7442;
+  --gold-light:#ff8d63;
+  --gold-dim:#cc5931;
+  --white:#151922;
+  --white-dim:#687180;
+  --white-faint:rgba(19,30,43,0.08);
+  --red:#e2574c;
+  --green:#38b47a;
+  --mint:#c9f2dc;
+  --ink:#111827;
+  --surface:#ffffff;
+  --page:#fbfaf7;
+}
+body{background:var(--page);color:var(--ink)}
+#splash{background:var(--page)}
+.splash-logo{font-family:'DM Sans',sans-serif;font-weight:800;color:var(--ink)}
+.splash-sub{color:var(--white-dim)}
+.splash-bar{background:#ece6dc}
+.topbar{background:rgba(255,255,255,.9);backdrop-filter:blur(14px);border-bottom:1px solid rgba(17,24,39,.08);padding:16px 18px}
+.topbar-logo{font-family:'DM Sans',sans-serif;font-size:23px;font-weight:800;color:var(--ink);letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.topbar-logo::before{content:'';width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#ff7442,#ffb15e);display:inline-block;clip-path:polygon(50% 0,100% 25%,50% 50%,0 25%)}
+.icon-btn{background:#fff;border:1px solid rgba(17,24,39,.08);box-shadow:0 6px 18px rgba(17,24,39,.06);color:var(--ink)}
+.home-hero{background:var(--page);padding:24px 18px 8px}
+.home-hero::before{display:none}
+.hero-greeting{color:var(--gold-dim);font-size:11px;font-weight:800}
+.hero-title{font-family:'DM Sans',sans-serif;font-size:28px;line-height:1.15;font-weight:800;letter-spacing:0;color:var(--ink);max-width:360px}
+.hero-title span{color:var(--gold)}
+.stats-row{gap:8px;margin-top:18px}
+.stat-card{background:#fff;border:1px solid rgba(17,24,39,.08);border-radius:14px;padding:12px 10px;box-shadow:0 8px 24px rgba(17,24,39,.05)}
+.stat-num{font-family:'DM Sans',sans-serif;color:var(--gold);font-weight:800;font-size:24px}
+.stat-label{color:var(--white-dim);font-weight:700}
+.section-header{padding:20px 18px 12px}
+.section-title{font-family:'DM Sans',sans-serif;font-size:19px;font-weight:800;color:var(--ink)}
+.section-link{color:var(--gold);font-weight:800}
+.view-toggle{background:#f0eee9;border:1px solid rgba(17,24,39,.06)}
+.view-btn{color:#7a8290}
+.view-btn.active{background:#fff;color:var(--ink);box-shadow:0 4px 12px rgba(17,24,39,.08)}
+.opp-card-list,.tracked-card,.ai-result,.ai-loading,.form-input,.form-textarea,.upload-area,.modal{
+  background:#fff;
+  border:1px solid rgba(56,180,122,.28);
+  box-shadow:0 12px 34px rgba(17,24,39,.06);
+}
+.opportunity-grid,.opps-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:0 16px}
+.opp-card-list{margin:0;border-radius:18px;padding:16px;border-left:1px solid rgba(56,180,122,.28);min-width:0}
+.opp-card-list.urgent,.opp-card-list.soon,.opp-card-list.safe{border-left:1px solid rgba(56,180,122,.28)}
+.opp-card-list:hover{border-color:rgba(56,180,122,.55)}
+.card-org,.tile-org{color:#6b7280;text-transform:none;font-size:13px;letter-spacing:0;margin-top:3px}
+.card-title{font-family:'DM Sans',sans-serif;font-size:17px;line-height:1.25;font-weight:800;color:var(--ink);letter-spacing:0;overflow-wrap:anywhere}
+.card-meta{margin-top:12px}
+.card-meta-item{color:#687180;font-size:12px}
+.badge{background:#fff;color:#4b5563;border:1px solid rgba(17,24,39,.1);font-size:12px;padding:5px 10px}
+.verified-badge{background:#ebfff4;color:#22a06b;border-color:#bdebd3}
+.requirements-preview{margin:16px 0 0;padding-top:14px;border-top:1px solid rgba(17,24,39,.07)}
+.requirements-title{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:8px}
+.requirements-preview ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.requirements-preview li{font-size:12px;color:#687180}
+.requirements-preview li::before{content:'•';color:var(--gold);margin-right:8px}
+.requirements-more{font-size:12px;color:var(--gold-dim);margin-top:6px;background:none;border:none;padding:0;font:inherit;font-weight:800;cursor:pointer;text-align:left}
+.requirements-more:hover{text-decoration:underline}
+.requirements-popup{position:fixed;inset:0;z-index:350;display:none;align-items:flex-end;justify-content:center;background:rgba(17,24,39,.28);backdrop-filter:blur(6px);padding:18px}
+.requirements-popup.show{display:flex}
+.requirements-sheet{width:min(520px,100%);background:#fff;border:1px solid rgba(17,24,39,.08);border-radius:22px;padding:20px;box-shadow:0 24px 70px rgba(17,24,39,.22)}
+.requirements-sheet-title{font-size:18px;font-weight:800;color:var(--ink);line-height:1.25;margin-bottom:4px}
+.requirements-sheet-sub{font-size:13px;color:var(--white-dim);margin-bottom:16px}
+.requirements-sheet ul{list-style:none;display:flex;flex-direction:column;gap:10px;margin:0 0 18px;padding:0}
+.requirements-sheet li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:#fbfaf7;border:1px solid rgba(17,24,39,.06);border-radius:12px;font-size:13px;color:var(--ink)}
+.requirements-sheet li::before{content:'•';color:var(--gold);font-weight:900}
+.requirements-sheet-actions{display:flex;gap:10px}
+.requirements-sheet-actions button{flex:1;min-height:44px;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer}
+.requirements-close{background:#f6f7f8;color:var(--ink);border:1px solid rgba(17,24,39,.08)}
+.requirements-details{background:var(--gold);color:#fff;border:none}
+.card-actions{border-top:none;padding-top:16px;margin-top:0;gap:10px;align-items:center}
+.btn-sm{border-radius:14px;font-size:13px}
+.btn-track{background:var(--gold);color:#fff;min-height:48px;flex:1;font-weight:800;box-shadow:0 8px 18px rgba(255,116,66,.22)}
+.btn-track:hover{background:var(--gold-light)}
+.btn-track.tracked{background:#ecfff4;color:#168252;border:1px solid #bdebd3;box-shadow:none}
+.btn-ghost{background:transparent;border:none;color:#687180;font-weight:800;padding-left:4px;padding-right:4px}
+.opp-card-tile{background:#fff;border:1px solid rgba(56,180,122,.28);border-radius:18px;box-shadow:0 12px 30px rgba(17,24,39,.06)}
+.opp-card-tile.urgent,.opp-card-tile.soon,.opp-card-tile.safe{border-top:1px solid rgba(56,180,122,.28)}
+.tile-flier{background:#fff4ee}
+.tile-title{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;color:var(--ink)}
+.tile-track{background:var(--gold);color:#fff;font-weight:800}
+.tile-track.tracked{background:#ecfff4;color:#168252}
+.dtag.urgent{background:#fff0ee;color:var(--red);border-color:#ffd0c9}
+.dtag.soon{background:#fff6ed;color:#c75c26;border-color:#ffd9bd}
+.dtag.safe{background:#ecfff4;color:#168252;border-color:#bdebd3}
+.bottomnav{background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1px solid rgba(17,24,39,.08);box-shadow:0 -8px 26px rgba(17,24,39,.06)}
+.nav-item{color:#687180;font-weight:700}
+.nav-item.active{color:var(--gold)}
+.detail-overlay{background:rgba(251,250,247,.98)}
+.detail-back{background:#fff;border-bottom:1px solid rgba(17,24,39,.08);color:var(--gold)}
+.detail-flier{background:linear-gradient(135deg,#fff1e9,#ffffff)}
+.detail-flier-overlay{background:linear-gradient(to bottom,transparent 30%,#fff)}
+.detail-body{background:#fff}
+.detail-title,.modal-title,.empty-title{font-family:'DM Sans',sans-serif;font-weight:800;color:var(--ink)}
+.tracked-title{font-family:'DM Sans',sans-serif;font-weight:800;color:var(--ink)}
+.dpara,.empty-sub,.modal-sub{color:var(--white-dim)}
+.tag,.doc-chip{background:#f6f7f8;border-color:rgba(17,24,39,.08);color:#4b5563}
+.time-box,.link-item,.notes-area,.note-prev{background:#f8f7f4;border:1px solid rgba(17,24,39,.06)}
+.detail-actions{background:#fff;border-top:1px solid rgba(17,24,39,.08)}
+.btn-primary,.save-btn,.ai-parse-btn,.add-btn,.publish-btn{background:var(--gold);color:#fff}
+.btn-secondary,.btn-icon-sq{background:#f6f7f8;color:var(--ink);border:1px solid rgba(17,24,39,.08)}
+.tracker-tabs{gap:8px}
+.tab{border-color:rgba(17,24,39,.1);color:#687180;background:#fff}
+.tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.progress-bar{background:#edf0f2}
+.progress-fill{background:var(--gold)}
+.toast{background:#fff;color:var(--ink);box-shadow:0 12px 30px rgba(17,24,39,.12)}
+body.dark-mode{
+  --navy:#101720;
+  --navy-mid:#161f2b;
+  --navy-light:#202c3a;
+  --white:#f7f2ea;
+  --white-dim:#aab3c1;
+  --white-faint:rgba(247,242,234,.1);
+  --ink:#f7f2ea;
+  --surface:#161f2b;
+  --page:#0b1118;
+  background:var(--page);
+  color:var(--ink);
+}
+body.dark-mode #splash{background:var(--page)}
+body.dark-mode .topbar{background:rgba(16,23,32,.92);border-bottom-color:rgba(247,242,234,.08)}
+body.dark-mode .icon-btn{background:#161f2b;border-color:rgba(247,242,234,.1);color:var(--ink);box-shadow:0 8px 22px rgba(0,0,0,.22)}
+body.dark-mode .home-hero{background:var(--page)}
+body.dark-mode .hero-title,
+body.dark-mode .section-title,
+body.dark-mode .card-title,
+body.dark-mode .tile-title,
+body.dark-mode .tracked-title,
+body.dark-mode .detail-title,
+body.dark-mode .modal-title,
+body.dark-mode .empty-title,
+body.dark-mode .requirements-title,
+body.dark-mode .requirements-sheet-title{color:var(--ink)}
+body.dark-mode .stat-card,
+body.dark-mode .opp-card-list,
+body.dark-mode .opp-card-tile,
+body.dark-mode .tracked-card,
+body.dark-mode .ai-result,
+body.dark-mode .ai-loading,
+body.dark-mode .form-input,
+body.dark-mode .form-textarea,
+body.dark-mode .upload-area,
+body.dark-mode .modal,
+body.dark-mode .requirements-sheet{background:#151e2a;border-color:rgba(56,180,122,.28);box-shadow:0 16px 34px rgba(0,0,0,.24)}
+body.dark-mode .view-toggle,
+body.dark-mode .btn-secondary,
+body.dark-mode .btn-icon-sq,
+body.dark-mode .requirements-close,
+body.dark-mode .time-box,
+body.dark-mode .link-item,
+body.dark-mode .notes-area,
+body.dark-mode .note-prev,
+body.dark-mode .requirements-sheet li{background:#101720;border-color:rgba(247,242,234,.1);color:var(--ink)}
+body.dark-mode .view-btn.active,
+body.dark-mode .tab,
+body.dark-mode .badge{background:#1b2634;color:var(--ink);border-color:rgba(247,242,234,.12)}
+body.dark-mode .verified-badge,
+body.dark-mode .btn-track.tracked,
+body.dark-mode .tile-track.tracked{background:rgba(56,180,122,.16);color:#7ee3ad;border-color:rgba(126,227,173,.32)}
+body.dark-mode .card-org,
+body.dark-mode .tile-org,
+body.dark-mode .card-meta-item,
+body.dark-mode .requirements-preview li,
+body.dark-mode .dpara,
+body.dark-mode .empty-sub,
+body.dark-mode .modal-sub,
+body.dark-mode .requirements-sheet-sub{color:var(--white-dim)}
+body.dark-mode .requirements-preview{border-top-color:rgba(247,242,234,.08)}
+body.dark-mode .bottomnav{background:rgba(16,23,32,.94);border-top-color:rgba(247,242,234,.08);box-shadow:0 -10px 26px rgba(0,0,0,.24)}
+body.dark-mode .detail-overlay{background:rgba(11,17,24,.98)}
+body.dark-mode .detail-back,
+body.dark-mode .detail-body,
+body.dark-mode .detail-actions{background:#151e2a;border-color:rgba(247,242,234,.08)}
+body.dark-mode .detail-flier{background:linear-gradient(135deg,#202c3a,#101720)}
+body.dark-mode .detail-flier-overlay{background:linear-gradient(to bottom,transparent 30%,#151e2a)}
+body.dark-mode .tag,
+body.dark-mode .doc-chip{background:#101720;border-color:rgba(247,242,234,.1);color:var(--white-dim)}
+body.dark-mode .progress-bar{background:#263244}
+body.dark-mode .toast{background:#151e2a;color:var(--ink);box-shadow:0 16px 34px rgba(0,0,0,.28)}
+body.dark-mode .requirements-popup{background:rgba(3,7,12,.58)}
+@media (min-width:900px){
+  .opportunity-grid,.opps-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:1180px;margin:0 auto}
+  .home-hero,.section-header{max-width:1180px;margin-left:auto;margin-right:auto}
+  .card-title{font-size:18px}
+}
+@media (max-width:640px){
+  .opportunity-grid,.opps-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:0 12px}
+  .opp-card-list{border-radius:15px;padding:12px}
+  .card-top{gap:8px;align-items:flex-start}
+  .badge{font-size:10px;padding:4px 8px}
+  .dtag{font-size:9px;padding:3px 7px}
+  .card-title{font-size:14px;line-height:1.25}
+  .card-org,.card-meta-item,.requirements-preview li,.requirements-more{font-size:11px}
+  .card-meta{gap:5px;margin-top:9px}
+  .requirements-preview{margin-top:12px;padding-top:10px}
+  .requirements-title{font-size:11px}
+  .card-actions{flex-direction:column;gap:6px;padding-top:12px}
+  .btn-track{width:100%;min-height:40px;font-size:12px}
+  .btn-ghost{width:100%;font-size:12px;padding:4px}
+}
+@media (max-width:360px){
+  .opportunity-grid,.opps-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -247,6 +458,18 @@ input[type="file"]{display:none}
   <div style="font-family:'Playfair Display',serif; font-size:32px; color:var(--gold);">OppTrack</div>
   <div style="font-size:14px; color:var(--white-dim); text-align:center;">Sign in to sync your profile and track opportunities securely.</div>
   <button id="authBtn" style="padding:14px 24px; background:var(--white); color:var(--navy); border:none; border-radius:var(--radius); font-size:15px; font-weight:600; cursor:pointer;">Sign in with Google</button>
+</div>
+
+<div class="requirements-popup" id="requirementsPopup" onclick="if(event.target===this)closeRequirementsPopup()">
+  <div class="requirements-sheet">
+    <div class="requirements-sheet-title" id="requirementsTitle">Requirements</div>
+    <div class="requirements-sheet-sub" id="requirementsSub"></div>
+    <ul id="requirementsList"></ul>
+    <div class="requirements-sheet-actions">
+      <button class="requirements-close" onclick="closeRequirementsPopup()">Stay here</button>
+      <button class="requirements-details" id="requirementsDetailsBtn">View details</button>
+    </div>
+  </div>
 </div>
 
 <div id="onboarding" style="display:none; position:fixed; inset:0; z-index:500;
@@ -375,6 +598,7 @@ input[type="file"]{display:none}
   <div class="topbar">
     <div class="topbar-logo">OppTrack</div>
     <div class="topbar-right">
+      <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">☾</button>
       <button class="icon-btn" onclick="reqNotif()" title="Enable push notifications">🔔<div class="notif-dot" id="notif-dot" style="display:none"></div></button>
       <button class="icon-btn" onclick="openModal()">⚙️</button>
     </div>
@@ -476,25 +700,25 @@ input[type="file"]{display:none}
   <nav class="bottomnav">
     <button class="nav-item active" onclick="showPage('home')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-      <span class="nav-label">Home</span>
+      <span class="nav-label">Browse</span>
     </button>
     <button class="nav-item" onclick="showPage('repository')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      <span class="nav-label">Repository</span>
+      <span class="nav-label">All</span>
     </button>
     <button class="nav-item" onclick="showPage('upload')" style="position:relative">
       <div style="width:46px;height:46px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;position:absolute;top:-18px;border:3px solid var(--navy)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a1628" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </div>
-      <span class="nav-label" style="margin-top:18px">Add</span>
+      <span class="nav-label" style="margin-top:18px">Submit</span>
     </button>
     <button class="nav-item" onclick="showPage('tracker')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
       <span class="nav-label">Tracker</span>
     </button>
-    <button class="nav-item" onclick="window._fb.signOut(window._fb.auth)">
+    <button class="nav-item" onclick="openModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span class="nav-label">Logout</span>
+      <span class="nav-label">Profile</span>
     </button>
   </nav>
 </div>
@@ -556,6 +780,96 @@ const STAGES=[
   {key:'offer',label:'Offer',icon:'🎉'}
 ];
 
+const DEMO_OPPS=[
+  {
+    id:'demo-mastercard',
+    title:'Mastercard Foundation Scholars Program 2026',
+    org:'Mastercard Foundation',
+    category:'scholarship',
+    industry:['STEM','Leadership','Social Impact'],
+    deadline:'2026-06-08',
+    about:'A fully funded scholarship pathway for high-potential African students who want to study, lead, and return impact to their communities.\n\nThe programme typically covers tuition, living support, mentorship, and leadership development, making it ideal for students who need both funding and a strong support network.',
+    requirements:'Open to academically strong African students with leadership potential, community commitment, and financial need.',
+    docs:['CV/Resume','Academic Transcript','Personal Statement','Recommendation Letter','Proof of Identity'],
+    steps:[
+      {step:1,title:'Confirm eligibility',description:'Review the official partner university criteria and make sure your academic level and country match.'},
+      {step:2,title:'Prepare documents',description:'Gather transcript, references, identification, and a personal statement before opening the form.'},
+      {step:3,title:'Submit application',description:'Complete the online form through the official university or programme portal.'},
+      {step:4,title:'Track follow-up',description:'Watch your email for interview invitations, missing document requests, or next-stage tasks.'}
+    ],
+    link:'https://mastercardfdn.org/all/scholars/',
+    emoji:'🎓',
+    target_regions:['Africa'],
+    funding_type:'fully_funded'
+  },
+  {
+    id:'demo-unilever',
+    title:'Unilever Future Leaders Graduate Programme',
+    org:'Unilever Nigeria',
+    category:'graduate',
+    industry:['Business','Marketing','Supply Chain'],
+    deadline:'2026-06-22',
+    about:'A structured graduate programme for ambitious young professionals who want hands-on business training, rotations, mentorship, and real responsibility early in their careers.',
+    requirements:'Best suited for recent graduates with strong communication skills, analytical ability, leadership experience, and interest in FMCG.',
+    docs:['CV/Resume','Degree Certificate','NYSC Certificate','Cover Letter'],
+    steps:[
+      {step:1,title:'Create candidate profile',description:'Register on the careers portal and complete your profile with education and work history.'},
+      {step:2,title:'Complete assessments',description:'Take any online tests or video questions before the stated deadline.'},
+      {step:3,title:'Prepare for interviews',description:'Review Unilever brands, leadership examples, and commercial case questions.'}
+    ],
+    link:'https://careers.unilever.com/',
+    emoji:'💼',
+    target_regions:['Nigeria'],
+    funding_type:'stipend'
+  },
+  {
+    id:'demo-westerwelle',
+    title:'Westerwelle Young Founders Programme',
+    org:'Westerwelle Foundation',
+    category:'fellowship',
+    industry:['Entrepreneurship','Technology','Business'],
+    deadline:'2026-05-29',
+    about:'A fellowship for early-stage founders from emerging markets who want mentorship, investor readiness, and a global network of entrepreneurs.',
+    requirements:'Applicants should be founders or co-founders running a scalable business with traction and a clear social or economic impact story.',
+    docs:['Founder CV','Startup Pitch Deck','Company Website/Profile','Short Motivation Responses'],
+    steps:[
+      {step:1,title:'Check startup fit',description:'Confirm your company stage, traction, and founder role match the programme criteria.'},
+      {step:2,title:'Polish pitch materials',description:'Prepare a short deck that explains problem, product, market, traction, team, and funding needs.'},
+      {step:3,title:'Apply online',description:'Submit the application form and keep answers concise, specific, and metrics-driven.'}
+    ],
+    link:'https://westerwelle-foundation.com/',
+    emoji:'🚀',
+    target_regions:['Global'],
+    funding_type:'unknown'
+  }
+];
+
+function startDemoMode() {
+  window.DEMO_MODE = true;
+  authUser = { uid: 'demo-user', email: 'demo@opptrack.local' };
+  opportunities = DEMO_OPPS;
+  tracked = {
+    'demo-mastercard': {
+      id:'demo-mastercard',
+      status:'saved',
+      current_stage:1,
+      docs:DEMO_OPPS[0].docs.map((name, i)=>({ name, checked:i < 2 })),
+      steps:DEMO_OPPS[0].steps.map(step=>({ ...step, completed:false })),
+      notes:{ text:'Emphasize community leadership and engineering projects.' },
+      reminders_set:true
+    }
+  };
+
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('splash').classList.add('hide');
+  document.getElementById('s-tracked').textContent = Object.keys(tracked).length;
+  renderHome();
+  renderRepo();
+  renderTracker();
+}
+
 function daysLeft(d){
   if(!d||d==='rolling') return 999;
   const n=new Date();n.setHours(0,0,0,0);
@@ -568,7 +882,30 @@ function fmtDate(s){return s==='rolling'||!s?'Rolling Basis':new Date(s).toLocal
 function dtag(days){if(days>900)return `<span class="dtag safe">🟢 Rolling</span>`; const u=urg(days);const t={urgent:`🔴 ${days}d left`,soon:`🟡 ${days}d left`,safe:`🟢 ${days}d left`};return`<span class="dtag ${u}">${t[u]}</span>`}
 function greet(){const h=new Date().getHours();return h<12?'GOOD MORNING':h<17?'GOOD AFTERNOON':'GOOD EVENING'}
 
+function applyTheme(theme){
+  const isDark=theme==='dark';
+  document.body.classList.toggle('dark-mode',isDark);
+  const btn=document.getElementById('themeToggle');
+  if(btn){
+    btn.textContent=isDark?'☀':'☾';
+    btn.title=isDark?'Switch to light mode':'Switch to dark mode';
+  }
+}
+
+function toggleTheme(){
+  const next=document.body.classList.contains('dark-mode')?'light':'dark';
+  localStorage.setItem('opptrack-theme',next);
+  applyTheme(next);
+}
+
+applyTheme(localStorage.getItem('opptrack-theme') || 'light');
+
 function setupApp() {
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    startDemoMode();
+    return;
+  }
+
   const { onAuthStateChanged, auth, signInWithPopup, GoogleAuthProvider } = window._fb;
   document.getElementById('authBtn').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()));
   
@@ -668,19 +1005,89 @@ function setView(v){
 
 function renderHome(){
   document.getElementById('greeting').textContent=greet();
-  const c=document.getElementById('home-opps');c.innerHTML='';
+  const c=document.getElementById('home-opps');c.innerHTML='';c.className='';
   const sorted=[...opportunities].sort((a,b)=>daysLeft(a.deadline)-daysLeft(b.deadline)).slice(0,6);
-  if(currentView==='list'){sorted.forEach(o=>c.appendChild(mkList(o)))}
-  else{const g=document.createElement('div');g.className='opps-grid';sorted.forEach(o=>g.appendChild(mkTile(o)));c.appendChild(g)}
+  if(currentView==='list'){c.className='opportunity-grid';sorted.forEach(o=>c.appendChild(mkListHybrid(o)))}
+  else{const g=document.createElement('div');g.className='opps-grid';sorted.forEach(o=>g.appendChild(mkTileHybrid(o)));c.appendChild(g)}
   document.getElementById('s-total').textContent=opportunities.length;
   document.getElementById('s-urgent').textContent=opportunities.filter(o=>daysLeft(o.deadline)<=5).length;
 }
 
 function renderRepo(){
-  const c=document.getElementById('repo-opps');c.innerHTML='';
+  const c=document.getElementById('repo-opps');c.innerHTML='';c.className='';
   const sorted=[...opportunities].sort((a,b)=>daysLeft(a.deadline)-daysLeft(b.deadline));
-  if(currentView==='list'){sorted.forEach(o=>c.appendChild(mkList(o)))}
-  else{const g=document.createElement('div');g.className='opps-grid';g.style.margin='0 12px';sorted.forEach(o=>g.appendChild(mkTile(o)));c.appendChild(g)}
+  if(currentView==='list'){c.className='opportunity-grid';sorted.forEach(o=>c.appendChild(mkListHybrid(o)))}
+  else{const g=document.createElement('div');g.className='opps-grid';sorted.forEach(o=>g.appendChild(mkTileHybrid(o)));c.appendChild(g)}
+}
+
+function reqPreview(o){
+  const docs=(o.docs||[]).slice(0,2);
+  const more=Math.max((o.docs||[]).length-docs.length,0);
+  return `<div class="requirements-preview"><div class="requirements-title">You need:</div><ul>${docs.map(d=>`<li>${d}</li>`).join('')}</ul>${more?`<button class="requirements-more" onclick="event.stopPropagation();openRequirementsPopup('${o.id}')">+ ${more} more requirement${more>1?'s':''}</button>`:''}</div>`;
+}
+
+function openRequirementsPopup(oppId){
+  const opp=opportunities.find(o=>o.id===oppId);
+  if(!opp)return;
+  const popup=document.getElementById('requirementsPopup');
+  document.getElementById('requirementsTitle').textContent='Requirements';
+  document.getElementById('requirementsSub').textContent=opp.title;
+  document.getElementById('requirementsList').innerHTML=(opp.docs||[]).map(d=>`<li>${d}</li>`).join('');
+  document.getElementById('requirementsDetailsBtn').onclick=()=>{
+    closeRequirementsPopup();
+    openDetail(oppId);
+  };
+  popup.classList.add('show');
+  document.body.style.overflow='hidden';
+}
+
+function closeRequirementsPopup(){
+  document.getElementById('requirementsPopup').classList.remove('show');
+  if(!document.getElementById('detailOverlay').classList.contains('show'))document.body.style.overflow='';
+}
+
+function mkListHybrid(o){
+  const days=daysLeft(o.deadline),u=urg(days),isTr=!!tracked[o.id];
+  const industry=Array.isArray(o.industry)?o.industry[0]:o.industry;
+  const el=document.createElement('div');el.className=`opp-card-list ${u}`;
+  el.innerHTML=`<div class="card-top">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span class="badge ${badgeCls(o.category)}">${catLbl(o.category)}</span>
+      <span class="badge verified-badge">Verified</span>
+    </div>
+    ${dtag(days)}
+  </div>
+  <div class="card-title">${o.title}</div>
+  <div class="card-org">${o.org}</div>
+  <div class="card-meta">
+    <span class="card-meta-item">Industry: ${industry}</span>
+    <span class="card-meta-item">Deadline: ${fmtDate(o.deadline)}</span>
+  </div>
+  ${reqPreview(o)}
+  <div class="card-actions">
+    <button class="btn-sm btn-track ${isTr?'tracked':''}" onclick="event.stopPropagation();toggleTrack('${o.id}',this)">${isTr?'Tracking':'+ Track This'}</button>
+    <button class="btn-sm btn-ghost" onclick="event.stopPropagation();openDetail('${o.id}')">Details</button>
+  </div>`;
+  el.addEventListener('click',()=>openDetail(o.id));
+  return el;
+}
+
+function mkTileHybrid(o){
+  const days=daysLeft(o.deadline),u=urg(days),isTr=!!tracked[o.id];
+  const el=document.createElement('div');el.className=`opp-card-tile ${u}`;
+  el.innerHTML=`<div class="tile-flier">${o.emoji||'+'}</div>
+  <div class="tile-body">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="badge ${badgeCls(o.category)}">${catLbl(o.category)}</span>
+      <span class="badge verified-badge">Verified</span>
+    </div>
+    <div class="tile-title">${o.title}</div>
+    <div class="tile-org">${o.org}</div>
+    <div style="margin-top:auto;padding-top:6px">${dtag(days)}</div>
+  </div>
+  <button class="tile-track ${isTr?'tracked':''}" onclick="event.stopPropagation();toggleTrack('${o.id}',this)">${isTr?'Tracking':'+ Track This'}</button>`;
+  el.addEventListener('click',()=>openDetail(o.id));
+  return el;
 }
 
 function mkList(o){
@@ -747,6 +1154,34 @@ function shareOpp(id){
 }
 
 async function toggleTrack(oppId, btn) {
+  if (window.DEMO_MODE) {
+    const opp = opportunities.find(o => o.id === oppId);
+    if (!opp) return;
+
+    btn.style.opacity = '0.5';
+    if (tracked[oppId]) {
+      delete tracked[oppId];
+      showToast('Removed from tracker');
+    } else {
+      tracked[oppId] = {
+        id:oppId,
+        status:'saved',
+        current_stage:-1,
+        docs:(opp.docs || []).map(name => ({ name, checked:false })),
+        steps:(opp.steps || []).map(step => ({ ...step, completed:false })),
+        notes:{},
+        reminders_set:true
+      };
+      showToast('Saved to tracker ✦ Reminders set');
+    }
+    btn.style.opacity = '1';
+    document.getElementById('s-tracked').textContent = Object.keys(tracked).length;
+    renderHome();
+    renderRepo();
+    renderTracker();
+    return;
+  }
+
   const { db, doc, setDoc, deleteDoc, serverTimestamp } = window._fb;
   if (!authUser) return;
 
@@ -840,6 +1275,12 @@ function buildPipe(id,t){
 
 async function setStage(id,i){
   if(!tracked[id])return;
+  if(window.DEMO_MODE){
+    tracked[id].current_stage = tracked[id].current_stage === i ? i-1 : i;
+    renderTracker();
+    showToast(`Stage Updated!`);
+    return;
+  }
   const { db, doc, updateDoc } = window._fb;
   const ref = doc(db, 'users', authUser.uid, 'applications', id);
   const tgt = tracked[id].current_stage === i ? i-1 : i;
@@ -847,6 +1288,11 @@ async function setStage(id,i){
   showToast(`Stage Updated!`);
 }
 async function updStatus(id,val){
+  if(window.DEMO_MODE){
+    if(tracked[id]) tracked[id].status = val;
+    renderTracker();
+    return;
+  }
   const { db, doc, updateDoc } = window._fb;
   const ref = doc(db, 'users', authUser.uid, 'applications', id);
   await updateDoc(ref, { status: val });
@@ -855,6 +1301,11 @@ async function togDoc(id,i){
   if(!tracked[id])return;
   const docs = [...tracked[id].docs];
   docs[i].checked = !docs[i].checked;
+  if(window.DEMO_MODE){
+    tracked[id].docs = docs;
+    renderTracker();
+    return;
+  }
   const { db, doc, updateDoc } = window._fb;
   const ref = doc(db, 'users', authUser.uid, 'applications', id);
   await updateDoc(ref, { docs });
