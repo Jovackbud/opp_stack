@@ -108,6 +108,42 @@ body{background:#e8e1d4;color:var(--text)}
 .dark-mode .brand{border-color:#2a2d2f}.dark-mode .org-logo{background:#22201d;border-color:#3b342b;color:#ff8a68}
 .side{display:flex;flex-direction:column}.side:before{content:"";display:block;width:42px;height:8px;background:linear-gradient(90deg,#ff6550 0 8px,transparent 8px 14px,#d99b2b 14px 22px,transparent 22px 28px,#21b86b 28px 36px);border-radius:999px;margin:0 0 18px}.side-search{width:100%;height:48px;border:0;border-radius:14px;background:#fff;color:#8a918b;display:flex;align-items:center;gap:10px;padding:0 14px;margin:4px 0 18px;font-weight:700;box-shadow:inset 0 0 0 1px #e8e1d4}.side-search svg{width:20px;height:20px;stroke-width:2}.side .nav button,.side .nav-extra{height:48px;border-radius:14px}.side .nav button.active,.side .nav-extra.active{background:#ff7448!important;color:#fff!important;border-color:#ff7448!important;box-shadow:0 10px 22px rgba(255,116,72,.18)}.side-theme{margin-top:auto;border:0;border-top:1px solid #e4dac8;background:#fff;color:#151716;border-radius:18px;padding:12px;display:grid;grid-template-columns:22px 1fr 42px;align-items:center;gap:10px;font-weight:750}.side-theme svg{width:20px;height:20px;stroke-width:2}.side-theme i{width:42px;height:24px;border-radius:999px;background:#f0e8da;position:relative}.side-theme i:after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;box-shadow:0 2px 6px rgba(47,36,21,.2)}.dark-mode .side-search,.dark-mode .side-theme{background:#17191b;border-color:#34383b;color:#f5f3ec;box-shadow:inset 0 0 0 1px #2f3335}.dark-mode .side-theme{border-top:1px solid #2a2d2f}.dark-mode .side-theme i{background:#ff7448}.dark-mode .side-theme i:after{left:21px}.dark-mode .side .nav button.active,.dark-mode .side .nav-extra.active{background:#ff7448!important;color:#fff!important;border-color:#ff7448!important}
 @media(max-width:860px){.side-search,.side-theme{display:none}.side:before{display:none}}
+.side:before{display:none!important}
+.side-theme{display:none!important}
+.sort-row{max-width:980px;display:flex;justify-content:flex-end;margin:-4px 0 12px}
+.sort-row label{display:flex;align-items:center;gap:9px;color:#74766f;font-size:12px;font-weight:800}
+.sort-row select{height:36px;border:1px solid #dfd5c4;border-radius:12px;background:#fff;color:#151716;padding:0 34px 0 12px;font-weight:750;outline:none}
+.grid{align-items:stretch!important}
+.card{height:100%!important;display:flex!important;flex-direction:column!important}
+.card-body{height:100%;display:flex!important;flex-direction:column!important}
+.card-desc{min-height:52px;display:-webkit-box!important;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden!important}
+.card-info-list{min-height:86px}
+.need-list{min-height:92px}
+.card-actions{margin-top:auto}
+.dark-mode .sort-row select{background:#17191b;border-color:#34383b;color:#f5f3ec}
+@media(max-width:860px){.side{display:none!important}.shell{display:block!important}.sort-row{justify-content:flex-start;margin:-2px 0 10px}.sort-row label{width:100%;justify-content:space-between}.sort-row select{min-width:164px}.card-desc{min-height:0;-webkit-line-clamp:2}.card-info-list{min-height:78px}.need-list{min-height:86px}}
+@media(max-width:420px){.card-info-list{min-height:70px}.need-list{min-height:72px}}
+#page-tracker .tracker-list{display:block;max-width:none!important;width:100%}
+.tracker-toolbar{display:flex;gap:8px;justify-content:flex-end;margin:0 0 10px}.sheet-action{border:1px solid #dfd5c4;background:#fff;color:#151716;border-radius:10px;padding:9px 11px;font-size:12px;font-weight:850}
+.tracker-table-wrap{width:100%;overflow:auto;border:1px solid #e4dac8;background:#fff;border-radius:12px;box-shadow:0 10px 24px rgba(47,36,21,.04)}
+.tracker-table{width:100%;min-width:1380px;border-collapse:separate;border-spacing:0;font-size:12px;color:#151716}
+.tracker-table th,.tracker-table td{border-right:1px solid #ece5da;border-bottom:1px solid #f0ebe3;text-align:left;vertical-align:middle;padding:8px 10px;background:#fff}
+.tracker-table th{position:sticky;top:0;z-index:2;background:#faf8f3;color:#72766f;font-size:11px;font-weight:850;white-space:nowrap}
+.tracker-table th:first-child,.tracker-table td:first-child{position:sticky;left:0;z-index:3;min-width:150px;box-shadow:8px 0 14px rgba(47,36,21,.035)}
+.tracker-table th:first-child{z-index:4}
+.tracker-table td:nth-child(2){min-width:220px}.tracker-table td:nth-child(10),.tracker-table td:nth-child(11){min-width:190px}
+.tracker-table td:last-child,.tracker-table th:last-child{border-right:0}
+.tracker-table tr:last-child td{border-bottom:0}
+.tracker-title{border:0;background:transparent;color:#111827;text-align:left;padding:0;font-weight:700;line-height:1.3}
+.tracker-title:hover{color:#f0643c;text-decoration:underline;text-underline-offset:3px}
+.tracker-pill{display:inline-flex;align-items:center;max-width:170px;border:1px solid #dfe6ef;background:#f8fafc;color:#52637a;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status-select{position:relative;display:inline-flex;align-items:center;border-radius:4px;padding:4px 7px;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid transparent}
+.status-select select{position:absolute;inset:0;opacity:0;cursor:pointer}
+.status-not_applied{background:#f3f4f6;color:#5c6170;border-color:#e5e7eb}.status-applied{background:#f3e8ff;color:#7c3aed;border-color:#e9d5ff}.status-in_progress,.status-assessment{background:#fff4cf;color:#98670a;border-color:#ead28d}.status-interview,.status-final_stage{background:#e8f8ef;color:#087b41;border-color:#b8e6c7}.status-offer{background:#e9fbef;color:#05a34f;border-color:#aee8c0}.status-rejected{background:#fff0ed;color:#b54134;border-color:#efc8bd}
+.tracker-table small{display:block;margin-top:5px;color:#74766f;font-size:11px}.tracker-link{color:#f0643c;text-decoration:underline;text-underline-offset:3px;font-weight:750}.tracker-cell-input,.tracker-note{width:100%;min-height:28px;border:0;background:transparent;border-radius:4px;padding:4px 2px;color:#151716;outline:1px solid transparent;resize:vertical}.tracker-cell-input:focus,.tracker-note:focus{outline-color:#ff7448;background:#fff8f4}.tracker-reminder{min-width:126px}
+.profile-modern{max-width:980px;display:grid;gap:14px}.profile-card{background:#fff;border:1px solid #e4dac8;border-radius:20px;padding:16px;box-shadow:0 12px 30px rgba(47,36,21,.05)}.profile-card h3{margin:0 0 14px;font-size:18px;letter-spacing:-.03em}.card-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px}.card-heading span{font-size:12px;color:#74766f}.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.profile-card .field.wide{grid-column:1/-1}.exam-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px}.exam-card{border:1px solid #efe5d8;background:#faf8f3;border-radius:16px;padding:12px}.exam-title{font-size:12px;font-weight:900;color:#f0643c;margin:0 0 10px;text-transform:uppercase;letter-spacing:.06em}.exam-grid{display:grid;gap:8px}.exam-row{display:grid;grid-template-columns:1fr 86px;gap:8px}.exam-row select{min-width:0;border:1px solid #dfd5c4;background:#fff;color:#151716;border-radius:12px;padding:9px 10px;outline:none}.tag-preview{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tag-preview span{background:#fff5f0;border:1px solid #f0cfc4;color:#f0643c;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:750}.doc-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.doc-checks label{display:flex!important;align-items:center;justify-content:flex-start;gap:10px;border:1px solid #eadfce;background:#faf8f3;border-radius:12px;padding:10px 12px;color:#4f554f;font-size:13px!important;font-weight:650;text-transform:none!important;letter-spacing:0!important;line-height:1.25}.doc-checks input{width:16px!important;height:16px;min-width:16px;accent-color:#ff7448;margin:0}
+.dark-mode .tracker-table-wrap,.dark-mode .tracker-table th,.dark-mode .tracker-table td,.dark-mode .sheet-action{background:#17191b;border-color:#34383b;color:#f5f3ec}.dark-mode .tracker-table th{background:#202326;color:#a6aaa5}.dark-mode .tracker-table td{border-color:#2a2d2f}.dark-mode .tracker-title{color:#f5f3ec}.dark-mode .tracker-pill,.dark-mode .tracker-note,.dark-mode .tracker-cell-input{background:transparent;border-color:#34383b;color:#c7cbc5}.dark-mode .tracker-link{color:#ff8a68}.dark-mode .tracker-table small{color:#a6aaa5}.dark-mode .profile-card{background:#17191b;border-color:#34383b;box-shadow:none}.dark-mode .exam-card,.dark-mode .doc-checks label,.dark-mode .exam-row select{background:#202326;border-color:#34383b;color:#c7cbc5}.dark-mode .tag-preview span{background:#2a1814;border-color:#6b3528;color:#ff8a68}
+@media(max-width:860px){.tracker-toolbar{justify-content:flex-start;overflow:auto}.tracker-table-wrap{border-radius:12px;margin:0 -4px}.tracker-table{min-width:1260px}.tracker-table th,.tracker-table td{padding:8px 9px}.tracker-table th:first-child,.tracker-table td:first-child{min-width:132px}.tracker-table td:nth-child(2){min-width:190px}.profile-grid,.exam-wrap{grid-template-columns:1fr}.doc-checks{grid-template-columns:1fr}.profile-card{padding:14px;border-radius:18px}}
 </style>
 </head>
 <body data-page="matches">
@@ -122,11 +158,6 @@ body{background:#e8e1d4;color:var(--text)}
     <button class="nav-extra" onclick="showPage('cvats')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
       <span>CV/ATS checker</span>
-    </button>
-    <button class="side-theme" onclick="toggleTheme()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg>
-      <span>Dark mode</span>
-      <i></i>
     </button>
   </aside>
   <main class="main">
@@ -151,6 +182,7 @@ body{background:#e8e1d4;color:var(--text)}
     <section class="page active" id="page-matches">
       <div class="profile-nudge"><strong>Stop missing the things you actually qualify for.</strong> Track deadlines, stay organized, never pay to apply.</div>
       <div class="home-search"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></span><input id="homeQ" placeholder="Search opportunities..." oninput="renderMatches()"></div>
+      <div class="sort-row"><label>Sort by <select id="homeSort" onchange="setSortMode(this.value)"><option value="relevance">Best match</option><option value="deadline_asc">Deadline: soonest</option><option value="deadline_desc">Deadline: latest</option><option value="posted_desc">Date posted: newest</option><option value="posted_asc">Date posted: oldest</option></select></label></div>
       <div class="match-tabs">
         <button class="chip active" onclick="setMatchFilter('all',this)">All</button>
         <button class="chip" onclick="setMatchFilter('job',this)">Jobs</button>
@@ -164,6 +196,7 @@ body{background:#e8e1d4;color:var(--text)}
     </section>
     <section class="page" id="page-search">
       <div class="home-search"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></span><input id="q" placeholder="Search jobs, fellowships, internships..." oninput="renderSearch()"></div>
+      <div class="sort-row"><label>Sort by <select id="searchSort" onchange="setSortMode(this.value)"><option value="relevance">Best match</option><option value="deadline_asc">Deadline: soonest</option><option value="deadline_desc">Deadline: latest</option><option value="posted_desc">Date posted: newest</option><option value="posted_asc">Date posted: oldest</option></select></label></div>
       <button class="ghost filter-toggle" onclick="toggleFilters()">Add filters</button>
       <div class="filters collapsed" id="searchFilters">
         <div class="field"><label>Type</label><select id="fType" onchange="renderSearch()"><option value="">All</option><option value="job">Jobs</option><option value="fellowship">Fellowships</option><option value="internship">Internships</option><option value="scholarship">Scholarships</option><option value="event">Events</option></select></div>
@@ -173,21 +206,54 @@ body{background:#e8e1d4;color:var(--text)}
       </div>
       <div class="grid" id="searchGrid"></div>
     </section>
-    <section class="page" id="page-tracker"><div class="tracker-list" id="trackerList"></div></section>
-    <section class="page" id="page-profile">
-      <div class="profile" id="profileForm">
-        <div class="field"><label>WAEC/NECO result</label><input data-profile="waec_neco" placeholder="e.g. 6 credits incl. Maths/English"></div>
-        <div class="field"><label>JAMB score</label><input data-profile="jamb" placeholder="e.g. 268"></div>
-        <div class="field"><label>CGPA</label><input data-profile="cgpa" placeholder="e.g. 4.32 / 5.00"></div>
-        <div class="field"><label>Field of study</label><input data-profile="field_of_study" placeholder="Computer Science"></div>
-        <div class="field"><label>School/place of study</label><input data-profile="school" placeholder="University of Lagos"></div>
-        <div class="field"><label>NYSC status</label><select data-profile="nysc_status"><option value="">Select</option><option>Not started</option><option>Serving</option><option>Completed</option><option>Exempted</option></select></div>
-        <div class="field wide"><label>Certifications</label><textarea data-profile="certifications" placeholder="Google Data Analytics, AWS Cloud Practitioner..."></textarea></div>
-        <div class="field wide"><label>Locations of interest</label><textarea data-profile="locations" placeholder="Lagos, Abuja, Remote, UK, Canada..."></textarea></div>
-        <div class="field wide"><label>Areas/fields of interest</label><textarea data-profile="interests" placeholder="Data, public policy, software engineering, climate..."></textarea></div>
-        <div class="field wide"><label>Skills and volunteering</label><textarea data-profile="skills_volunteering" placeholder="Python, Excel, debate club volunteer, community teaching..."></textarea></div>
-        <div class="field wide"><label>LinkedIn profile</label><input data-profile="linkedin" placeholder="https://linkedin.com/in/yourname"></div>
+    <section class="page" id="page-tracker">
+      <div class="tracker-toolbar">
+        <button class="sheet-action" onclick="exportTrackerCsv()">Export Excel CSV</button>
+        <button class="sheet-action" onclick="copyTrackerForDocs()">Copy for Google Docs</button>
       </div>
+      <div class="tracker-list" id="trackerList"></div>
+    </section>
+    <section class="page" id="page-profile">
+      <div class="profile-modern" id="profileForm">
+        <section class="profile-card">
+          <h3>Personal</h3>
+          <div class="profile-grid">
+            <div class="field"><label>Full name</label><input data-profile="full_name" placeholder="Your full name"></div>
+            <div class="field"><label>LinkedIn profile</label><input data-profile="linkedin" placeholder="https://linkedin.com/in/yourname"></div>
+            <div class="field wide"><label>Portfolio and social links</label><input data-profile="portfolio_links" data-tags placeholder="Portfolio, GitHub, Behance, Instagram..."></div>
+          </div>
+        </section>
+        <section class="profile-card">
+          <div class="card-heading"><h3>WAEC/NECO Results</h3><span>Supports two sittings</span></div>
+          <div class="exam-wrap">
+            <div class="exam-card"><div class="exam-title">First sitting</div><div id="examOne" class="exam-grid"></div></div>
+            <div class="exam-card"><div class="exam-title">Second sitting</div><div id="examTwo" class="exam-grid"></div></div>
+          </div>
+        </section>
+        <section class="profile-card">
+          <h3>Tertiary Education</h3>
+          <div class="profile-grid">
+            <div class="field"><label>School</label><input data-profile="school" list="schoolOptions" placeholder="University of Lagos"></div>
+            <div class="field"><label>Field of study</label><input data-profile="field_of_study" placeholder="Computer Science"></div>
+            <div class="field"><label>CGPA</label><input data-profile="cgpa" inputmode="decimal" placeholder="4.32"></div>
+            <div class="field"><label>Max CGPA</label><select data-profile="cgpa_max"><option value="">Select</option><option>4.00</option><option>5.00</option><option>7.00</option><option>100</option></select></div>
+            <div class="field"><label>Class of degree</label><select data-profile="degree_class"><option value="">Select</option><option>First Class</option><option>Second Class Upper</option><option>Second Class Lower</option><option>Third Class</option><option>Pass</option><option>Distinction</option><option>Upper Credit</option><option>Lower Credit</option></select></div>
+            <div class="field"><label>Graduation year</label><input data-profile="graduation_year" inputmode="numeric" placeholder="2026"></div>
+          </div>
+        </section>
+        <section class="profile-card">
+          <h3>Readiness</h3>
+          <div class="profile-grid">
+            <div class="field"><label>NYSC status</label><select data-profile="nysc_status"><option value="">Select</option><option>Not started</option><option>Serving</option><option>Completed</option><option>Exempted</option></select></div>
+            <div class="field"><label>Skills and competencies</label><input data-profile="skills_volunteering" data-tags placeholder="data analysis, graphic design, Excel"></div>
+            <div class="field"><label>Locations of interest</label><input data-profile="locations" data-tags placeholder="Lagos, Abuja, Remote, UK"></div>
+            <div class="field"><label>Areas of interest</label><input data-profile="interests" data-tags placeholder="technology, climate, finance"></div>
+            <div class="field wide"><label>Certifications</label><input data-profile="certifications" data-tags placeholder="Google Data Analytics, AWS Cloud Practitioner"></div>
+            <div class="field wide"><label>Documents you have</label><div class="doc-checks" id="docChecks"></div></div>
+          </div>
+        </section>
+      </div>
+      <datalist id="schoolOptions"><option>University of Lagos</option><option>University of Ibadan</option><option>Obafemi Awolowo University</option><option>University of Nigeria, Nsukka</option><option>Covenant University</option><option>Ahmadu Bello University</option><option>Federal University of Technology Akure</option></datalist>
       <div class="savebar"><button class="primary" onclick="saveProfile()">Save profile</button></div>
     </section>
     <section class="page" id="page-cvats">
@@ -237,21 +303,26 @@ const icons = {
 const stages = ['Applied','Assessment','Interview','Final stage','Offer'];
 let current = 'matches';
 let matchFilter = 'all';
+let sortMode = 'relevance';
 let user = null;
 let opps = [];
 let tracked = {};
 let profile = {};
 const demoOpps = [
- {id:'mastercard-2026',title:'Mastercard Foundation Scholars Program 2026',org:'Mastercard Foundation',category:'scholarship',industry:['STEM','Leadership','Social Impact'],deadline:'2026-06-08',target_regions:['Africa'],funding_type:'fully_funded',funding_label:'Fully funded',link:'https://mastercardfdn.org/all/scholars/',about:'Fully funded scholarship support for high-potential African students with leadership promise and community commitment.',requirements:'Strong academics, leadership potential, financial need, and African citizenship.',needs:['Strong academics','Leadership record','+ 2 more requirements'],docs:['Transcript','Personal statement','Recommendation letter','Proof of identity'],steps:['Confirm partner university eligibility','Prepare documents','Submit online application','Watch email for interview updates'],tags:['undergraduate','postgraduate','africa','stem','leadership','scholarship']},
- {id:'unilever-grad',title:'Unilever Future Leaders Graduate Programme',org:'Unilever Nigeria',category:'job',industry:['Business','Marketing','Supply Chain'],deadline:'2026-06-22',target_regions:['Nigeria'],funding_type:'stipend',funding_label:'Paid graduate programme',link:'https://careers.unilever.com/',about:'A rotational graduate programme for young professionals who want commercial training, mentorship, and real business exposure.',requirements:'Recent graduate, strong communication, analytical ability, and interest in FMCG.',needs:['Recent graduate','NYSC ready or completed','+ 2 more requirements'],docs:['CV','Degree certificate','NYSC certificate','Cover letter'],steps:['Create candidate profile','Complete assessments','Prepare for interviews'],tags:['nigeria','graduate','business','marketing','supply chain','nysc']},
- {id:'tony-elumelu-2026',title:'Tony Elumelu Foundation Entrepreneurship Programme',org:'Tony Elumelu Foundation',category:'fellowship',type_label:'Program',industry:['Entrepreneurship','Business','Social Impact'],deadline:'2026-06-01',target_regions:['Pan-African'],funding_type:'seed_capital',funding_label:'$5,000 seed capital',link:'https://www.tonyelumelufoundation.org/',about:'Annual programme empowering young African entrepreneurs with training, mentorship, and seed capital.',requirements:'Applicants should be young African entrepreneurs with a business idea or existing business and a clear growth plan.',needs:['18-35 years old','Business idea or existing business','+ 1 more requirement'],docs:['Founder profile','Business summary','Proof of identity'],steps:['Create TEFConnect profile','Complete business training','Submit application'],tags:['entrepreneurship','africa','business','seed capital','fellowship']},
- {id:'schwarzman',title:'Schwarzman Scholars Programme',org:'Tsinghua University',category:'scholarship',industry:['Public Policy','Leadership','International Relations'],deadline:'2026-09-12',target_regions:['Global'],funding_type:'fully_funded',funding_label:'Fully funded',link:'https://www.schwarzmanscholars.org/',about:'A fully funded master’s programme for future global leaders interested in policy, business, and international relations.',requirements:'Bachelor degree, English ability, leadership track record, and strong essays.',needs:['Bachelor degree','English ability','+ 2 more requirements'],docs:['CV','Essays','Academic records','Recommendations'],steps:['Review eligibility','Draft essays','Request references','Submit before deadline'],tags:['masters','global','policy','leadership','scholarship']},
- {id:'tech-career-event',title:'Lagos Tech Career Fair 2026',org:'Tech Career Hub',category:'event',industry:['Technology','Career Development'],deadline:'2026-07-05',target_regions:['Nigeria'],funding_type:'free',funding_label:'Free registration',link:'https://example.com/',about:'A career event for young people exploring technology roles, internships, mentorship, and employer networking.',requirements:'Open to students and early-career applicants interested in technology careers.',needs:['Student or early-career','Interest in technology','CV recommended'],docs:['Registration form','CV'],steps:['Register online','Prepare your CV','Attend the career sessions'],tags:['event','technology','career','lagos']}
+ {id:'mastercard-2026',title:'Mastercard Foundation Scholars Program 2026',org:'Mastercard Foundation',category:'scholarship',industry:['STEM','Leadership','Social Impact'],deadline:'2026-06-08',posted_at:'2026-05-20',target_regions:['Africa'],funding_type:'fully_funded',funding_label:'Fully funded',link:'https://mastercardfdn.org/all/scholars/',about:'Fully funded scholarship support for high-potential African students with leadership promise and community commitment.',requirements:'Strong academics, leadership potential, financial need, and African citizenship.',needs:['Strong academics','Leadership record','+ 2 more requirements'],docs:['Transcript','Personal statement','Recommendation letter','Proof of identity'],steps:['Confirm partner university eligibility','Prepare documents','Submit online application','Watch email for interview updates'],tags:['undergraduate','postgraduate','africa','stem','leadership','scholarship']},
+ {id:'unilever-grad',title:'Unilever Future Leaders Graduate Programme',org:'Unilever Nigeria',category:'job',industry:['Business','Marketing','Supply Chain'],deadline:'2026-06-22',posted_at:'2026-05-23',target_regions:['Nigeria'],funding_type:'stipend',funding_label:'Paid graduate programme',link:'https://careers.unilever.com/',about:'A rotational graduate programme for young professionals who want commercial training, mentorship, and real business exposure.',requirements:'Recent graduate, strong communication, analytical ability, and interest in FMCG.',needs:['Recent graduate','NYSC ready or completed','+ 2 more requirements'],docs:['CV','Degree certificate','NYSC certificate','Cover letter'],steps:['Create candidate profile','Complete assessments','Prepare for interviews'],tags:['nigeria','graduate','business','marketing','supply chain','nysc']},
+ {id:'tony-elumelu-2026',title:'Tony Elumelu Foundation Entrepreneurship Programme',org:'Tony Elumelu Foundation',category:'fellowship',type_label:'Program',industry:['Entrepreneurship','Business','Social Impact'],deadline:'2026-06-01',posted_at:'2026-05-16',target_regions:['Pan-African'],funding_type:'seed_capital',funding_label:'$5,000 seed capital',link:'https://www.tonyelumelufoundation.org/',about:'Annual programme empowering young African entrepreneurs with training, mentorship, and seed capital.',requirements:'Applicants should be young African entrepreneurs with a business idea or existing business and a clear growth plan.',needs:['18-35 years old','Business idea or existing business','+ 1 more requirement'],docs:['Founder profile','Business summary','Proof of identity'],steps:['Create TEFConnect profile','Complete business training','Submit application'],tags:['entrepreneurship','africa','business','seed capital','fellowship']},
+ {id:'schwarzman',title:'Schwarzman Scholars Programme',org:'Tsinghua University',category:'scholarship',industry:['Public Policy','Leadership','International Relations'],deadline:'2026-09-12',posted_at:'2026-05-11',target_regions:['Global'],funding_type:'fully_funded',funding_label:'Fully funded',link:'https://www.schwarzmanscholars.org/',about:'A fully funded master’s programme for future global leaders interested in policy, business, and international relations.',requirements:'Bachelor degree, English ability, leadership track record, and strong essays.',needs:['Bachelor degree','English ability','+ 2 more requirements'],docs:['CV','Essays','Academic records','Recommendations'],steps:['Review eligibility','Draft essays','Request references','Submit before deadline'],tags:['masters','global','policy','leadership','scholarship']},
+ {id:'tech-career-event',title:'Lagos Tech Career Fair 2026',org:'Tech Career Hub',category:'event',industry:['Technology','Career Development'],deadline:'2026-07-05',posted_at:'2026-05-25',target_regions:['Nigeria'],funding_type:'free',funding_label:'Free registration',link:'https://example.com/',about:'A career event for young people exploring technology roles, internships, mentorship, and employer networking.',requirements:'Open to students and early-career applicants interested in technology careers.',needs:['Student or early-career','Interest in technology','CV recommended'],docs:['Registration form','CV'],steps:['Register online','Prepare your CV','Attend the career sessions'],tags:['event','technology','career','lagos']}
 ];
+const examSubjects = ['English Language','Mathematics','Biology','Chemistry','Physics','Economics','Government','Literature in English','Commerce','Accounting','Geography','Civic Education','Agricultural Science','Computer Studies'];
+const examGrades = ['A1','B2','B3','C4','C5','C6','D7','E8','F9'];
+const docOptions = ['WAEC/NECO result','JAMB result','Undergraduate certificate','Statement of result','Academic transcript','NYSC certificate','CV/Resume','Cover letter','International passport','National ID/NIN','Recommendation letter','Portfolio'];
 
 function bootOppTrack(){
   applySidebarPrefs();
   buildNav();
+  buildProfileControls();
   setTheme(localStorage.getItem('oppTheme') || 'light');
   profile = JSON.parse(localStorage.getItem('oppProfile')||'{}');
   tracked = JSON.parse(localStorage.getItem('oppTracked')||'{}');
@@ -265,6 +336,7 @@ function bootOppTrack(){
     user = u;
     const snap = await fb.getDoc(fb.doc(fb.db,'users',u.uid));
     profile = snap.exists() ? (snap.data().profile || {}) : {};
+    buildProfileControls();
     fillProfile();
     fb.onSnapshot(fb.query(fb.collection(fb.db,'opportunities'),fb.where('is_approved','==',true),fb.where('is_active','==',true),fb.orderBy('deadline_timestamp','asc'),fb.limit(80)), s => { opps = s.docs.map(d=>({id:d.id,...d.data()})); renderAll(); });
     fb.onSnapshot(fb.collection(fb.db,'users',u.uid,'applications'), s => { tracked={}; s.docs.forEach(d=>tracked[d.id]={id:d.id,...d.data()}); renderAll(); });
@@ -273,6 +345,22 @@ function bootOppTrack(){
 function buildNav(){
   const html = navItems.map(([id,label,icon])=>`<button onclick="showPage('${id}')" data-nav="${id}">${icons[icon]}<span>${label}</span></button>`).join('');
   sideNav.innerHTML = html; mobileNav.innerHTML = html; setNav();
+}
+function buildProfileControls(){
+  const subjectOptions = '<option value="">Subject</option>' + examSubjects.map(s=>`<option>${s}</option>`).join('');
+  const gradeOptions = '<option value="">Grade</option>' + examGrades.map(g=>`<option>${g}</option>`).join('');
+  const rows = sitting => Array.from({length:8},(_,i)=>`<div class="exam-row"><select data-exam="${sitting}" data-index="${i}" data-key="subject">${subjectOptions}</select><select data-exam="${sitting}" data-index="${i}" data-key="grade">${gradeOptions}</select></div>`).join('');
+  if(examOne && !examOne.children.length) examOne.innerHTML = rows('one');
+  if(examTwo && !examTwo.children.length) examTwo.innerHTML = rows('two');
+  if(docChecks && !docChecks.children.length) docChecks.innerHTML = docOptions.map(d=>`<label><input type="checkbox" value="${d}" data-doc>${d}</label>`).join('');
+  document.querySelectorAll('[data-tags]').forEach(input=>{
+    if(input.dataset.tagReady) return;
+    input.dataset.tagReady = 'true';
+    const preview = document.createElement('div');
+    preview.className = 'tag-preview';
+    input.insertAdjacentElement('afterend', preview);
+    input.addEventListener('input', () => renderTagPreview(input));
+  });
 }
 function showPage(id){const page=document.getElementById('page-'+id);if(!page)return;current=id;document.body.dataset.page=id;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));page.classList.add('active');[pageEyebrow.textContent,pageTitle.textContent,pageSub.textContent]=pages[id];setNav();if(id==='search')renderSearch();if(id==='tracker')renderTracker();}
 function setNav(){document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===current));document.querySelector('.nav-extra')?.classList.toggle('active',current==='cvats');}
@@ -306,12 +394,13 @@ function toggleFilters(){
   box.classList.toggle('collapsed');
   box.classList.toggle('open');
 }
-function profileText(){return Object.values(profile).join(' ').toLowerCase();}
+function profileText(){return JSON.stringify(profile).toLowerCase();}
+function profileFieldText(key){const value=profile[key];return Array.isArray(value)?value.join(' '):String(value||'');}
 function scoreOpp(o){
   const text = profileText(), tags = [...(o.tags||[]),...(o.industry||[]),o.category,...(o.target_regions||[])].join(' ').toLowerCase();
   let score = 20;
   tags.split(/\s+/).forEach(t=>{ if(t && text.includes(t)) score += 7; });
-  if((profile.locations||'').toLowerCase().split(/[,;\n]/).some(l=>l.trim() && (o.target_regions||[]).join(' ').toLowerCase().includes(l.trim()))) score += 18;
+  if(profileFieldText('locations').toLowerCase().split(/[,;\n]/).some(l=>l.trim() && (o.target_regions||[]).join(' ').toLowerCase().includes(l.trim()))) score += 18;
   if((profile.field_of_study||'') && tags.includes(profile.field_of_study.toLowerCase().split(' ')[0])) score += 14;
   if(o.funding_type === 'fully_funded') score += 8;
   if(daysLeft(o.deadline) < 8) score -= 6;
@@ -321,16 +410,43 @@ function matchReason(o){
   const hits = [];
   const t = profileText();
   (o.industry||[]).forEach(i=>{ if(t.includes(i.toLowerCase().split(' ')[0])) hits.push(i); });
-  (o.target_regions||[]).forEach(r=>{ if((profile.locations||'').toLowerCase().includes(r.toLowerCase()) || r === 'Global') hits.push(r); });
+  (o.target_regions||[]).forEach(r=>{ if(profileFieldText('locations').toLowerCase().includes(r.toLowerCase()) || r === 'Global') hits.push(r); });
   if(o.funding_type === 'fully_funded') hits.push('fully funded');
   return hits.length ? `Matched because of ${hits.slice(0,3).join(', ')}.` : 'Matched from your profile and broad opportunity fit.';
 }
 function daysLeft(d){if(!d||d==='rolling')return 9999;return Math.ceil((new Date(d)-new Date())/86400000)}
+function toMillis(value){
+  if(!value) return 0;
+  if(value.toDate) return value.toDate().getTime();
+  if(value.seconds) return value.seconds * 1000;
+  const parsed = new Date(value).getTime();
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+function postedTime(o){return toMillis(o.posted_at || o.created_at || o.discovered_at || o.updated_at || o.deadline)}
 function fmtDate(d){return !d||d==='rolling'?'Rolling':new Date(d).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'})}
 function urgencyClass(o){const d=daysLeft(o.deadline);if(d<=0)return'today';if(d<=7)return'urgent';if(d<=21)return'soon';return'open'}
 function urgencyText(o){const d=daysLeft(o.deadline);if(d>9000)return'Rolling';if(d<=0)return'Closes today';if(d===1)return'1 day left';return`${d} days left`}
 function fitInfo(score){if(score>=55)return{label:'Strong fit',cls:'fit-strong'};if(score>=25)return{label:'Weak fit',cls:'fit-weak'};return{label:'No fit',cls:'fit-none'}}
-function sortedOpps(){return [...opps].map(o=>({...o,score:scoreOpp(o)})).sort((a,b)=>b.score-a.score||daysLeft(a.deadline)-daysLeft(b.deadline));}
+function sortedOpps(){
+  return [...opps].map(o=>({...o,score:scoreOpp(o)})).sort((a,b)=>{
+    if(sortMode === 'deadline_asc') return daysLeft(a.deadline) - daysLeft(b.deadline);
+    if(sortMode === 'deadline_desc') return daysLeft(b.deadline) - daysLeft(a.deadline);
+    if(sortMode === 'posted_desc') return postedTime(b) - postedTime(a);
+    if(sortMode === 'posted_asc') return postedTime(a) - postedTime(b);
+    return b.score - a.score || daysLeft(a.deadline) - daysLeft(b.deadline);
+  });
+}
+function syncSortControls(){
+  [document.getElementById('homeSort'), document.getElementById('searchSort')].forEach(select=>{
+    if(select && select.value !== sortMode) select.value = sortMode;
+  });
+}
+function setSortMode(mode){
+  sortMode = mode;
+  syncSortControls();
+  renderMatches();
+  renderSearch();
+}
 function renderAll(){renderMatches();renderSearch();renderTracker();statMatches.textContent=opps.length;statTracked.textContent=Object.keys(tracked).length;statReady.textContent=profileStrength()+'%';}
 function renderMatches(){
   const query = (document.getElementById('homeQ')?.value || '').toLowerCase();
@@ -388,6 +504,28 @@ function fundingLabel(opp){
   const value = typeof opp === 'string' ? opp : opp?.funding_type;
   return (typeof opp === 'object' && opp?.funding_label) || {fully_funded:'Fully funded',partial:'Partial funding',stipend:'Stipend',unpaid:'Unpaid',unknown:'Funding unknown',seed_capital:'Seed capital',free:'Free'}[value] || 'Funding unknown';
 }
+function industryLabel(o){return (o.industry && o.industry.length ? o.industry[0] : categoryLabel(o.category)) || 'General';}
+function locationLabel(o){return (o.target_regions && o.target_regions.length ? o.target_regions.join(', ') : 'Global');}
+function htmlSafe(value){return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));}
+function attrSafe(value){return htmlSafe(value).replace(/`/g,'&#096;');}
+const trackerStatuses = [
+  ['not_applied','Not applied'],
+  ['applied','Applied'],
+  ['in_progress','In progress'],
+  ['assessment','Assessment'],
+  ['interview','Interview'],
+  ['final_stage','Final stage'],
+  ['offer','Offer'],
+  ['rejected','Rejected']
+];
+function trackerStatusValue(t){
+  if(!t) return 'not_applied';
+  const value = String(t.status || '').replace(/\s+/g,'_');
+  if(trackerStatuses.some(([id])=>id===value)) return value;
+  if(Number.isFinite(t.current_stage) && t.current_stage >= 0) return ['applied','assessment','interview','final_stage','offer'][t.current_stage] || 'in_progress';
+  return 'not_applied';
+}
+function trackerStatusLabel(value){return (trackerStatuses.find(([id])=>id===value) || trackerStatuses[0])[1];}
 function uiIcon(name){
   const icons = {
     calendar:'<svg viewBox="0 0 24 24"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M3 10h18"></path></svg>',
@@ -461,15 +599,87 @@ async function trackOpp(id){
 }
 function renderTracker(){
   const list = Object.keys(tracked).map(id=>opps.find(o=>o.id===id)).filter(Boolean);
-  trackerList.innerHTML = list.map(o=>{
-    const t=tracked[o.id], stage=Number.isFinite(t.current_stage)?t.current_stage:-1;
-    return `<div class="track-card"><div class="track-head"><div><h3>${o.title}</h3><div class="org">${o.org} - ${fmtDate(o.deadline)}</div></div><button class="ghost" onclick="untrack('${o.id}')">Untrack</button></div><div class="stages">${stages.map((s,i)=>`<button class="stage ${i<stage?'done':i===stage?'current':''}" onclick="setStage('${o.id}',${i})">${s}</button>`).join('')}</div><div class="field"><label>Notes</label><textarea onchange="saveLearning('${o.id}',this.value)" placeholder="What changed? What did you learn?">${t.learnings||''}</textarea></div></div>`;
-  }).join('') || '<div class="empty">Nothing tracked yet. Track an opportunity and reminders stay active until you apply or untrack.</div>';
+  if(!list.length){
+    trackerList.innerHTML = '<div class="empty">Nothing tracked yet. Track an opportunity and reminders stay active until you apply or untrack.</div>';
+    return;
+  }
+  trackerList.innerHTML = `<div class="tracker-table-wrap"><table class="tracker-table">
+    <thead><tr><th>Organisation</th><th>Opportunity</th><th>Industry</th><th>Location</th><th>Benefit</th><th>Application Status</th><th>Application Deadline</th><th>Next Action</th><th>Reminder Date</th><th>Application Link</th><th>Notes</th></tr></thead>
+    <tbody>${list.map(o=>{
+      const t = tracked[o.id] || {};
+      const status = trackerStatusValue(t);
+      return `<tr>
+        <td data-label="Organisation"><strong>${htmlSafe(o.org)}</strong></td>
+        <td data-label="Opportunity"><button class="tracker-title" onclick="openDetail('${o.id}')">${htmlSafe(o.title)}</button></td>
+        <td data-label="Industry"><span class="tracker-pill industry">${htmlSafe(industryLabel(o))}</span></td>
+        <td data-label="Location">${htmlSafe(locationLabel(o))}</td>
+        <td data-label="Benefit">${htmlSafe(fundingLabel(o))}</td>
+        <td data-label="Application Status"><label class="status-select status-${status}"><span>${trackerStatusLabel(status)}</span><select onchange="setTrackerStatus('${o.id}',this.value)">${trackerStatuses.map(([id,label])=>`<option value="${id}" ${id===status?'selected':''}>${label}</option>`).join('')}</select></label></td>
+        <td data-label="Application Deadline"><span class="deadline-badge ${urgencyClass(o)}">${urgencyText(o)}</span><small>${fmtDate(o.deadline)}</small></td>
+        <td data-label="Next Action"><input class="tracker-cell-input" value="${attrSafe(t.next_action || '')}" onchange="saveTrackerField('${o.id}','next_action',this.value)" placeholder="e.g. Submit CV"></td>
+        <td data-label="Reminder Date"><input class="tracker-cell-input tracker-reminder" type="date" value="${attrSafe(t.reminder_date || '')}" onchange="saveTrackerField('${o.id}','reminder_date',this.value)"></td>
+        <td data-label="Application Link"><a class="tracker-link" href="${o.link||'#'}" target="_blank" rel="noreferrer">Apply</a></td>
+        <td data-label="Notes"><textarea class="tracker-note" rows="1" onchange="saveLearning('${o.id}',this.value)" placeholder="Add note">${htmlSafe(t.learnings || '')}</textarea></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
 }
 async function setStage(id,i){tracked[id].current_stage=i;tracked[id].status=stages[i].toLowerCase();await persistTrack(id);renderTracker();}
+async function setTrackerStatus(id,value){
+  if(!tracked[id]) return;
+  const stageByStatus = {applied:0,assessment:1,interview:2,final_stage:3,offer:4};
+  tracked[id].status = value;
+  tracked[id].current_stage = Object.prototype.hasOwnProperty.call(stageByStatus,value) ? stageByStatus[value] : -1;
+  await persistTrack(id);
+  renderTracker();
+}
 async function saveLearning(id,val){tracked[id].learnings=val;await persistTrack(id);}
+async function saveTrackerField(id,key,val){if(!tracked[id])return;tracked[id][key]=val;await persistTrack(id);}
 async function untrack(id){delete tracked[id];localStorage.setItem('oppTracked',JSON.stringify(tracked));if(user&&window._fb){const fb=window._fb;await fb.deleteDoc(fb.doc(fb.db,'users',user.uid,'applications',id));}renderAll();}
 async function persistTrack(id){localStorage.setItem('oppTracked',JSON.stringify(tracked));if(user&&window._fb){const fb=window._fb;await fb.setDoc(fb.doc(fb.db,'users',user.uid,'applications',id),{...tracked[id],updated_at:fb.serverTimestamp()},{merge:true});}}
+function trackerRows(){
+  return Object.keys(tracked).map(id=> {
+    const o = opps.find(item=>item.id===id);
+    if(!o) return null;
+    const t = tracked[id] || {};
+    return {
+      Organisation:o.org,
+      Opportunity:o.title,
+      Industry:industryLabel(o),
+      Location:locationLabel(o),
+      Benefit:fundingLabel(o),
+      'Application Status':trackerStatusLabel(trackerStatusValue(t)),
+      'Application Deadline':fmtDate(o.deadline),
+      'Next Action':t.next_action || '',
+      'Reminder Date':t.reminder_date || '',
+      'Application Link':o.link || '',
+      Notes:t.learnings || ''
+    };
+  }).filter(Boolean);
+}
+function tableText(rows, delimiter='\t'){
+  const headers = ['Organisation','Opportunity','Industry','Location','Benefit','Application Status','Application Deadline','Next Action','Reminder Date','Application Link','Notes'];
+  return [headers.join(delimiter), ...rows.map(row=>headers.map(h=>String(row[h] || '').replace(/\r?\n/g,' ')).join(delimiter))].join('\n');
+}
+function csvText(rows){
+  const headers = ['Organisation','Opportunity','Industry','Location','Benefit','Application Status','Application Deadline','Next Action','Reminder Date','Application Link','Notes'];
+  const esc = value => `"${String(value || '').replace(/"/g,'""')}"`;
+  return [headers.map(esc).join(','), ...rows.map(row=>headers.map(h=>esc(row[h])).join(','))].join('\n');
+}
+function exportTrackerCsv(){
+  const rows = trackerRows();
+  if(!rows.length){ alert('Track an opportunity first.'); return; }
+  const url = URL.createObjectURL(new Blob([csvText(rows)], {type:'text/csv;charset=utf-8'}));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'opptrack-applications.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+async function copyTrackerForDocs(){
+  const rows = trackerRows();
+  if(!rows.length){ alert('Track an opportunity first.'); return; }
+  await navigator.clipboard?.writeText(tableText(rows));
+  alert('Tracker copied. Paste it into Google Docs or Google Sheets.');
+}
 function openDetail(id){
   const o=opps.find(x=>x.id===id); if(!o)return; const score=scoreOpp(o), isTracked=!!tracked[o.id];
   sheet.innerHTML = `<div class="sheet-head"><div class="opp-logo">${orgLogo(o)}</div><button class="close-icon" onclick="closeDetail()" aria-label="Close">&times;</button></div><div class="sheet-body"><div class="meta"><span class="tag">${o.type_label || categoryLabel(o.category)}</span><span class="tag">${fmtDate(o.deadline)}</span>${canShowFit()?`<span class="tag">${fitInfo(score).label}</span>`:''}</div><h2>${o.title}</h2><div class="org">${o.org}</div><div class="sections"><div class="section"><h4>About</h4><p>${o.about||''}</p></div><div class="section"><h4>Requirements</h4><p>${o.requirements||''}</p></div><div class="section"><h4>Your readiness</h4>${requirementsChecklist(o)}</div><div class="section"><h4>Documents</h4><ul>${(o.docs||[]).map(d=>`<li>${d}</li>`).join('')}</ul></div><div class="section"><h4>Application roadmap</h4><ul>${(o.steps||[]).map(s=>`<li>${typeof s==='string'?s:s.title||s.description}</li>`).join('')}</ul></div></div><div class="detail-actions"><button class="primary track-btn ${isTracked?'tracked':''}" onclick="trackOpp('${o.id}')">${isTracked?'Tracked':'+ Track This'}</button><button class="ghost share-btn" onclick="shareOpp('${o.id}')" title="Share"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path></svg></button><a class="ghost" href="${o.link||'#'}" target="_blank">Apply</a></div></div>`;
@@ -486,16 +696,61 @@ async function shareOpp(id){
   if(navigator.share) await navigator.share({title:o.title,text,url:o.link});
   else { await navigator.clipboard?.writeText(text); alert('Share message copied.'); }
 }
-function fillProfile(){document.querySelectorAll('[data-profile]').forEach(el=>el.value=profile[el.dataset.profile]||'');}
-function profileStrength(){const fields=[...document.querySelectorAll('[data-profile]')].map(e=>e.dataset.profile);const filled=fields.filter(f=>(profile[f]||'').trim()).length;return Math.round(filled/fields.length*100);}
+function renderTagPreview(input){
+  const preview = input.nextElementSibling?.classList.contains('tag-preview') ? input.nextElementSibling : null;
+  if(!preview) return;
+  const tags = String(input.value || '').split(',').map(t=>t.trim()).filter(Boolean).slice(0,10);
+  preview.innerHTML = tags.map(t=>`<span>${htmlSafe(t)}</span>`).join('');
+}
+function fillExamRows(){
+  const sittings = profile.exam_results || {};
+  document.querySelectorAll('[data-exam]').forEach(el=>{
+    const row = sittings[el.dataset.exam]?.[Number(el.dataset.index)] || {};
+    el.value = row[el.dataset.key] || '';
+  });
+}
+function collectExamRows(){
+  const result = {one:[],two:[]};
+  ['one','two'].forEach(sitting=>{
+    for(let i=0;i<8;i++){
+      const subject = document.querySelector(`[data-exam="${sitting}"][data-index="${i}"][data-key="subject"]`)?.value || '';
+      const grade = document.querySelector(`[data-exam="${sitting}"][data-index="${i}"][data-key="grade"]`)?.value || '';
+      if(subject || grade) result[sitting].push({subject,grade});
+    }
+  });
+  return result;
+}
+function fillProfile(){
+  buildProfileControls();
+  document.querySelectorAll('[data-profile]').forEach(el=>{
+    const value = profile[el.dataset.profile];
+    el.value = Array.isArray(value) ? value.join(', ') : (value || '');
+    if(el.dataset.tags !== undefined) renderTagPreview(el);
+  });
+  const docs = new Set(profile.documents || []);
+  document.querySelectorAll('[data-doc]').forEach(box=>box.checked = docs.has(box.value));
+  fillExamRows();
+}
+function profileStrength(){
+  const basic = ['full_name','linkedin','school','field_of_study','cgpa','cgpa_max','degree_class','graduation_year','nysc_status','skills_volunteering','locations','interests'];
+  const filled = basic.filter(f=>profile[f] && String(profile[f]).trim()).length;
+  const examCount = Object.values(profile.exam_results || {}).flat().filter(r=>r.subject && r.grade).length;
+  const docCount = (profile.documents || []).length;
+  return Math.min(100, Math.round(((filled / basic.length) * 70) + Math.min(examCount,6) * 3 + Math.min(docCount,6) * 2));
+}
 function canShowFit(){return !!user || profileStrength() > 0;}
 async function saveProfile(){
-  document.querySelectorAll('[data-profile]').forEach(el=>profile[el.dataset.profile]=el.value.trim());
+  document.querySelectorAll('[data-profile]').forEach(el=>{
+    const value = el.value.trim();
+    profile[el.dataset.profile] = el.dataset.tags !== undefined ? value.split(',').map(t=>t.trim()).filter(Boolean) : value;
+  });
+  profile.exam_results = collectExamRows();
+  profile.documents = [...document.querySelectorAll('[data-doc]:checked')].map(box=>box.value);
   localStorage.setItem('oppProfile',JSON.stringify(profile));
   if(user&&window._fb){const fb=window._fb;await fb.setDoc(fb.doc(fb.db,'users',user.uid),{role:'user',profile,updated_at:fb.serverTimestamp()},{merge:true});}
   renderAll(); alert('Profile saved. Your ranking has been refreshed.');
 }
-window.bootOppTrack=bootOppTrack; window.showPage=showPage; window.renderSearch=renderSearch; window.setMatchFilter=setMatchFilter; window.setTheme=setTheme; window.toggleTheme=toggleTheme; window.toggleSidebar=toggleSidebar; window.setSidebarSize=setSidebarSize; window.toggleFilters=toggleFilters; window.toggleReq=toggleReq; window.openDetail=openDetail; window.closeDetail=closeDetail; window.trackOpp=trackOpp; window.untrack=untrack; window.setStage=setStage; window.saveLearning=saveLearning; window.shareOpp=shareOpp; window.saveProfile=saveProfile;
+window.bootOppTrack=bootOppTrack; window.showPage=showPage; window.renderSearch=renderSearch; window.setMatchFilter=setMatchFilter; window.setSortMode=setSortMode; window.setTheme=setTheme; window.toggleTheme=toggleTheme; window.toggleSidebar=toggleSidebar; window.setSidebarSize=setSidebarSize; window.toggleFilters=toggleFilters; window.toggleReq=toggleReq; window.openDetail=openDetail; window.closeDetail=closeDetail; window.trackOpp=trackOpp; window.untrack=untrack; window.setStage=setStage; window.setTrackerStatus=setTrackerStatus; window.saveTrackerField=saveTrackerField; window.exportTrackerCsv=exportTrackerCsv; window.copyTrackerForDocs=copyTrackerForDocs; window.saveLearning=saveLearning; window.shareOpp=shareOpp; window.saveProfile=saveProfile;
 </script>
 </body>
 </html>
