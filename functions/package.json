@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "engines": { "node": "20" },
   "main": "index.js",
+  "scripts": {
+    "lint": "node -c index.js && node -c scout.js && node -c analyst.js && node -c matcher.js && node -c notifier.js && node -c admin_config.js && node -c essay_assist.js && node -c whatsapp_digest.js"
+  },
   "dependencies": {
     "firebase-admin": "^12.0.0",
     "firebase-functions": "^4.0.0",

@@ -1,37 +1,36 @@
 const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
-const { getFirestore }      = require('firebase-admin/firestore');
+const { getFirestore } = require('firebase-admin/firestore');
 
 exports.matcher = onDocumentUpdated({
   document: 'opportunities/{oppId}',
-  memory:   '256MiB',
+  memory: '256MiB',
 }, async (event) => {
-  const after  = event.data.after.data();
+  const after = event.data.after.data();
   const before = event.data.before.data();
 
-  // Only run when Analyst just finished (analyst_version went from 0 → 1)
-  if (before.analyst_version === after.analyst_version) return;
-  if (!after.analyst_done || !after.is_active) return;
+  const analystChanged = before.analyst_version !== after.analyst_version;
+  const approvalChanged = before.review_status !== 'approved' && after.review_status === 'approved';
+  if (!analystChanged && !approvalChanged) return;
+  if (!after.is_approved || !after.is_active) return;
 
-  const db    = getFirestore();
+  const db = getFirestore();
   const users = await db.collection('users').get();
-
   const batch = db.batch();
 
   users.forEach(userDoc => {
-    const prefs = userDoc.data().prefs || {};
-    const score = scoreMatch(after, prefs);
-    if (score === 0) return; // no match at all, don't notify
+    const userData = userDoc.data();
+    const score = scoreMatch(after, userData.profile || userData.prefs || {});
+    if (score === 0) return;
 
-    // Write match score into a sub-collection for efficient per-user queries
     const matchRef = db
       .collection('users').doc(userDoc.id)
       .collection('matches').doc(event.params.oppId);
 
     batch.set(matchRef, {
-      opp_id:       event.params.oppId,
+      opp_id: event.params.oppId,
       score,
-      notified:     false,
-      created_at:   new Date(),
+      notified: false,
+      created_at: new Date(),
     });
   });
 
@@ -39,26 +38,53 @@ exports.matcher = onDocumentUpdated({
   console.log(`Matcher: scored "${after.title}" against ${users.size} users.`);
 });
 
-function scoreMatch(opp, prefs) {
-  let score = 0;
+function splitList(value) {
+  if (Array.isArray(value)) return value;
+  return String(value || '').split(/[,;\n]/).map(v => v.trim()).filter(Boolean);
+}
 
-  // Field/industry match
-  const userFields  = (prefs.fields || []).map(f => f.toLowerCase());
-  const oppIndustry = (opp.industry || []).map(i => i.toLowerCase());
+function scoreMatch(opp, profile) {
+  let score = 0;
+  const profileText = [
+    profile.waec_neco,
+    profile.jamb,
+    profile.cgpa,
+    profile.field_of_study,
+    profile.school,
+    profile.certifications,
+    profile.nysc_status,
+    profile.locations,
+    profile.interests,
+    profile.skills_volunteering,
+    profile.linkedin,
+    ...splitList(profile.fields),
+    ...splitList(profile.keywords),
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  const userFields = [
+    ...splitList(profile.fields),
+    ...splitList(profile.interests),
+    profile.field_of_study,
+  ].filter(Boolean).map(f => String(f).toLowerCase());
+  const oppIndustry = (opp.industry || []).map(i => String(i).toLowerCase());
   if (userFields.some(f => oppIndustry.some(i => i.includes(f) || f.includes(i)))) score += 40;
 
-  // Region match
-  const userLocs = (prefs.locations || ['Nigeria']).map(l => l.toLowerCase());
-  const oppRegions = (opp.target_regions || ['Global']).map(r => r.toLowerCase());
+  const userLocs = splitList(profile.locations || 'Nigeria').map(l => l.toLowerCase());
+  const oppRegions = (opp.target_regions || ['Global']).map(r => String(r).toLowerCase());
   if (oppRegions.includes('global') || userLocs.some(l => oppRegions.includes(l))) score += 30;
 
-  // Keyword match
-  const kw = (prefs.keywords || []).map(k => k.toLowerCase());
-  const haystack = `${opp.title} ${opp.about} ${opp.requirements}`.toLowerCase();
-  if (kw.some(k => haystack.includes(k))) score += 20;
+  const keywords = [
+    ...splitList(profile.keywords),
+    ...splitList(profile.skills_volunteering),
+    ...splitList(profile.certifications),
+  ].map(k => String(k).toLowerCase());
+  const haystack = `${opp.title} ${opp.about} ${opp.requirements} ${(opp.tags || []).join(' ')}`.toLowerCase();
+  if (keywords.some(k => k && haystack.includes(k))) score += 20;
 
-  // Funding type bonus — fully funded always surfaced
+  const oppTags = [...(opp.tags || []), ...(opp.industry || []), opp.category, opp.funding_type]
+    .filter(Boolean).map(t => String(t).toLowerCase());
+  if (oppTags.some(t => t && profileText.includes(t))) score += 15;
+
   if (opp.funding_type === 'fully_funded') score += 10;
-
-  return score;
+  return Math.min(score, 100);
 }

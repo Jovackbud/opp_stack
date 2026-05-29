@@ -148,7 +148,7 @@ exports.parseUrl = onCall({
   let pageText = text || '';
   if (url && !text) {
     try { pageText = await fetchPageText(url); }
-    catch (e) { pageText = \`URL: \${url}\`; }
+    catch (e) { pageText = `URL: ${url}`; }
   }
 
   const extracted = await analyseOpportunity(url || 'user-upload', pageText);
