@@ -19,6 +19,7 @@
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}.stat{padding:16px;border-radius:18px;background:var(--panel);border:1px solid var(--line)}.stat strong{font-size:28px}.stat span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
 .page{display:none}.page.active{display:block}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),#0d182c);border-radius:18px;overflow:hidden}.card-img{height:118px;background:linear-gradient(135deg,#17335c,#123326);display:flex;align-items:flex-end;padding:14px;position:relative}.card-img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(7,16,31,.75))}.card-img b{position:relative;z-index:1;font-size:34px}.score{position:absolute;right:12px;top:12px;z-index:2;background:rgba(83,214,162,.95);color:#07101f;padding:6px 9px;border-radius:999px;font-weight:850;font-size:12px}.card-body{padding:14px}.meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.tag{font-size:11px;color:#dce6f6;border:1px solid var(--line);background:rgba(255,255,255,.06);padding:5px 8px;border-radius:999px}.tag.hot{background:rgba(245,200,75,.14);color:#f7d978}.card h3{font-size:16px;line-height:1.35;margin:0 0 6px}.org{font-size:12px;color:var(--muted);margin-bottom:12px}.why{font-size:12px;color:#c6d2e6;line-height:1.5;background:rgba(255,255,255,.045);border-radius:12px;padding:10px;margin-bottom:12px}.row{display:flex;gap:8px;align-items:center;justify-content:space-between}.row button{flex:1}.filters{display:grid;grid-template-columns:1.2fr repeat(4,1fr);gap:10px;margin-bottom:14px}.field{display:grid;gap:6px}.field label{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:13px;background:#0d182c;color:var(--text);padding:11px;outline:none}.field textarea{min-height:78px;resize:vertical}.tracker-list{display:grid;gap:12px}.track-card{padding:15px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.track-head{display:flex;justify-content:space-between;gap:12px}.stages{display:flex;overflow-x:auto;gap:8px;padding:14px 0 4px}.stage{min-width:104px;border:1px solid var(--line);border-radius:13px;padding:9px;color:var(--muted);background:#0d182c;text-align:center;font-size:12px}.stage.done{background:rgba(83,214,162,.13);border-color:rgba(83,214,162,.45);color:var(--text)}.stage.current{background:rgba(245,200,75,.14);border-color:rgba(245,200,75,.5);color:#f7d978}
 .profile{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.wide{grid-column:1/-1}.savebar{position:sticky;bottom:14px;margin-top:16px;display:flex;justify-content:flex-end}.mobile-nav{display:none}.empty{border:1px dashed var(--line);border-radius:18px;padding:34px;text-align:center;color:var(--muted)}
+.empty-title{display:block;color:#171a1f;font-size:18px;font-weight:900;margin-bottom:6px}.empty-copy{display:block;max-width:420px;margin:0 auto;color:#667085;line-height:1.55}.empty-action{margin-top:14px}
 .detail{position:fixed;inset:0;background:rgba(4,10,20,.78);z-index:20;display:none;align-items:stretch;justify-content:flex-end}.detail.show{display:flex}.sheet{width:min(520px,100%);background:#0b1324;border-left:1px solid var(--line);overflow:auto}.sheet-img{height:190px;background:linear-gradient(135deg,#17335c,#16402f);padding:18px;display:flex;align-items:flex-end;justify-content:space-between}.sheet-img span{font-size:58px}.sheet-body{padding:18px}.sheet h2{margin:0 0 8px;font-size:24px}.sections{display:grid;gap:14px;margin:16px 0}.section{border-top:1px solid var(--line);padding-top:14px}.section h4{margin:0 0 8px;color:var(--brand);font-size:12px;text-transform:uppercase;letter-spacing:.1em}.section p,.section li{color:#4f554f;line-height:1.6;font-size:14px}.share-card{background:#f7f9fd;color:#07101f;border-radius:16px;padding:14px;margin-top:12px}.share-card b{display:block;font-size:17px}.share-card span{display:block;font-size:12px;margin-top:5px;color:#324058}
 @media(max-width:860px){.shell{display:block}.side{display:none}.main{padding:18px 14px 88px}.title{font-size:25px}.top{display:block}.top-actions{margin-top:14px}.stats{grid-template-columns:repeat(3,1fr);gap:8px}.stat{padding:12px}.stat strong{font-size:22px}.grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.filters .field:first-child{grid-column:1/-1}.profile{grid-template-columns:1fr}.mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#0b1324;border-top:1px solid var(--line);z-index:15}.mobile-nav button{flex:1;border:0;background:transparent;color:var(--muted);padding:8px 2px 10px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px}.mobile-nav button span{font-size:12px;font-weight:850}.mobile-nav button.active{color:var(--brand)}}
 
@@ -144,9 +145,43 @@ body{background:#e8e1d4;color:var(--text)}
 .profile-modern{max-width:980px;display:grid;gap:14px}.profile-card{background:#fff;border:1px solid #e4dac8;border-radius:20px;padding:16px;box-shadow:0 12px 30px rgba(47,36,21,.05)}.profile-card h3{margin:0 0 14px;font-size:18px;letter-spacing:-.03em}.card-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px}.card-heading span{font-size:12px;color:#74766f}.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.profile-card .field.wide{grid-column:1/-1}.exam-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px}.exam-card{border:1px solid #efe5d8;background:#faf8f3;border-radius:16px;padding:12px}.exam-title{font-size:12px;font-weight:900;color:#f0643c;margin:0 0 10px;text-transform:uppercase;letter-spacing:.06em}.exam-grid{display:grid;gap:8px}.exam-row{display:grid;grid-template-columns:1fr 86px;gap:8px}.exam-row select{min-width:0;border:1px solid #dfd5c4;background:#fff;color:#151716;border-radius:12px;padding:9px 10px;outline:none}.tag-preview{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tag-preview span{background:#fff5f0;border:1px solid #f0cfc4;color:#f0643c;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:750}.doc-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.doc-checks label{display:flex!important;align-items:center;justify-content:flex-start;gap:10px;border:1px solid #eadfce;background:#faf8f3;border-radius:12px;padding:10px 12px;color:#4f554f;font-size:13px!important;font-weight:650;text-transform:none!important;letter-spacing:0!important;line-height:1.25}.doc-checks input{width:16px!important;height:16px;min-width:16px;accent-color:#ff7448;margin:0}
 .dark-mode .tracker-table-wrap,.dark-mode .tracker-table th,.dark-mode .tracker-table td,.dark-mode .sheet-action{background:#17191b;border-color:#34383b;color:#f5f3ec}.dark-mode .tracker-table th{background:#202326;color:#a6aaa5}.dark-mode .tracker-table td{border-color:#2a2d2f}.dark-mode .tracker-title{color:#f5f3ec}.dark-mode .tracker-pill,.dark-mode .tracker-note,.dark-mode .tracker-cell-input{background:transparent;border-color:#34383b;color:#c7cbc5}.dark-mode .tracker-link{color:#ff8a68}.dark-mode .tracker-table small{color:#a6aaa5}.dark-mode .profile-card{background:#17191b;border-color:#34383b;box-shadow:none}.dark-mode .exam-card,.dark-mode .doc-checks label,.dark-mode .exam-row select{background:#202326;border-color:#34383b;color:#c7cbc5}.dark-mode .tag-preview span{background:#2a1814;border-color:#6b3528;color:#ff8a68}
 @media(max-width:860px){.tracker-toolbar{justify-content:flex-start;overflow:auto}.tracker-table-wrap{border-radius:12px;margin:0 -4px}.tracker-table{min-width:1260px}.tracker-table th,.tracker-table td{padding:8px 9px}.tracker-table th:first-child,.tracker-table td:first-child{min-width:132px}.tracker-table td:nth-child(2){min-width:190px}.profile-grid,.exam-wrap{grid-template-columns:1fr}.doc-checks{grid-template-columns:1fr}.profile-card{padding:14px;border-radius:18px}}
+.splash-screen{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#f8f6f0;color:#151716;transition:opacity .45s ease,visibility .45s ease}.splash-screen.hide{opacity:0;visibility:hidden;pointer-events:none}.splash-inner{display:grid;justify-items:center;gap:14px;transform:translateY(-10px)}.splash-logo{font-family:'Audiowide',Inter,sans-serif;font-size:38px;font-weight:400;letter-spacing:0;color:#151716;display:flex;align-items:center;gap:12px}.splash-logo:before{content:"";width:30px;height:30px;background:linear-gradient(135deg,#ff8158,#f25b2d);clip-path:polygon(50% 0,100% 24%,50% 48%,0 24%);box-shadow:0 12px 28px rgba(255,116,72,.28)}.splash-sub{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#74766f}.splash-line{width:138px;height:3px;border-radius:999px;background:#e4dac8;overflow:hidden;margin-top:14px}.splash-line span{display:block;height:100%;width:0;background:#ff7448;border-radius:inherit;animation:splashFill 1.05s ease forwards}.dark-mode .splash-screen{background:#151716;color:#f8f6f0}.dark-mode .splash-logo{color:#fff}.dark-mode .splash-sub{color:#cfc7bb}.dark-mode .splash-line{background:#363330}@keyframes splashFill{to{width:100%}}
+@media(max-width:860px){html,body{min-height:100%;overscroll-behavior-y:none}body{background:#ebe4d8}.shell{max-width:480px;margin:0 auto;min-height:100dvh;background:#fbfbf8;box-shadow:0 0 0 1px rgba(47,36,21,.04)}.main{min-height:100dvh;padding-top:0!important;padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}.appbar{position:sticky;top:0;z-index:30;margin:0 -16px 20px!important;padding:calc(10px + env(safe-area-inset-top)) 16px 10px!important;border-bottom:1px solid rgba(228,218,200,.72);background:rgba(251,251,248,.94)!important;backdrop-filter:blur(18px);box-shadow:0 10px 28px rgba(47,36,21,.055)}.dark-mode .appbar{background:rgba(15,17,18,.94)!important;border-color:#2a2d2f}.mobile-nav{left:50%!important;right:auto!important;width:min(100%,480px);transform:translateX(-50%);padding-bottom:env(safe-area-inset-bottom);border-radius:22px 22px 0 0}.mobile-nav button{min-height:58px}.detail{max-width:480px;left:50%;right:auto;width:min(100%,480px);transform:translateX(-50%)}}
+/* Brand identity experiment: cleaner light mode, charcoal structure, orange-pink action system */
+:root{--brand:#ff5f45;--brand2:#ff8a68;--ink:#171a1f;--muted:#667085;--surface:#ffffff;--wash:#f6f7f9;--line:#e4e7ec}
+body{background:#eef1f5;color:#171a1f}.shell{background:#f6f7f9;box-shadow:0 30px 90px rgba(16,24,40,.14)}.main{background:#f6f7f9}.side{background:#ffffff;border-right:1px solid #e4e7ec}.brand{border-bottom-color:#eaecf0}.mark{background:#171a1f;color:#fff}.brand p,.sub,.org,.stat span,.section-heading p{color:#667085}.title,.section-heading h2,.stat strong,.card-title-row h3,.profile-card h3{color:#171a1f}.eyebrow{color:#ff5f45}.logo-word::before,.admin-logo:before,.splash-logo:before{background:#ff5f45;box-shadow:0 10px 22px rgba(255,95,69,.18)}.primary,.chip.active,.track-btn,.admin-side .tabs button.active{background:#ff5f45!important;color:#fff!important;border-color:#ff5f45!important;box-shadow:0 10px 22px rgba(255,95,69,.16)!important}.track-btn.tracked{background:#fff!important;color:#ff5f45!important;border-color:#ff5f45!important;box-shadow:none!important}.ghost,.pill,.chip,.theme-toggle,.home-search,.profile-nudge,.stat,.profile-card,.filters,.tracker-table-wrap{background:#fff;border-color:#e4e7ec;box-shadow:0 10px 24px rgba(16,24,40,.045)}.profile-nudge{background:#fff4f1;border-color:#ffd7cc;color:#2f343d}.profile-nudge strong,.more-req,.tracker-link{color:#ff5f45}.card{background:#fff!important;border-color:#d8dee8!important;border-left-color:#ff5f45!important;box-shadow:0 12px 28px rgba(16,24,40,.055)!important}.card.urgent,.card.today{border-color:#ff4d4f!important;border-left-color:#ff4d4f!important}.card.soon{border-color:#f5a524!important;border-left-color:#f5a524!important}.tag{background:#f9fafb!important;border-color:#d0d5dd!important;color:#475467!important}.tag.verified{background:#ecfdf3!important;border-color:#abefc6!important;color:#067647!important}.deadline-badge.open{background:#fff1ed;color:#c4320a;border-color:#ffd7cc}.deadline-badge.soon{background:#f79009}.deadline-badge.urgent,.deadline-badge.today{background:#f04438}.org-logo,.opp-logo{background:#fff4f1;border-color:#ffd7cc;color:#ff5f45}.mobile-nav{background:rgba(255,255,255,.96)!important;border-color:#e4e7ec!important}.mobile-nav button.active,.nav button.active,.nav-extra.active{color:#ff5f45!important}.side .nav button.active,.side .nav-extra.active{background:#fff1ed!important;color:#ff5f45!important;border-color:#ffd7cc!important;box-shadow:none!important}.splash-screen{background:#f6f7f9}.splash-logo{color:#171a1f}.splash-sub{color:#667085}.splash-line{background:#d0d5dd}.splash-line span{background:#ff5f45}
+.dark-mode{background:#0d1117;color:#f4f6f8}.dark-mode .shell,.dark-mode .main{background:#101418}.dark-mode .main{background:#101418}.dark-mode .side,.dark-mode .card,.dark-mode .stat,.dark-mode .profile-card,.dark-mode .filters,.dark-mode .home-search,.dark-mode .chip,.dark-mode .ghost,.dark-mode .theme-toggle,.dark-mode .tracker-table-wrap{background:#171c22!important;border-color:#29313a!important;box-shadow:none!important}.dark-mode .title,.dark-mode .section-heading h2,.dark-mode .stat strong,.dark-mode .card-title-row h3,.dark-mode .profile-card h3{color:#f4f6f8}.dark-mode .profile-nudge{background:#251712;border-color:#623225;color:#f7ded6}.dark-mode .tag{background:#20262d!important;border-color:#343d48!important;color:#d0d5dd!important}.dark-mode .tag.verified{background:#1b2c22!important;border-color:#315f42!important;color:#75e0a7!important}.dark-mode .mobile-nav{background:rgba(16,20,24,.96)!important;border-color:#29313a!important}.dark-mode .splash-screen{background:#0d1117}.dark-mode .splash-logo{color:#fff}.dark-mode .splash-sub{color:#98a2b3}.dark-mode .splash-line{background:#29313a}
+@media(max-width:860px){body{background:#e6eaf0}.shell{background:#f6f7f9}.main{background:#f6f7f9!important}.appbar{background:rgba(246,247,249,.94)!important;border-bottom-color:#e4e7ec!important}.dark-mode body{background:#0d1117}.dark-mode .shell,.dark-mode .main{background:#101418!important}.dark-mode .appbar{background:rgba(16,20,24,.94)!important}}
+.match-tabs{display:flex!important;flex-wrap:nowrap!important;gap:5px!important;overflow-x:auto!important;overflow-y:hidden!important;max-width:980px!important;width:100%;padding:0 0 10px!important;margin-bottom:18px!important;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.match-tabs .chip{flex:0 0 auto;scroll-snap-align:start;padding:8px 8px!important;font-size:11.5px!important;line-height:1!important}.match-tabs::-webkit-scrollbar{height:5px;display:block}.match-tabs::-webkit-scrollbar-thumb{background:#d0d5dd;border-radius:999px}.match-tabs::-webkit-scrollbar-track{background:transparent}.dark-mode .match-tabs::-webkit-scrollbar-thumb{background:#343d48}
+@media(max-width:860px){.match-tabs{margin-left:0;margin-right:-16px;width:calc(100% + 16px);padding-right:18px!important}.mobile-nav button span{font-size:11px!important;white-space:nowrap}.mobile-nav button{padding-left:1px!important;padding-right:1px!important}}
+.view-toggle{display:flex;gap:4px;padding:4px;border:1px solid #e4e7ec;background:#fff;border-radius:14px;box-shadow:0 10px 24px rgba(16,24,40,.045)}
+.view-btn{width:34px;height:30px;border:0;border-radius:10px;background:transparent;color:#667085;display:grid;place-items:center;padding:0}
+.view-btn svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}.view-btn svg rect{fill:none}
+.view-btn.active{background:#ff5f45;color:#fff}.dark-mode .view-toggle{background:#171c22;border-color:#29313a;box-shadow:none}.dark-mode .view-btn{color:#98a2b3}.dark-mode .view-btn.active{background:#ff5f45;color:#fff}
+.urgency-chip{font-size:10px!important;padding:6px 8px!important;border-radius:999px;font-weight:850}.urgency-chip.open{background:#fff1ed!important;color:#c4320a!important;border-color:#ffd7cc!important}.urgency-chip.soon{background:#fffaeb!important;color:#b54708!important;border-color:#fedf89!important}.urgency-chip.urgent,.urgency-chip.today{background:#fff0ed!important;color:#b42318!important;border-color:#fecdca!important}.dark-mode .urgency-chip.open{background:#2a1814!important;color:#ff8a68!important;border-color:#6b3528!important}.dark-mode .urgency-chip.soon{background:#2b2413!important;color:#f0c65c!important;border-color:#6f5520!important}.dark-mode .urgency-chip.urgent,.dark-mode .urgency-chip.today{background:#2c1714!important;color:#f3a092!important;border-color:#713629!important}
+.grid.view-list{grid-template-columns:1fr!important;max-width:980px!important}.grid.view-list .card{min-height:0!important}.grid.view-list .card-body{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(130px,auto);gap:9px 16px;align-items:start}.grid.view-list .card-top{grid-column:1/-1;margin-bottom:0}.grid.view-list .card-title-row{grid-column:1/2}.grid.view-list .card-desc{grid-column:1/2;min-height:0!important;margin:2px 0!important;-webkit-line-clamp:2}.grid.view-list .card-info-list{grid-column:1/2;display:flex;flex-wrap:wrap;gap:8px 12px;min-height:0!important;margin:0}.grid.view-list .need-list{display:none}.grid.view-list .card-foot{grid-column:2/3;grid-row:2/3;margin:0;justify-self:end}.grid.view-list .card-actions{grid-column:2/3;grid-row:4/5;min-width:132px;align-self:end;margin:0}.grid.view-list .track-btn{min-height:42px}
+.detail{background:rgba(16,24,40,.56)!important;backdrop-filter:blur(10px);z-index:80}.sheet{width:min(640px,100%)!important;background:#fff!important;border-left:1px solid #e4e7ec!important;box-shadow:-24px 0 70px rgba(16,24,40,.18)}.sheet-head{position:sticky;top:0;z-index:2;height:70px!important;background:#fff!important;border-bottom:1px solid #e4e7ec!important;padding:14px 18px!important}.detail-hero{padding:18px;border-bottom:1px solid #e4e7ec;background:#f9fafb}.detail-hero h2{margin:12px 0 6px;font-size:25px;line-height:1.14;letter-spacing:-.04em;color:#171a1f}.detail-time{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}.detail-time svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;flex:0 0 16px}.detail-time small{color:#667085}.detail-docs{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}.detail-docs li{border:1px solid #e4e7ec;background:#fff;border-radius:999px;padding:7px 10px;color:#344054!important;font-size:12px!important;font-weight:750}.close-icon svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.3;fill:none;stroke-linecap:round;pointer-events:none}.dark-mode .sheet{background:#101418!important;border-color:#29313a!important}.dark-mode .sheet-head{background:#171c22!important;border-color:#29313a!important}.dark-mode .detail-hero{background:#171c22;border-color:#29313a}.dark-mode .detail-hero h2{color:#f4f6f8}.dark-mode .detail-docs li{background:#20262d;border-color:#343d48;color:#d0d5dd!important}
+@media(max-width:860px){.section-heading{align-items:center;gap:10px}.section-heading h2{font-size:18px}.view-toggle{flex:0 0 auto}.grid.view-list .card-body{display:flex!important;flex-direction:column!important}.grid.view-list .card-actions{width:100%;min-width:0}.detail{inset:0!important;max-width:none!important;width:100%!important;left:0!important;right:0!important;transform:none!important}.sheet{width:100%!important;height:100dvh;border-left:0!important}.sheet-body{padding-bottom:96px!important}.detail-actions{position:sticky;bottom:0;background:#fff;border-top:1px solid #e4e7ec;padding-top:12px}.dark-mode .detail-actions{background:#101418;border-color:#29313a}}
+.tracker-toolbar{align-items:center;flex-wrap:wrap}.tracker-view-toggle{display:flex;gap:4px;padding:4px;border:1px solid #e4e7ec;background:#fff;border-radius:14px;box-shadow:0 10px 24px rgba(16,24,40,.045);margin-right:auto}.tracker-view-btn{height:32px;border:0;border-radius:10px;background:transparent;color:#667085;padding:0 12px;font-size:12px;font-weight:850}.tracker-view-btn.active{background:#ff5f45;color:#fff}.tracker-pipeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;width:100%}.pipeline-card{background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:14px;box-shadow:0 12px 28px rgba(16,24,40,.055)}.pipeline-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.pipeline-card h3{margin:0 0 5px;font-size:15px;line-height:1.25;color:#171a1f}.pipeline-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.pipeline-bar{height:4px;background:#f2f4f7;border-radius:999px;overflow:hidden;margin:12px 0}.pipeline-bar span{display:block;height:100%;background:#ff5f45;border-radius:inherit}.pipeline-stages{display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none}.pipeline-stages::-webkit-scrollbar{display:none}.pipeline-stage{display:grid;justify-items:center;gap:5px;min-width:62px;border:0;background:transparent;color:#667085;padding:0}.stage-dot{width:30px;height:30px;border-radius:50%;border:2px solid #d0d5dd;background:#fff;color:#667085;display:grid;place-items:center;font-size:11px;font-weight:900}.pipeline-stage.done .stage-dot{background:#ff5f45;border-color:#ff5f45;color:#fff}.pipeline-stage.current .stage-dot{border-color:#ff5f45;color:#ff5f45;background:#fff4f1}.stage-name{font-size:9px;line-height:1.15;text-align:center;font-weight:750;max-width:58px}.stage-line{height:2px;min-width:18px;background:#d0d5dd;margin-top:15px;flex:1}.stage-line.done{background:#ff5f45}.pipeline-docs{border-top:1px solid #eaecf0;padding-top:10px}.pipeline-docs-title{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#667085;margin-bottom:8px}.pipeline-doc{display:flex;align-items:center;gap:8px;border:0;background:transparent;color:#344054;padding:5px 0;text-align:left;font-size:12px}.doc-box{width:17px;height:17px;border-radius:5px;border:1.5px solid #d0d5dd;display:grid;place-items:center;font-size:11px;color:#fff;flex:0 0 17px}.pipeline-doc.checked .doc-box{background:#ff5f45;border-color:#ff5f45}.pipeline-doc.checked span:last-child{text-decoration:line-through;color:#98a2b3}.pipeline-note{width:100%;min-height:62px;margin-top:10px;border:1px solid #e4e7ec;background:#f9fafb;border-radius:12px;padding:10px;color:#171a1f;resize:vertical;outline:none}.pipeline-note:focus{border-color:#ff5f45;background:#fff}.pipeline-actions{display:flex;gap:8px;margin-top:10px}.pipeline-actions .ghost{flex:1;text-align:center;text-decoration:none}.modal-overlay{position:fixed;inset:0;background:rgba(16,24,40,.56);backdrop-filter:blur(10px);z-index:90;display:none;align-items:flex-end;justify-content:center}.modal-overlay.show{display:flex}.modal{width:min(520px,100%);background:#fff;border:1px solid #e4e7ec;border-radius:22px 22px 0 0;box-shadow:0 -24px 70px rgba(16,24,40,.18);padding:12px 18px 18px}.modal-handle{width:42px;height:4px;border-radius:999px;background:#d0d5dd;margin:0 auto 16px}.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}.modal-head h2{margin:0 0 5px;font-size:20px;letter-spacing:-.035em}.modal-head p{margin:0;color:#667085;font-size:13px;line-height:1.45}.reminder-options{display:grid;gap:8px}.reminder-row{width:100%;border:1px solid #e4e7ec;background:#f9fafb;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:left;color:#171a1f}.reminder-row b{display:block;font-size:13px}.reminder-row small{display:block;color:#667085;margin-top:3px}.reminder-row i{width:44px;height:24px;border-radius:999px;background:#d0d5dd;position:relative;flex:0 0 44px}.reminder-row i:after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;box-shadow:0 2px 6px rgba(16,24,40,.18);transition:left .18s}.reminder-row.on{border-color:#ffd7cc;background:#fff4f1}.reminder-row.on i{background:#ff5f45}.reminder-row.on i:after{left:23px}.reminder-time{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #e4e7ec;background:#fff;border-radius:14px;padding:12px;color:#344054;font-weight:800;font-size:13px}.reminder-time input{border:1px solid #d0d5dd;border-radius:10px;padding:8px;color:#171a1f}.reminder-save{width:100%;margin-top:12px}.dark-mode .tracker-view-toggle,.dark-mode .pipeline-card,.dark-mode .modal,.dark-mode .reminder-time{background:#171c22;border-color:#29313a;box-shadow:none}.dark-mode .tracker-view-btn{color:#98a2b3}.dark-mode .tracker-view-btn.active{background:#ff5f45;color:#fff}.dark-mode .pipeline-card h3,.dark-mode .modal-head h2,.dark-mode .reminder-row,.dark-mode .pipeline-note,.dark-mode .reminder-time input{color:#f4f6f8}.dark-mode .pipeline-card,.dark-mode .pipeline-docs{border-color:#29313a}.dark-mode .pipeline-bar{background:#29313a}.dark-mode .stage-dot{background:#171c22;border-color:#475467;color:#98a2b3}.dark-mode .pipeline-stage.current .stage-dot{background:#251712;border-color:#ff5f45;color:#ff8a68}.dark-mode .stage-line{background:#475467}.dark-mode .pipeline-doc{color:#d0d5dd}.dark-mode .pipeline-note,.dark-mode .reminder-row,.dark-mode .reminder-time input{background:#20262d;border-color:#343d48}.dark-mode .reminder-row.on{background:#251712;border-color:#623225}.dark-mode .modal-head p,.dark-mode .reminder-row small{color:#98a2b3}
+@media(max-width:860px){.tracker-toolbar{gap:8px}.tracker-view-toggle{order:-1;width:100%;margin-right:0}.tracker-view-btn{flex:1}.tracker-pipeline{grid-template-columns:1fr}.modal{width:min(100%,480px)}}
+.stats{max-width:980px}.stat{position:relative;overflow:hidden}.stat:after{content:"";position:absolute;right:14px;top:14px;width:8px;height:8px;border-radius:50%;background:#ff5f45;opacity:.42}.stat:nth-child(2):after{background:#12b76a}.stat:nth-child(3):after{background:#f04438}.stat strong{letter-spacing:-.05em}.stat span{font-weight:750}.dark-mode .stat:after{opacity:.75}
+body[data-page="matches"] .stats{display:grid!important;margin:0 0 18px}
+.profile-nudge strong{display:block}.profile-nudge span{display:block;margin-top:5px;font-size:13px;font-weight:500;color:#667085}.dark-mode .profile-nudge span{color:#d0d5dd}
+.appbar-actions{display:flex;align-items:center;gap:8px}.notif-btn{position:relative;width:38px;height:38px;border:1px solid #e4e7ec;background:#fff;color:#344054;border-radius:14px;display:grid;place-items:center;box-shadow:0 10px 24px rgba(16,24,40,.045)}.notif-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}.notif-btn span{position:absolute;right:8px;top:7px;width:8px;height:8px;border-radius:50%;background:#f79009;border:2px solid #fff}.notif-btn.granted span{background:#12b76a}.notif-btn.denied span{background:#f04438}.reminder-pill{height:38px;border:1px solid #ffd7cc;background:#fff4f1;color:#ff5f45;border-radius:14px;padding:0 13px;font-size:12px;font-weight:900;box-shadow:0 10px 24px rgba(16,24,40,.045)}.dark-mode .notif-btn,.dark-mode .reminder-pill{background:#171c22;border-color:#29313a;box-shadow:none;color:#f4f6f8}.dark-mode .reminder-pill{background:#251712;border-color:#623225;color:#ff8a68}.dark-mode .notif-btn span{border-color:#171c22}
+.time-box{margin-top:16px;border:1px solid #ffd7cc;background:#fff4f1;border-radius:18px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}.time-big{font-size:42px;font-weight:950;letter-spacing:-.06em;line-height:.95;color:#ff5f45}.time-label{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#c4320a}.time-date{font-size:13px;color:#667085;font-weight:750}.detail-docs li{display:inline-flex;align-items:center;gap:6px}.detail-docs li:before{content:"";width:7px;height:7px;border-radius:50%;background:#ff5f45;box-shadow:0 0 0 3px #fff1ed}.toast-stack{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:120;display:grid;gap:8px;width:min(420px,calc(100% - 28px));pointer-events:none}.toast{background:#171a1f;color:#fff;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 13px;box-shadow:0 18px 46px rgba(16,24,40,.24);display:flex;align-items:flex-start;gap:9px;font-size:13px;font-weight:750;animation:toastIn .22s ease both}.toast:before{content:"";width:9px;height:9px;border-radius:50%;background:#12b76a;margin-top:4px;flex:0 0 9px}.toast.error:before{background:#f04438}.toast.info:before{background:#ff5f45}@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.dark-mode .empty-title{color:#f4f6f8}.dark-mode .empty-copy,.dark-mode .time-date{color:#98a2b3}.dark-mode .time-box{background:#251712;border-color:#623225}.dark-mode .detail-docs li:before{box-shadow:0 0 0 3px #251712}
+.doc-progress-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 6px;color:#667085;font-size:11px;font-weight:850}.doc-progress-head b{color:#171a1f}.doc-progress{height:5px;background:#f2f4f7;border-radius:999px;overflow:hidden;margin-bottom:10px}.doc-progress span{display:block;height:100%;background:#ff5f45;border-radius:inherit}.stage-note-wrap{border-top:1px solid #eaecf0;margin-top:10px;padding-top:10px}.stage-note-label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#667085;margin-bottom:6px}.pipeline-note.stage-note{margin-top:0}.reminder-group-title{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#ff5f45;margin:7px 2px 0}.custom-reminder-row{display:grid;grid-template-columns:1fr 78px auto;gap:8px}.custom-reminder-row input{min-width:0;border:1px solid #d0d5dd;border-radius:10px;padding:9px;color:#171a1f;background:#fff}.custom-reminder-list{display:grid;gap:6px}.custom-reminder-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #e4e7ec;background:#f9fafb;border-radius:12px;padding:9px 10px;font-size:12px}.custom-reminder-item b{color:#171a1f}.custom-reminder-item span{color:#667085}.custom-reminder-item button{border:0;background:transparent;color:#f04438;font-weight:900}.dark-mode .doc-progress-head b,.dark-mode .custom-reminder-item b{color:#f4f6f8}.dark-mode .doc-progress,.dark-mode .stage-note-wrap{background:#29313a;border-color:#29313a}.dark-mode .custom-reminder-row input,.dark-mode .custom-reminder-item{background:#20262d;border-color:#343d48;color:#f4f6f8}.dark-mode .custom-reminder-item span{color:#98a2b3}
+@media(max-width:860px){body[data-page="matches"] .stats{display:flex!important}.stats{margin-top:0}.custom-reminder-row{grid-template-columns:1fr 70px}.custom-reminder-row button{grid-column:1/-1}.appbar-actions{gap:6px}.reminder-pill{display:none}.notif-btn{width:36px;height:36px;border-radius:13px}}
 </style>
 </head>
 <body data-page="matches">
+<div class="splash-screen" id="splashScreen" role="status" aria-live="polite">
+  <div class="splash-inner">
+    <div class="splash-logo">OppTrack</div>
+    <div class="splash-sub">Never miss an opportunity</div>
+    <div class="splash-line"><span></span></div>
+  </div>
+</div>
 <div class="shell">
   <aside class="side">
     <div class="brand"><div class="mark">O</div><div><h1>OppTrack</h1><p>AI opportunity companion</p></div></div>
@@ -163,24 +198,28 @@ body{background:#e8e1d4;color:var(--text)}
   <main class="main">
     <div class="appbar">
       <b class="logo-word">OppTrack</b>
-      <div class="theme-toggle" aria-label="Theme">
-        <button id="lightBtn" onclick="toggleTheme()" title="Toggle theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button><button id="darkBtn" onclick="toggleTheme()" title="Toggle theme"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"></path></svg></button>
+      <div class="appbar-actions">
+        <button class="notif-btn" id="notifBtn" onclick="openNotificationSettings()" title="Notification settings" aria-label="Notification settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path><path d="M10 21h4"></path></svg><span id="notifDot"></span></button>
+        <button class="reminder-pill" onclick="openReminderSettings()">Reminders</button>
+        <div class="theme-toggle" aria-label="Theme">
+          <button id="lightBtn" onclick="toggleTheme()" title="Toggle theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></button><button id="darkBtn" onclick="toggleTheme()" title="Toggle theme"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z"></path></svg></button>
+        </div>
       </div>
     </div>
     <div class="top">
       <div>
-        <div class="eyebrow" id="pageEyebrow">Home</div>
-        <div class="title" id="pageTitle">All opportunities</div>
-        <p class="sub" id="pageSub">All verified opportunities as they come in.</p>
+        <div class="eyebrow" id="pageEyebrow">For you</div>
+        <div class="title" id="pageTitle">Recommended opportunities</div>
+        <p class="sub" id="pageSub">Opportunities selected and ranked around your profile.</p>
       </div>
     </div>
-    <section class="stats">
-      <div class="stat"><strong id="statMatches">0</strong><span>ranked matches</span></div>
-      <div class="stat"><strong id="statTracked">0</strong><span>tracked applications</span></div>
-      <div class="stat"><strong id="statReady">0%</strong><span>profile strength</span></div>
-    </section>
     <section class="page active" id="page-matches">
-      <div class="profile-nudge"><strong>Stop missing the things you actually qualify for.</strong> Track deadlines, stay organized, never pay to apply.</div>
+      <div class="profile-nudge"><strong>Stop missing the things you actually qualify for.</strong><span>Track deadlines, stay organized, never pay to apply.</span></div>
+      <section class="stats">
+        <div class="stat"><strong id="statMatches">0</strong><span>total opportunities</span></div>
+        <div class="stat"><strong id="statTracked">0</strong><span>tracked opportunities</span></div>
+        <div class="stat"><strong id="statUrgent">0</strong><span>urgent deadlines</span></div>
+      </section>
       <div class="home-search"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></span><input id="homeQ" placeholder="Search opportunities..." oninput="renderMatches()"></div>
       <div class="sort-row"><label>Sort by <select id="homeSort" onchange="setSortMode(this.value)"><option value="relevance">Best match</option><option value="deadline_asc">Deadline: soonest</option><option value="deadline_desc">Deadline: latest</option><option value="posted_desc">Date posted: newest</option><option value="posted_asc">Date posted: oldest</option></select></label></div>
       <div class="match-tabs">
@@ -191,7 +230,7 @@ body{background:#e8e1d4;color:var(--text)}
         <button class="chip" onclick="setMatchFilter('scholarship',this)">Scholarships</button>
         <button class="chip" onclick="setMatchFilter('event',this)">Events</button>
       </div>
-      <div class="section-heading"><div><h2>Closing soon</h2><p id="closingCount">Verified opportunities closing soon</p></div></div>
+      <div class="section-heading"><div><h2>Closing soon</h2><p id="closingCount">Verified opportunities closing soon</p></div><div class="view-toggle" aria-label="Opportunity view"><button id="matchTileBtn" class="view-btn active" onclick="setOppView('tile')" title="Tile view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg></button><button id="matchListBtn" class="view-btn" onclick="setOppView('list')" title="List view"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg></button></div></div>
       <div class="grid" id="matchGrid"></div>
     </section>
     <section class="page" id="page-search">
@@ -204,10 +243,16 @@ body{background:#e8e1d4;color:var(--text)}
         <div class="field"><label>Funding</label><select id="fFunding" onchange="renderSearch()"><option value="">All</option><option value="fully_funded">Fully funded</option><option>stipend</option><option>partial</option><option>unknown</option></select></div>
         <div class="field"><label>Deadline</label><select id="fDeadline" onchange="renderSearch()"><option value="">Any</option><option value="14">Next 14 days</option><option value="30">Next 30 days</option><option value="rolling">Rolling</option></select></div>
       </div>
+      <div class="section-heading explore-heading"><div><h2>Explore</h2><p>All verified opportunities</p></div><div class="view-toggle" aria-label="Opportunity view"><button id="searchTileBtn" class="view-btn active" onclick="setOppView('tile')" title="Tile view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg></button><button id="searchListBtn" class="view-btn" onclick="setOppView('list')" title="List view"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg></button></div></div>
       <div class="grid" id="searchGrid"></div>
     </section>
     <section class="page" id="page-tracker">
       <div class="tracker-toolbar">
+        <div class="tracker-view-toggle" aria-label="Tracker view">
+          <button id="trackerSheetBtn" class="tracker-view-btn active" onclick="setTrackerView('sheet')">Sheet</button>
+          <button id="trackerPipelineBtn" class="tracker-view-btn" onclick="setTrackerView('pipeline')">Pipeline</button>
+        </div>
+        <button class="sheet-action" onclick="openReminderSettings()">Reminder settings</button>
         <button class="sheet-action" onclick="exportTrackerCsv()">Export Excel CSV</button>
         <button class="sheet-action" onclick="copyTrackerForDocs()">Copy for Google Docs</button>
       </div>
@@ -269,6 +314,39 @@ body{background:#e8e1d4;color:var(--text)}
 </div>
 <nav class="mobile-nav" id="mobileNav"></nav>
 <div class="detail" id="detail"><div class="sheet" id="sheet"></div></div>
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+<div class="modal-overlay" id="reminderModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal reminder-sheet" role="dialog" aria-modal="true" aria-labelledby="reminderTitle">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div>
+        <h2 id="reminderTitle">Reminder settings</h2>
+        <p>Choose how OppTrack should nudge you before deadlines.</p>
+      </div>
+      <button class="close-icon" onclick="document.getElementById('reminderModal').classList.remove('show')" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+    </div>
+    <div class="reminder-options">
+      <button class="reminder-row" data-reminder="seven_day" onclick="toggleReminderSetting('seven_day')"><span><b>7-day reminder</b><small>A week before the deadline</small></span><i></i></button>
+      <button class="reminder-row" data-reminder="three_day" onclick="toggleReminderSetting('three_day')"><span><b>3-day reminder</b><small>Enough time for final documents</small></span><i></i></button>
+      <button class="reminder-row" data-reminder="one_day" onclick="toggleReminderSetting('one_day')"><span><b>24-hour reminder</b><small>Final check before closing day</small></span><i></i></button>
+      <div class="reminder-group-title">Channels</div>
+      <button class="reminder-row" data-reminder="push" onclick="toggleReminderSetting('push')"><span><b>Push notification</b><small>Browser/app notification when supported</small></span><i></i></button>
+      <button class="reminder-row" data-reminder="email" onclick="toggleReminderSetting('email')"><span><b>Email</b><small>Use my account email for reminder messages</small></span><i></i></button>
+      <button class="reminder-row" data-reminder="whatsapp" onclick="toggleReminderSetting('whatsapp')"><span><b>WhatsApp</b><small>Send reminder prompts to WhatsApp later</small></span><i></i></button>
+      <label class="reminder-time"><span>Preferred time</span><input id="reminderTime" type="time" value="09:00"></label>
+      <label class="reminder-time"><span>WhatsApp number</span><input id="reminderWhatsapp" inputmode="tel" placeholder="+234..."></label>
+      <label class="reminder-time"><span>Email address</span><input id="reminderEmail" type="email" placeholder="you@example.com"></label>
+      <div class="reminder-group-title">Custom reminders</div>
+      <div class="custom-reminder-row">
+        <input id="customReminderText" placeholder="e.g. start essay">
+        <input id="customReminderDays" type="number" min="0" max="365" value="14" aria-label="Days before deadline">
+        <button class="sheet-action" onclick="addCustomReminder()">Add</button>
+      </div>
+      <div class="custom-reminder-list" id="customReminderList"></div>
+    </div>
+    <button class="primary reminder-save" onclick="saveReminderSettings()">Save reminders</button>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -285,14 +363,14 @@ window.bootOppTrack();
 
 <script>
 const pages = {
-  matches:['Home','All opportunities','All verified opportunities as they come in.'],
-  search:['For me','Matched to you','Personalised opportunities ranked by your profile and interests.'],
+  matches:['For you','Recommended opportunities','Opportunities selected and ranked around your profile.'],
+  search:['Explore','Search opportunities','Browse all verified opportunities and refine with filters.'],
   tracker:['Tracker','Follow every application','Save first, apply when ready, then track each stage and what you learn.'],
   profile:['Profile','Your qualification profile','This is what OppTrack uses to rank opportunities for you.'],
   cvats:['CV/ATS','CV readiness checker','Check how well your CV fits a role or opportunity.']
 };
 const navItems = [
-  ['matches','Home','home'],['search','For me','search'],['tracker','Tracker','route'],['profile','Profile','user']
+  ['matches','For you','home'],['search','Explore','search'],['tracker','Tracker','route'],['profile','Profile','user']
 ];
 const icons = {
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>',
@@ -304,10 +382,13 @@ const stages = ['Applied','Assessment','Interview','Final stage','Offer'];
 let current = 'matches';
 let matchFilter = 'all';
 let sortMode = 'relevance';
+let oppView = localStorage.getItem('oppView') || 'tile';
+let trackerView = localStorage.getItem('trackerView') || 'sheet';
 let user = null;
 let opps = [];
 let tracked = {};
 let profile = {};
+let reminderSettings = JSON.parse(localStorage.getItem('oppReminderSettings') || '{"seven_day":true,"three_day":true,"one_day":true,"push":true,"email":false,"whatsapp":false,"time":"09:00","email_address":"","whatsapp_number":"","custom":[]}');
 const demoOpps = [
  {id:'mastercard-2026',title:'Mastercard Foundation Scholars Program 2026',org:'Mastercard Foundation',category:'scholarship',industry:['STEM','Leadership','Social Impact'],deadline:'2026-06-08',posted_at:'2026-05-20',target_regions:['Africa'],funding_type:'fully_funded',funding_label:'Fully funded',link:'https://mastercardfdn.org/all/scholars/',about:'Fully funded scholarship support for high-potential African students with leadership promise and community commitment.',requirements:'Strong academics, leadership potential, financial need, and African citizenship.',needs:['Strong academics','Leadership record','+ 2 more requirements'],docs:['Transcript','Personal statement','Recommendation letter','Proof of identity'],steps:['Confirm partner university eligibility','Prepare documents','Submit online application','Watch email for interview updates'],tags:['undergraduate','postgraduate','africa','stem','leadership','scholarship']},
  {id:'unilever-grad',title:'Unilever Future Leaders Graduate Programme',org:'Unilever Nigeria',category:'job',industry:['Business','Marketing','Supply Chain'],deadline:'2026-06-22',posted_at:'2026-05-23',target_regions:['Nigeria'],funding_type:'stipend',funding_label:'Paid graduate programme',link:'https://careers.unilever.com/',about:'A rotational graduate programme for young professionals who want commercial training, mentorship, and real business exposure.',requirements:'Recent graduate, strong communication, analytical ability, and interest in FMCG.',needs:['Recent graduate','NYSC ready or completed','+ 2 more requirements'],docs:['CV','Degree certificate','NYSC certificate','Cover letter'],steps:['Create candidate profile','Complete assessments','Prepare for interviews'],tags:['nigeria','graduate','business','marketing','supply chain','nysc']},
@@ -324,24 +405,26 @@ function bootOppTrack(){
   buildNav();
   buildProfileControls();
   setTheme(localStorage.getItem('oppTheme') || 'light');
+  syncNotificationButton();
   profile = JSON.parse(localStorage.getItem('oppProfile')||'{}');
   tracked = JSON.parse(localStorage.getItem('oppTracked')||'{}');
   fillProfile();
   if(location.hostname === 'localhost' || location.hostname === '127.0.0.1' || !window._fb || window._fb?.auth?.app?.options?.apiKey === '...'){
-    opps = demoOpps; renderAll(); return;
+    opps = demoOpps; renderAll(); hideSplash(); return;
   }
   const fb = window._fb;
   fb.onAuthStateChanged(fb.auth, async u => {
-    if(!u){ await fb.signInWithPopup(fb.auth, new fb.GoogleAuthProvider()); return; }
+    if(!u){ hideSplash(); await fb.signInWithPopup(fb.auth, new fb.GoogleAuthProvider()); return; }
     user = u;
     const snap = await fb.getDoc(fb.doc(fb.db,'users',u.uid));
     profile = snap.exists() ? (snap.data().profile || {}) : {};
     buildProfileControls();
     fillProfile();
-    fb.onSnapshot(fb.query(fb.collection(fb.db,'opportunities'),fb.where('is_approved','==',true),fb.where('is_active','==',true),fb.orderBy('deadline_timestamp','asc'),fb.limit(80)), s => { opps = s.docs.map(d=>({id:d.id,...d.data()})); renderAll(); });
+    fb.onSnapshot(fb.query(fb.collection(fb.db,'opportunities'),fb.where('is_approved','==',true),fb.where('is_active','==',true),fb.orderBy('deadline_timestamp','asc'),fb.limit(80)), s => { opps = s.docs.map(d=>({id:d.id,...d.data()})); renderAll(); hideSplash(); });
     fb.onSnapshot(fb.collection(fb.db,'users',u.uid,'applications'), s => { tracked={}; s.docs.forEach(d=>tracked[d.id]={id:d.id,...d.data()}); renderAll(); });
   });
 }
+function hideSplash(){setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),900);}
 function buildNav(){
   const html = navItems.map(([id,label,icon])=>`<button onclick="showPage('${id}')" data-nav="${id}">${icons[icon]}<span>${label}</span></button>`).join('');
   sideNav.innerHTML = html; mobileNav.innerHTML = html; setNav();
@@ -426,6 +509,9 @@ function postedTime(o){return toMillis(o.posted_at || o.created_at || o.discover
 function fmtDate(d){return !d||d==='rolling'?'Rolling':new Date(d).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'})}
 function urgencyClass(o){const d=daysLeft(o.deadline);if(d<=0)return'today';if(d<=7)return'urgent';if(d<=21)return'soon';return'open'}
 function urgencyText(o){const d=daysLeft(o.deadline);if(d>9000)return'Rolling';if(d<=0)return'Closes today';if(d===1)return'1 day left';return`${d} days left`}
+function urgencyLabel(o){const d=daysLeft(o.deadline);if(d>9000)return'Rolling';if(d<=0)return'Due today';if(d<=7)return'Urgent';if(d<=21)return'Closing soon';return'Open'}
+function timeBig(o){const d=daysLeft(o.deadline);if(d>9000)return'Rolling';if(d<=0)return'Today';return String(d)}
+function timeLabel(o){const d=daysLeft(o.deadline);if(d>9000)return'No fixed deadline';if(d<=0)return'Apply today';return d===1?'day left':'days left'}
 function fitInfo(score){if(score>=55)return{label:'Strong fit',cls:'fit-strong'};if(score>=25)return{label:'Weak fit',cls:'fit-weak'};return{label:'No fit',cls:'fit-none'}}
 function sortedOpps(){
   return [...opps].map(o=>({...o,score:scoreOpp(o)})).sort((a,b)=>{
@@ -447,7 +533,43 @@ function setSortMode(mode){
   renderMatches();
   renderSearch();
 }
-function renderAll(){renderMatches();renderSearch();renderTracker();statMatches.textContent=opps.length;statTracked.textContent=Object.keys(tracked).length;statReady.textContent=profileStrength()+'%';}
+function syncOppViewControls(){
+  [['matchTileBtn','tile'],['searchTileBtn','tile'],['matchListBtn','list'],['searchListBtn','list']].forEach(([id,view])=>{
+    document.getElementById(id)?.classList.toggle('active', oppView === view);
+  });
+  [matchGrid, searchGrid].forEach(grid=>{
+    if(!grid) return;
+    grid.classList.toggle('view-list', oppView === 'list');
+    grid.classList.toggle('view-tile', oppView === 'tile');
+  });
+}
+function setOppView(view){
+  oppView = view === 'list' ? 'list' : 'tile';
+  localStorage.setItem('oppView', oppView);
+  syncOppViewControls();
+  renderMatches();
+  renderSearch();
+}
+function syncTrackerViewControls(){
+  document.getElementById('trackerSheetBtn')?.classList.toggle('active', trackerView === 'sheet');
+  document.getElementById('trackerPipelineBtn')?.classList.toggle('active', trackerView === 'pipeline');
+}
+function setTrackerView(view){
+  trackerView = view === 'pipeline' ? 'pipeline' : 'sheet';
+  localStorage.setItem('trackerView', trackerView);
+  syncTrackerViewControls();
+  renderTracker();
+}
+function renderAll(){
+  syncOppViewControls();
+  renderMatches();
+  renderSearch();
+  renderTracker();
+  statMatches.textContent=opps.length;
+  statTracked.textContent=Object.keys(tracked).length;
+  const urgentCount = opps.filter(o=>daysLeft(o.deadline) <= 7).length;
+  statUrgent.textContent=urgentCount;
+}
 function renderMatches(){
   const query = (document.getElementById('homeQ')?.value || '').toLowerCase();
   const list = sortedOpps().filter(o => {
@@ -455,6 +577,7 @@ function renderMatches(){
     return (matchFilter === 'all' || o.category === matchFilter) && (!query || hay.includes(query));
   });
   document.getElementById('closingCount').textContent = `${list.length} verified opportunit${list.length === 1 ? 'y' : 'ies'} closing soon`;
+  syncOppViewControls();
   matchGrid.innerHTML = list.map(card).join('') || '<div class="empty">No approved opportunities yet.</div>';
 }
 function setMatchFilter(filter, btn){
@@ -475,6 +598,7 @@ function renderSearch(){
     if(dv && dv!=='rolling' && daysLeft(o.deadline) > Number(dv)) return false;
     return true;
   });
+  syncOppViewControls();
   searchGrid.innerHTML = results.map(card).join('') || '<div class="empty">No opportunities match these filters.</div>';
 }
 function card(o){
@@ -482,7 +606,7 @@ function card(o){
   const fit = fitInfo(score);
   const urgency = urgencyClass(o);
   const isTracked = !!tracked[o.id];
-  return `<article class="card ${urgency}" onclick="openDetail('${o.id}')"><div class="card-body"><div class="card-top"><div class="meta"><span class="tag">${o.type_label || categoryLabel(o.category)}</span><span class="tag verified">${uiIcon('shield')}<span>Verified</span></span></div><div class="org-logo" title="${o.org}">${orgLogo(o)}</div></div><div class="card-title-row"><div><h3>${o.title}</h3><div class="org">${o.org}</div></div></div><p class="card-desc">${o.about||o.requirements||''}</p><div class="card-info-list"><div>${uiIcon('calendar')}<b class="deadline-badge ${urgency}">${urgencyText(o)}</b><span>${fmtDate(o.deadline)}</span></div><div>${uiIcon('map')}<span>${(o.target_regions||['Global']).join(', ')}</span></div><div>${uiIcon('wallet')}<span>${fundingLabel(o)}</span></div></div>${canShowFit()?`<div class="card-foot"><span class="fit-label ${fit.cls}">${fit.label}</span></div>`:''}<div class="need-list"><p>You need:</p><ul>${needItemsHtml(o)}</ul></div><div class="card-actions"><button class="primary track-btn ${isTracked?'tracked':''}" onclick="event.stopPropagation();trackOpp('${o.id}')">${isTracked?'Tracked':'+ Track This'}</button></div></div></article>`
+  return `<article class="card ${urgency}" onclick="openDetail('${o.id}')"><div class="card-body"><div class="card-top"><div class="meta"><span class="tag">${o.type_label || categoryLabel(o.category)}</span><span class="tag verified">${uiIcon('shield')}<span>Verified</span></span><span class="tag urgency-chip ${urgency}">${urgencyLabel(o)}</span></div><div class="org-logo" title="${o.org}">${orgLogo(o)}</div></div><div class="card-title-row"><div><h3>${o.title}</h3><div class="org">${o.org}</div></div></div><p class="card-desc">${o.about||o.requirements||''}</p><div class="card-info-list"><div>${uiIcon('calendar')}<b class="deadline-badge ${urgency}">${urgencyText(o)}</b><span>${fmtDate(o.deadline)}</span></div><div>${uiIcon('map')}<span>${(o.target_regions||['Global']).join(', ')}</span></div><div>${uiIcon('wallet')}<span>${fundingLabel(o)}</span></div></div>${canShowFit()?`<div class="card-foot"><span class="fit-label ${fit.cls}">${fit.label}</span></div>`:''}<div class="need-list"><p>You need:</p><ul>${needItemsHtml(o)}</ul></div><div class="card-actions"><button class="primary track-btn ${isTracked?'tracked':''}" onclick="event.stopPropagation();trackOpp('${o.id}')">${isTracked?'Tracked':'+ Track This'}</button></div></div></article>`
 }
 function categoryLabel(category){
   return {job:'Job',fellowship:'Fellowship',internship:'Internship',scholarship:'Scholarship',event:'Events'}[category] || category || 'Opportunity';
@@ -517,6 +641,13 @@ const trackerStatuses = [
   ['final_stage','Final stage'],
   ['offer','Offer'],
   ['rejected','Rejected']
+];
+const pipelineStages = [
+  ['applied','Applied'],
+  ['assessment','Assessment'],
+  ['interview','Interview'],
+  ['final_stage','Final'],
+  ['offer','Offer']
 ];
 function trackerStatusValue(t){
   if(!t) return 'not_applied';
@@ -585,6 +716,7 @@ async function trackOpp(id){
     delete tracked[id];
     localStorage.setItem('oppTracked',JSON.stringify(tracked));
     if(user&&window._fb){const fb=window._fb;await fb.deleteDoc(fb.doc(fb.db,'users',user.uid,'applications',id));}
+    showToast('Removed from tracker. You can track it again anytime.', 'info');
     renderAll();
     if(detail.classList.contains('show')) openDetail(id);
     return;
@@ -593,50 +725,175 @@ async function trackOpp(id){
     const app = {status:'tracked',current_stage:-1,docs:(o.docs||[]).map(name=>({name,checked:false})),stage_notes:{},learnings:'',tracked_at:new Date().toISOString()};
     tracked[id]=app; localStorage.setItem('oppTracked',JSON.stringify(tracked));
     if(user&&window._fb){const fb=window._fb;await fb.setDoc(fb.doc(fb.db,'users',user.uid,'applications',id),{...app,tracked_at:fb.serverTimestamp(),updated_at:fb.serverTimestamp()});}
+    showToast('Tracked. Reminders will help you apply before the deadline.');
   }
   renderAll();
   if(detail.classList.contains('show')) openDetail(id);
 }
 function renderTracker(){
+  syncTrackerViewControls();
   const list = Object.keys(tracked).map(id=>opps.find(o=>o.id===id)).filter(Boolean);
   if(!list.length){
-    trackerList.innerHTML = '<div class="empty">Nothing tracked yet. Track an opportunity and reminders stay active until you apply or untrack.</div>';
+    trackerList.innerHTML = `<div class="empty"><span class="empty-title">No tracked opportunities yet</span><span class="empty-copy">When something looks promising, tap Track This. OppTrack will keep the deadline, documents, notes, and reminders in one calm place.</span><button class="primary empty-action" onclick="showPage('matches')">Find opportunities</button></div>`;
     return;
   }
-  trackerList.innerHTML = `<div class="tracker-table-wrap"><table class="tracker-table">
+  if(trackerView === 'pipeline'){
+    trackerList.innerHTML = renderTrackerPipeline(list);
+    return;
+  }
+  trackerList.innerHTML = renderTrackerSheet(list);
+}
+function renderTrackerSheet(list){
+  return `<div class="tracker-table-wrap"><table class="tracker-table">
     <thead><tr><th>Organisation</th><th>Opportunity</th><th>Industry</th><th>Location</th><th>Benefit</th><th>Application Status</th><th>Application Deadline</th><th>Next Action</th><th>Reminder Date</th><th>Application Link</th><th>Notes</th></tr></thead>
-    <tbody>${list.map(o=>{
-      const t = tracked[o.id] || {};
-      const status = trackerStatusValue(t);
-      return `<tr>
-        <td data-label="Organisation"><strong>${htmlSafe(o.org)}</strong></td>
-        <td data-label="Opportunity"><button class="tracker-title" onclick="openDetail('${o.id}')">${htmlSafe(o.title)}</button></td>
-        <td data-label="Industry"><span class="tracker-pill industry">${htmlSafe(industryLabel(o))}</span></td>
-        <td data-label="Location">${htmlSafe(locationLabel(o))}</td>
-        <td data-label="Benefit">${htmlSafe(fundingLabel(o))}</td>
-        <td data-label="Application Status"><label class="status-select status-${status}"><span>${trackerStatusLabel(status)}</span><select onchange="setTrackerStatus('${o.id}',this.value)">${trackerStatuses.map(([id,label])=>`<option value="${id}" ${id===status?'selected':''}>${label}</option>`).join('')}</select></label></td>
-        <td data-label="Application Deadline"><span class="deadline-badge ${urgencyClass(o)}">${urgencyText(o)}</span><small>${fmtDate(o.deadline)}</small></td>
-        <td data-label="Next Action"><input class="tracker-cell-input" value="${attrSafe(t.next_action || '')}" onchange="saveTrackerField('${o.id}','next_action',this.value)" placeholder="e.g. Submit CV"></td>
-        <td data-label="Reminder Date"><input class="tracker-cell-input tracker-reminder" type="date" value="${attrSafe(t.reminder_date || '')}" onchange="saveTrackerField('${o.id}','reminder_date',this.value)"></td>
-        <td data-label="Application Link"><a class="tracker-link" href="${o.link||'#'}" target="_blank" rel="noreferrer">Apply</a></td>
-        <td data-label="Notes"><textarea class="tracker-note" rows="1" onchange="saveLearning('${o.id}',this.value)" placeholder="Add note">${htmlSafe(t.learnings || '')}</textarea></td>
-      </tr>`;
-    }).join('')}</tbody>
+    <tbody>${list.map(o=>trackerRow(o)).join('')}</tbody>
   </table></div>`;
 }
+function trackerRow(o){
+  const t = tracked[o.id] || {};
+  const status = trackerStatusValue(t);
+  return `<tr>
+    <td data-label="Organisation"><strong>${htmlSafe(o.org)}</strong></td>
+    <td data-label="Opportunity"><button class="tracker-title" onclick="openDetail('${o.id}')">${htmlSafe(o.title)}</button></td>
+    <td data-label="Industry"><span class="tracker-pill industry">${htmlSafe(industryLabel(o))}</span></td>
+    <td data-label="Location">${htmlSafe(locationLabel(o))}</td>
+    <td data-label="Benefit">${htmlSafe(fundingLabel(o))}</td>
+    <td data-label="Application Status"><label class="status-select status-${status}"><span>${trackerStatusLabel(status)}</span><select onchange="setTrackerStatus('${o.id}',this.value)">${trackerStatuses.map(([id,label])=>`<option value="${id}" ${id===status?'selected':''}>${label}</option>`).join('')}</select></label></td>
+    <td data-label="Application Deadline"><span class="deadline-badge ${urgencyClass(o)}">${urgencyText(o)}</span><small>${fmtDate(o.deadline)}</small></td>
+    <td data-label="Next Action"><input class="tracker-cell-input" value="${attrSafe(t.next_action || '')}" onchange="saveTrackerField('${o.id}','next_action',this.value)" placeholder="e.g. Submit CV"></td>
+    <td data-label="Reminder Date"><input class="tracker-cell-input tracker-reminder" type="date" value="${attrSafe(t.reminder_date || '')}" onchange="saveTrackerField('${o.id}','reminder_date',this.value)"></td>
+    <td data-label="Application Link"><a class="tracker-link" href="${o.link||'#'}" target="_blank" rel="noreferrer">Apply</a></td>
+    <td data-label="Notes"><textarea class="tracker-note" rows="1" onchange="saveLearning('${o.id}',this.value)" placeholder="Add note">${htmlSafe(t.learnings || '')}</textarea></td>
+  </tr>`;
+}
+function renderTrackerPipeline(list){
+  return `<div class="tracker-pipeline">${list.map(o=>pipelineCard(o)).join('')}</div>`;
+}
+function pipelineCard(o){
+  const t = tracked[o.id] || {};
+  const status = trackerStatusValue(t);
+  const currentIndex = currentPipelineIndex(status);
+  const docs = Array.isArray(t.docs) && t.docs.length ? t.docs : (o.docs || []).map(name=>({name,checked:false}));
+  const checkedCount = docs.filter(d=>d.checked).length;
+  const docProgress = docs.length ? Math.round((checkedCount / docs.length) * 100) : 0;
+  const noteStage = currentIndex >= 0 ? pipelineStages[currentIndex][0] : 'preparation';
+  const noteLabel = currentIndex >= 0 ? pipelineStages[currentIndex][1] : 'Preparation';
+  const stageNote = (t.stage_notes || {})[noteStage] || '';
+  return `<article class="pipeline-card">
+    <div class="pipeline-card-head">
+      <div><h3>${htmlSafe(o.title)}</h3><div class="org">${htmlSafe(o.org)}</div><div class="pipeline-meta"><span class="tag">${htmlSafe(industryLabel(o))}</span><span class="deadline-badge ${urgencyClass(o)}">${urgencyText(o)}</span></div></div>
+      <div class="org-logo">${orgLogo(o)}</div>
+    </div>
+    <div class="pipeline-stages">${pipelineStages.map(([id,label],index)=>pipelineStage(o.id,id,label,index,currentIndex,status)).join('')}</div>
+    <div class="pipeline-docs"><div class="pipeline-docs-title">Documents ${checkedCount}/${docs.length}</div><div class="doc-progress-head"><span>Readiness</span><b>${docProgress}%</b></div><div class="doc-progress" aria-label="Document completion"><span style="width:${docProgress}%"></span></div>${docs.map((doc,index)=>`<button class="pipeline-doc ${doc.checked?'checked':''}" onclick="toggleTrackDoc('${o.id}',${index})"><span class="doc-box">${doc.checked?'✓':''}</span><span>${htmlSafe(doc.name || doc)}</span></button>`).join('')}</div>
+    <div class="stage-note-wrap"><div class="stage-note-label">${htmlSafe(noteLabel)} notes</div><textarea class="pipeline-note stage-note" onchange="saveStageNote('${o.id}','${noteStage}',this.value)" placeholder="What happened at this stage? What did you learn?">${htmlSafe(stageNote)}</textarea></div>
+    <textarea class="pipeline-note" onchange="saveLearning('${o.id}',this.value)" placeholder="General application notes">${htmlSafe(t.learnings || '')}</textarea>
+    <div class="pipeline-actions"><a class="ghost" href="${o.link||'#'}" target="_blank" rel="noreferrer">Apply</a><button class="ghost" onclick="openDetail('${o.id}')">Details</button></div>
+  </article>`;
+}
+function pipelineStage(id,status,label,index,currentIndex,currentStatus){
+  const cls = currentStatus === 'rejected' || currentIndex < 0 ? '' : index < currentIndex ? 'done' : index === currentIndex ? 'current' : '';
+  const connector = index < pipelineStages.length - 1 ? `<span class="stage-line ${currentIndex >= 0 && index < currentIndex ? 'done' : ''}"></span>` : '';
+  const mark = cls === 'done' ? '✓' : index + 1;
+  return `<button class="pipeline-stage ${cls}" onclick="setTrackerStatus('${id}','${status}')"><span class="stage-dot">${mark}</span><span class="stage-name">${label}</span></button>${connector}`;
+}
+function currentPipelineIndex(status){return pipelineStages.findIndex(([id])=>id===status);}
 async function setStage(id,i){tracked[id].current_stage=i;tracked[id].status=stages[i].toLowerCase();await persistTrack(id);renderTracker();}
 async function setTrackerStatus(id,value){
   if(!tracked[id]) return;
-  const stageByStatus = {applied:0,assessment:1,interview:2,final_stage:3,offer:4};
+  const stageByStatus = {not_applied:-1,applied:0,assessment:1,interview:2,final_stage:3,offer:4};
   tracked[id].status = value;
   tracked[id].current_stage = Object.prototype.hasOwnProperty.call(stageByStatus,value) ? stageByStatus[value] : -1;
   await persistTrack(id);
+  showToast(`Stage updated to ${trackerStatusLabel(value)}.`);
   renderTracker();
 }
-async function saveLearning(id,val){tracked[id].learnings=val;await persistTrack(id);}
-async function saveTrackerField(id,key,val){if(!tracked[id])return;tracked[id][key]=val;await persistTrack(id);}
-async function untrack(id){delete tracked[id];localStorage.setItem('oppTracked',JSON.stringify(tracked));if(user&&window._fb){const fb=window._fb;await fb.deleteDoc(fb.doc(fb.db,'users',user.uid,'applications',id));}renderAll();}
+async function saveLearning(id,val){tracked[id].learnings=val;await persistTrack(id);showToast('Notes saved.');}
+async function saveTrackerField(id,key,val){if(!tracked[id])return;tracked[id][key]=val;await persistTrack(id);showToast('Tracker updated.');}
+async function saveStageNote(id,stage,val){
+  if(!tracked[id]) return;
+  tracked[id].stage_notes = tracked[id].stage_notes || {};
+  tracked[id].stage_notes[stage] = val;
+  await persistTrack(id);
+  showToast('Stage note saved.');
+}
+async function toggleTrackDoc(id,index){
+  if(!tracked[id]) return;
+  const o = opps.find(item=>item.id===id);
+  if(!Array.isArray(tracked[id].docs) || !tracked[id].docs.length) tracked[id].docs = (o?.docs || []).map(name=>({name,checked:false}));
+  if(!tracked[id].docs[index]) return;
+  tracked[id].docs[index].checked = !tracked[id].docs[index].checked;
+  await persistTrack(id);
+  showToast(tracked[id].docs[index].checked ? 'Document marked ready.' : 'Document unchecked.', 'info');
+  renderTracker();
+}
+async function untrack(id){delete tracked[id];localStorage.setItem('oppTracked',JSON.stringify(tracked));if(user&&window._fb){const fb=window._fb;await fb.deleteDoc(fb.doc(fb.db,'users',user.uid,'applications',id));}showToast('Removed from tracker.', 'info');renderAll();}
 async function persistTrack(id){localStorage.setItem('oppTracked',JSON.stringify(tracked));if(user&&window._fb){const fb=window._fb;await fb.setDoc(fb.doc(fb.db,'users',user.uid,'applications',id),{...tracked[id],updated_at:fb.serverTimestamp()},{merge:true});}}
+function syncReminderSettings(){
+  ['seven_day','three_day','one_day','push','email','whatsapp'].forEach(key=>document.querySelector(`[data-reminder="${key}"]`)?.classList.toggle('on', !!reminderSettings[key]));
+  if(reminderTime) reminderTime.value = reminderSettings.time || '09:00';
+  if(reminderEmail) reminderEmail.value = reminderSettings.email_address || '';
+  if(reminderWhatsapp) reminderWhatsapp.value = reminderSettings.whatsapp_number || '';
+  renderCustomReminders();
+}
+function openReminderSettings(){syncReminderSettings();document.getElementById('reminderModal')?.classList.add('show');}
+function closeReminderSettings(){document.getElementById('reminderModal')?.classList.remove('show');}
+async function openNotificationSettings(){
+  if('Notification' in window && Notification.permission === 'default'){
+    try{
+      const permission = await Notification.requestPermission();
+      syncNotificationButton();
+      showToast(permission === 'granted' ? 'Notifications enabled. We will use your reminder settings.' : 'Notification permission was not enabled.', permission === 'granted' ? 'success' : 'info');
+    }catch(e){
+      showToast('Could not request notifications in this browser.', 'error');
+    }
+  } else if('Notification' in window && Notification.permission === 'granted') {
+    showToast('Notifications are already enabled.');
+  } else if('Notification' in window && Notification.permission === 'denied') {
+    showToast('Notifications are blocked. You can change this in browser settings.', 'error');
+  } else {
+    showToast('This browser does not support push notifications yet.', 'info');
+  }
+  openReminderSettings();
+}
+function syncNotificationButton(){
+  const btn = document.getElementById('notifBtn');
+  if(!btn) return;
+  btn.classList.remove('granted','denied');
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'granted') btn.classList.add('granted');
+  if(Notification.permission === 'denied') btn.classList.add('denied');
+}
+function toggleReminderSetting(key){reminderSettings[key] = !reminderSettings[key];syncReminderSettings();}
+function addCustomReminder(){
+  const text = customReminderText?.value.trim();
+  const days = Number(customReminderDays?.value || 0);
+  if(!text || !Number.isFinite(days)){ showToast('Add a reminder name and days before deadline.', 'error'); return; }
+  reminderSettings.custom = Array.isArray(reminderSettings.custom) ? reminderSettings.custom : [];
+  reminderSettings.custom.push({id:Date.now(),text,days:Math.max(0,Math.min(365,days))});
+  customReminderText.value = '';
+  customReminderDays.value = '14';
+  renderCustomReminders();
+  showToast('Custom reminder added.');
+}
+function removeCustomReminder(id){
+  reminderSettings.custom = (reminderSettings.custom || []).filter(item=>String(item.id)!==String(id));
+  renderCustomReminders();
+  showToast('Custom reminder removed.', 'info');
+}
+function renderCustomReminders(){
+  if(!customReminderList) return;
+  const items = Array.isArray(reminderSettings.custom) ? reminderSettings.custom : [];
+  customReminderList.innerHTML = items.length ? items.map(item=>`<div class="custom-reminder-item"><div><b>${htmlSafe(item.text)}</b><br><span>${Number(item.days)||0} day${Number(item.days)===1?'':'s'} before deadline</span></div><button onclick="removeCustomReminder('${item.id}')" aria-label="Remove custom reminder">Remove</button></div>`).join('') : '<div class="custom-reminder-item"><span>No custom reminders yet.</span></div>';
+}
+function saveReminderSettings(){
+  reminderSettings.time = reminderTime?.value || '09:00';
+  reminderSettings.email_address = reminderEmail?.value.trim() || '';
+  reminderSettings.whatsapp_number = reminderWhatsapp?.value.trim() || '';
+  localStorage.setItem('oppReminderSettings', JSON.stringify(reminderSettings));
+  closeReminderSettings();
+  showToast('Reminder settings saved.');
+}
 function trackerRows(){
   return Object.keys(tracked).map(id=> {
     const o = opps.find(item=>item.id===id);
@@ -668,21 +925,22 @@ function csvText(rows){
 }
 function exportTrackerCsv(){
   const rows = trackerRows();
-  if(!rows.length){ alert('Track an opportunity first.'); return; }
+  if(!rows.length){ showToast('Track an opportunity first, then export your tracker.', 'error'); return; }
   const url = URL.createObjectURL(new Blob([csvText(rows)], {type:'text/csv;charset=utf-8'}));
   const a = document.createElement('a');
   a.href = url; a.download = 'opptrack-applications.csv'; a.click();
   URL.revokeObjectURL(url);
+  showToast('Tracker exported as CSV.');
 }
 async function copyTrackerForDocs(){
   const rows = trackerRows();
-  if(!rows.length){ alert('Track an opportunity first.'); return; }
+  if(!rows.length){ showToast('Track an opportunity first, then copy your tracker.', 'error'); return; }
   await navigator.clipboard?.writeText(tableText(rows));
-  alert('Tracker copied. Paste it into Google Docs or Google Sheets.');
+  showToast('Tracker copied. Paste it into Google Docs or Sheets.');
 }
 function openDetail(id){
-  const o=opps.find(x=>x.id===id); if(!o)return; const score=scoreOpp(o), isTracked=!!tracked[o.id];
-  sheet.innerHTML = `<div class="sheet-head"><div class="opp-logo">${orgLogo(o)}</div><button class="close-icon" onclick="closeDetail()" aria-label="Close">&times;</button></div><div class="sheet-body"><div class="meta"><span class="tag">${o.type_label || categoryLabel(o.category)}</span><span class="tag">${fmtDate(o.deadline)}</span>${canShowFit()?`<span class="tag">${fitInfo(score).label}</span>`:''}</div><h2>${o.title}</h2><div class="org">${o.org}</div><div class="sections"><div class="section"><h4>About</h4><p>${o.about||''}</p></div><div class="section"><h4>Requirements</h4><p>${o.requirements||''}</p></div><div class="section"><h4>Your readiness</h4>${requirementsChecklist(o)}</div><div class="section"><h4>Documents</h4><ul>${(o.docs||[]).map(d=>`<li>${d}</li>`).join('')}</ul></div><div class="section"><h4>Application roadmap</h4><ul>${(o.steps||[]).map(s=>`<li>${typeof s==='string'?s:s.title||s.description}</li>`).join('')}</ul></div></div><div class="detail-actions"><button class="primary track-btn ${isTracked?'tracked':''}" onclick="trackOpp('${o.id}')">${isTracked?'Tracked':'+ Track This'}</button><button class="ghost share-btn" onclick="shareOpp('${o.id}')" title="Share"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path></svg></button><a class="ghost" href="${o.link||'#'}" target="_blank">Apply</a></div></div>`;
+  const o=opps.find(x=>x.id===id); if(!o)return; const score=scoreOpp(o), isTracked=!!tracked[o.id], urgency=urgencyClass(o);
+  sheet.innerHTML = `<div class="sheet-head"><div class="opp-logo">${orgLogo(o)}</div><button class="close-icon" onclick="closeDetail()" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><div class="detail-hero"><div class="meta"><span class="tag">${o.type_label || categoryLabel(o.category)}</span><span class="tag verified">${uiIcon('shield')}<span>Verified</span></span><span class="tag urgency-chip ${urgency}">${urgencyLabel(o)}</span>${canShowFit()?`<span class="tag">${fitInfo(score).label}</span>`:''}</div><h2>${o.title}</h2><div class="org">${o.org}</div><div class="time-box"><div><div class="time-big">${timeBig(o)}</div><div class="time-label">${timeLabel(o)}</div></div><div class="time-date">${fmtDate(o.deadline)}</div></div></div><div class="sheet-body"><div class="sections"><div class="section"><h4>About</h4><p>${o.about||''}</p></div><div class="section"><h4>Requirements</h4><p>${o.requirements||''}</p></div><div class="section"><h4>Your readiness</h4>${requirementsChecklist(o)}</div><div class="section"><h4>Documents</h4><ul class="detail-docs">${(o.docs||[]).map(d=>`<li>${d}</li>`).join('')}</ul></div><div class="section"><h4>Application roadmap</h4><ul>${(o.steps||[]).map(s=>`<li>${typeof s==='string'?s:s.title||s.description}</li>`).join('')}</ul></div></div><div class="detail-actions"><button class="primary track-btn ${isTracked?'tracked':''}" onclick="trackOpp('${o.id}')">${isTracked?'Tracked':'+ Track This'}</button><button class="ghost share-btn" onclick="shareOpp('${o.id}')" title="Share"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path></svg></button><a class="ghost" href="${o.link||'#'}" target="_blank">Apply</a></div></div>`;
   detail.classList.add('show');
 }
 function closeDetail(){detail.classList.remove('show')}
@@ -692,9 +950,28 @@ function requirementsChecklist(o){
 }
 async function shareOpp(id){
   const o=opps.find(x=>x.id===id); if(!o)return;
-  const text = `${o.title}\n${o.org}\nDeadline: ${fmtDate(o.deadline)}\nType: ${o.category}\nRequirements: ${o.requirements}\nDocs: ${(o.docs||[]).join(', ')}\nOppTrack: ${location.origin}${location.pathname}?opp=${id}\nApply: ${o.link}`;
-  if(navigator.share) await navigator.share({title:o.title,text,url:o.link});
-  else { await navigator.clipboard?.writeText(text); alert('Share message copied.'); }
+  const text = `${o.title}\n${o.org}\n${urgencyText(o)} · Deadline: ${fmtDate(o.deadline)}\nType: ${categoryLabel(o.category)}\nRequirements: ${o.requirements}\nDocuments: ${(o.docs||[]).join(', ')}\nOppTrack: ${location.origin}${location.pathname}?opp=${id}\nApply: ${o.link}`;
+  try{
+    if(navigator.share){
+      await navigator.share({title:o.title,text,url:o.link || `${location.origin}${location.pathname}?opp=${id}`});
+      showToast('Opportunity shared.');
+    } else {
+      await navigator.clipboard?.writeText(text);
+      showToast('Share message copied.');
+    }
+  } catch(e) {
+    if(e?.name !== 'AbortError') showToast('Could not share right now.', 'error');
+  }
+}
+function showToast(message,type='success'){
+  const host = document.getElementById('toastStack');
+  if(!host) return;
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  host.appendChild(toast);
+  setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateY(8px)';},2600);
+  setTimeout(()=>toast.remove(),3100);
 }
 function renderTagPreview(input){
   const preview = input.nextElementSibling?.classList.contains('tag-preview') ? input.nextElementSibling : null;
@@ -748,9 +1025,9 @@ async function saveProfile(){
   profile.documents = [...document.querySelectorAll('[data-doc]:checked')].map(box=>box.value);
   localStorage.setItem('oppProfile',JSON.stringify(profile));
   if(user&&window._fb){const fb=window._fb;await fb.setDoc(fb.doc(fb.db,'users',user.uid),{role:'user',profile,updated_at:fb.serverTimestamp()},{merge:true});}
-  renderAll(); alert('Profile saved. Your ranking has been refreshed.');
+  renderAll(); showToast('Profile saved. Your ranking has been refreshed.');
 }
-window.bootOppTrack=bootOppTrack; window.showPage=showPage; window.renderSearch=renderSearch; window.setMatchFilter=setMatchFilter; window.setSortMode=setSortMode; window.setTheme=setTheme; window.toggleTheme=toggleTheme; window.toggleSidebar=toggleSidebar; window.setSidebarSize=setSidebarSize; window.toggleFilters=toggleFilters; window.toggleReq=toggleReq; window.openDetail=openDetail; window.closeDetail=closeDetail; window.trackOpp=trackOpp; window.untrack=untrack; window.setStage=setStage; window.setTrackerStatus=setTrackerStatus; window.saveTrackerField=saveTrackerField; window.exportTrackerCsv=exportTrackerCsv; window.copyTrackerForDocs=copyTrackerForDocs; window.saveLearning=saveLearning; window.shareOpp=shareOpp; window.saveProfile=saveProfile;
+window.bootOppTrack=bootOppTrack; window.showPage=showPage; window.renderSearch=renderSearch; window.setMatchFilter=setMatchFilter; window.setSortMode=setSortMode; window.setOppView=setOppView; window.setTrackerView=setTrackerView; window.setTheme=setTheme; window.toggleTheme=toggleTheme; window.toggleSidebar=toggleSidebar; window.setSidebarSize=setSidebarSize; window.toggleFilters=toggleFilters; window.toggleReq=toggleReq; window.openDetail=openDetail; window.closeDetail=closeDetail; window.trackOpp=trackOpp; window.untrack=untrack; window.setStage=setStage; window.setTrackerStatus=setTrackerStatus; window.toggleTrackDoc=toggleTrackDoc; window.saveTrackerField=saveTrackerField; window.exportTrackerCsv=exportTrackerCsv; window.copyTrackerForDocs=copyTrackerForDocs; window.saveLearning=saveLearning; window.saveStageNote=saveStageNote; window.shareOpp=shareOpp; window.showToast=showToast; window.openReminderSettings=openReminderSettings; window.openNotificationSettings=openNotificationSettings; window.closeReminderSettings=closeReminderSettings; window.toggleReminderSetting=toggleReminderSetting; window.addCustomReminder=addCustomReminder; window.removeCustomReminder=removeCustomReminder; window.saveReminderSettings=saveReminderSettings; window.saveProfile=saveProfile;
 </script>
 </body>
 </html>
