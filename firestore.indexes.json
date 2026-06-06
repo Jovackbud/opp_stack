@@ -4,8 +4,40 @@
       "collectionGroup": "opportunities",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "is_approved",        "order": "ASCENDING" },
         { "fieldPath": "is_active",          "order": "ASCENDING" },
         { "fieldPath": "deadline_timestamp", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "opportunities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "is_active",          "order": "ASCENDING" },
+        { "fieldPath": "deadline_timestamp", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "opportunities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "is_approved",   "order": "ASCENDING" },
+        { "fieldPath": "updated_at",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "matches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "notified", "order": "ASCENDING" },
+        { "fieldPath": "score",    "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "applications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "opp_id", "order": "ASCENDING" }
       ]
     },
     {

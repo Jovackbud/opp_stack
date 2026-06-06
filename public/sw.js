@@ -15,18 +15,31 @@ self.addEventListener('fetch', e => {
 
 // Handle background push notifications
 self.addEventListener('push', e => {
-  const data = e.data?.json() || {};
+  const data = parsePushPayload(e);
+  const notification = data.notification || {};
+  const meta = data.data || {};
   e.waitUntil(
-    self.registration.showNotification(data.title || 'OppTrack', {
-      body:  data.body  || 'You have a new notification',
-      icon:  '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
-      data:  data.data  || {},
+    self.registration.showNotification(notification.title || meta.title || data.title || 'OppTrack', {
+      body:  notification.body || meta.body || data.body || 'You have a new notification',
+      icon:  '/icons/icon.svg',
+      badge: '/icons/badge.svg',
+      data:  meta,
     })
   );
 });
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  e.waitUntil(clients.openWindow('/'));
+  const oppId = e.notification.data?.opp_id;
+  const url = oppId ? `/?opp=${encodeURIComponent(oppId)}` : '/';
+  e.waitUntil(clients.openWindow(url));
 });
+
+function parsePushPayload(e) {
+  if (!e.data) return {};
+  try { return e.data.json(); }
+  catch (err) {
+    try { return JSON.parse(e.data.text()); }
+    catch (err2) { return { body: e.data.text() }; }
+  }
+}

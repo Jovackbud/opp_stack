@@ -10,7 +10,6 @@ exports.notifier = onSchedule({
 }, async () => {
   const db  = getFirestore();
   const fcm = getMessaging();
-  const now = Timestamp.now();
 
   // ── 1. New match notifications ────────────────────────────────────────────
   const users = await db.collection('users').get();
@@ -47,9 +46,9 @@ exports.notifier = onSchedule({
         apns:    { payload: { aps: { badge: count } } },
       });
     } catch (e) {
-      console.warn(`Notifier: FCM failed for ${uid}:`, e.message);
+      console.warn('Notifier: FCM send failed:', e.code || e.message);
       // Token expired — clean it up
-      if (e.code === 'messaging/registration-token-not-registered') {
+      if (isDeadFcmToken(e)) {
         await db.collection('users').doc(uid).update({ fcm_token: null });
       }
     }
@@ -80,20 +79,18 @@ exports.notifier = onSchedule({
     for (const oppDoc of dueSoon.docs) {
       const oppData = oppDoc.data();
       // Find users tracking this opportunity
-      const trackers = await db.collectionGroup('applications')
-        .where('__name__', '>=', `users/`)
-        .limit(500) // safety limit
+      const relevantTrackers = await db.collectionGroup('applications')
+        .where('opp_id', '==', oppDoc.id)
+        .limit(500)
         .get();
 
-      // Filter to only users tracking this oppId
-      const relevantTrackers = trackers.docs.filter(d =>
-        d.ref.path.includes(`/applications/${oppDoc.id}`)
-      );
-
-      for (const appDoc of relevantTrackers) {
+      for (const appDoc of relevantTrackers.docs) {
         const uid      = appDoc.ref.path.split('/')[1];
         const userDoc  = await db.collection('users').doc(uid).get();
-        const token    = userDoc.data()?.fcm_token;
+        const userData = userDoc.data() || {};
+        const token    = userData.fcm_token;
+        const channels = userData.prefs?.notify_channels || userData.reminders?.notify_channels || ['push'];
+        if (!channels.includes('push')) continue;
         if (!token) continue;
 
         // Check doc readiness for smart nudge
@@ -113,7 +110,10 @@ exports.notifier = onSchedule({
             data: { type: 'deadline_alert', opp_id: oppDoc.id, days: String(days) },
           });
         } catch (e) {
-          console.warn(`Notifier: deadline alert failed for ${uid}:`, e.message);
+          console.warn('Notifier: deadline alert failed:', e.code || e.message);
+          if (isDeadFcmToken(e)) {
+            await db.collection('users').doc(uid).update({ fcm_token: null });
+          }
         }
       }
     }
@@ -121,3 +121,10 @@ exports.notifier = onSchedule({
 
   console.log('Notifier: run complete.');
 });
+
+function isDeadFcmToken(error) {
+  return [
+    'messaging/registration-token-not-registered',
+    'messaging/invalid-registration-token',
+  ].includes(error?.code);
+}

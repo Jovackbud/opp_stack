@@ -1,6 +1,5 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { getFirestore } = require('firebase-admin/firestore');
-const fetch = require('node-fetch');
 
 exports.whatsappDigest = onSchedule({
   schedule: 'every friday 09:00',
@@ -17,6 +16,8 @@ exports.whatsappDigest = onSchedule({
   
   for (const user of users.docs) {
     const data = user.data();
+    const channels = data.prefs?.notify_channels || data.reminders?.notify_channels || [];
+    if (!channels.includes('whatsapp')) continue;
     if (!data.whatsapp_number) continue;
 
     // Fetch top 3 matches
@@ -32,9 +33,10 @@ exports.whatsappDigest = onSchedule({
     }
 
     try {
-      await fetch(`https://graph.facebook.com/v17.0/${phoneId}/messages`, {
+      const res = await fetch(`https://graph.facebook.com/v17.0/${phoneId}/messages`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(15000),
         body: JSON.stringify({
           messaging_product: "whatsapp",
           to: data.whatsapp_number,
@@ -42,6 +44,10 @@ exports.whatsappDigest = onSchedule({
           text: { body: text }
         })
       });
-    } catch(e) { console.warn("WhatsApp send failed for " + user.id, e); }
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        throw new Error(`Meta API ${res.status}: ${body.slice(0, 180)}`);
+      }
+    } catch(e) { console.warn("WhatsApp send failed:", e.message); }
   }
 });

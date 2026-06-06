@@ -1,17 +1,15 @@
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { onCall }            = require('firebase-functions/v2/https');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
-const Anthropic = require('@anthropic-ai/sdk');
-const fetch     = require('node-fetch');
 const cheerio   = require('cheerio');
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const { generateText } = require('./llm');
 
 // ── Shared extraction logic ─────────────────────────────────────────────────
 async function fetchPageText(url) {
-  const res = await fetch(url, {
+  const safeUrl = publicHttpUrl(url);
+  const res = await fetch(safeUrl, {
     headers: { 'User-Agent': 'OppTrackBot/1.0 (civic-good scholarship aggregator)' },
-    timeout: 15000,
+    signal: AbortSignal.timeout(15000),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const html = await res.text();
@@ -60,25 +58,93 @@ Page text:
 ${pageText}
 `;
 
-async function analyseOpportunity(link, title) {
-  let pageText;
-  try {
-    pageText = await fetchPageText(link);
-  } catch (err) {
-    console.warn(`Analyst: could not fetch ${link}:`, err.message);
-    // Fall back to title-only analysis (lower quality but doesn't block)
-    pageText = `Opportunity title: ${title}. Full page could not be fetched.`;
+function publicHttpUrl(value) {
+  let parsed;
+  try { parsed = new URL(String(value || '')); }
+  catch (e) { throw new Error('Invalid opportunity URL'); }
+  if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('Only HTTP(S) URLs are allowed');
+  const host = parsed.hostname.toLowerCase();
+  if (
+    host === 'localhost' ||
+    host === '0.0.0.0' ||
+    host === '::1' ||
+    host.startsWith('127.') ||
+    host.startsWith('10.') ||
+    host.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(host) ||
+    host.startsWith('169.254.')
+  ) {
+    throw new Error('Private or local URLs are not allowed');
+  }
+  return parsed.href;
+}
+
+async function analyseOpportunity(link, title, suppliedText = '') {
+  let pageText = String(suppliedText || '').trim();
+  if (!pageText) {
+    try {
+      pageText = await fetchPageText(link);
+    } catch (err) {
+      console.warn(`Analyst: could not fetch ${link}:`, err.message);
+      // Fall back to title-only analysis (lower quality but doesn't block)
+      pageText = `Opportunity title: ${title}. Full page could not be fetched.`;
+    }
   }
 
-  const message = await anthropic.messages.create({
-    model:      'claude-haiku-4-5-20251001',  // cheapest model; swap to sonnet for quality
-    max_tokens: 1000,
-    messages: [{ role: 'user', content: ANALYST_PROMPT(pageText, link) }],
-  });
-
-  const raw = message.content[0].text.replace(/```json|```/g, '').trim();
+  const raw = (await generateText({
+    task: 'analyst',
+    prompt: ANALYST_PROMPT(pageText, link),
+    maxTokens: 1000,
+    json: true,
+  })).replace(/```json|```/g, '').trim();
   const parsed = JSON.parse(raw);
-  return parsed;
+  return normalizeOpportunity(parsed);
+}
+
+function normalizeText(value, fallback = '') {
+  return String(value || fallback).replace(/\s+/g, ' ').trim();
+}
+
+function normalizeList(value) {
+  if (Array.isArray(value)) return value.map(v => normalizeText(v)).filter(Boolean).slice(0, 12);
+  return String(value || '').split(/[,;\n]/).map(v => normalizeText(v)).filter(Boolean).slice(0, 12);
+}
+
+function normalizeSteps(value) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 8).map((item, index) => {
+    if (typeof item === 'string') {
+      return { step: index + 1, title: normalizeText(item).slice(0, 120), description: '' };
+    }
+    return {
+      step: Number(item.step) || index + 1,
+      title: normalizeText(item.title || `Step ${index + 1}`).slice(0, 120),
+      description: normalizeText(item.description).slice(0, 500),
+    };
+  }).filter(item => item.title);
+}
+
+function normalizeOpportunity(parsed) {
+  if (parsed && parsed.skip) return { skip: true };
+
+  const category = normalizeText(parsed.category, 'scholarship').toLowerCase();
+  const fundingType = normalizeText(parsed.funding_type, 'unknown').toLowerCase();
+  const deadline = normalizeText(parsed.deadline, 'rolling');
+
+  return {
+    title: normalizeText(parsed.title, 'Untitled opportunity').slice(0, 220),
+    org: normalizeText(parsed.org, 'Unknown organisation').slice(0, 160),
+    category: ['scholarship', 'fellowship', 'internship', 'job', 'graduate', 'grant', 'event'].includes(category) ? category : 'scholarship',
+    industry: normalizeList(parsed.industry),
+    deadline: /^\d{4}-\d{2}-\d{2}$/.test(deadline) ? deadline : 'rolling',
+    about: normalizeText(parsed.about).slice(0, 2400),
+    requirements: normalizeText(parsed.requirements).slice(0, 900),
+    docs: normalizeList(parsed.docs),
+    steps: normalizeSteps(parsed.steps),
+    target_regions: normalizeList(parsed.target_regions).length ? normalizeList(parsed.target_regions) : ['Global'],
+    funding_type: ['fully_funded', 'partial', 'stipend', 'unpaid', 'unknown', 'seed_capital', 'free'].includes(fundingType) ? fundingType : 'unknown',
+    emoji: normalizeText(parsed.emoji, 'O').slice(0, 4),
+  };
 }
 
 // ── Firestore trigger: fires when Scout writes a new opportunity stub ────────
@@ -86,7 +152,7 @@ exports.analyst = onDocumentCreated({
   document:        'opportunities/{oppId}',
   memory:          '256MiB',
   timeoutSeconds:  120,
-  secrets:         ['ANTHROPIC_API_KEY'],
+  secrets:         ['LLM_API_KEY'],
 }, async (event) => {
   const snap = event.data;
   const data = snap.data();
@@ -98,20 +164,31 @@ exports.analyst = onDocumentCreated({
   const ref = snap.ref;
 
   // Lock immediately to prevent double-processing
-  await ref.update({ analyst_done: true, analyst_started_at: Timestamp.now() });
+  await ref.update({ analyst_started_at: Timestamp.now(), analyst_error: null });
 
   let extracted;
   try {
     extracted = await analyseOpportunity(data.link, data.title);
   } catch (err) {
-    console.error(`Analyst: Claude failed for ${data.link}:`, err.message);
-    await ref.update({ analyst_error: err.message });
+    console.error(`Analyst: LLM failed for ${data.link}:`, err.message);
+    await ref.update({
+      analyst_done: false,
+      analyst_error: String(err.message || err).slice(0, 500),
+      analyst_failed_at: Timestamp.now(),
+    });
     return;
   }
 
-  // If Claude says skip (irrelevant page), mark inactive and bail
+  // If the model says skip (irrelevant page), mark inactive and bail
   if (extracted.skip) {
-    await ref.update({ is_active: false, analyst_done: true });
+    await ref.update({
+      is_active: false,
+      is_approved: false,
+      review_status: 'rejected',
+      analyst_done: true,
+      analyst_version: 1,
+      updated_at: Timestamp.now(),
+    });
     return;
   }
 
@@ -125,6 +202,9 @@ exports.analyst = onDocumentCreated({
   await ref.update({
     ...extracted,
     deadline_timestamp,
+    is_active: false,
+    is_approved: false,
+    review_status: data.review_status || 'pending',
     analyst_done:    true,
     analyst_version: 1,
     updated_at:      Timestamp.now(),
@@ -137,7 +217,7 @@ exports.analyst = onDocumentCreated({
 // Called from the frontend Upload page. Same logic, returns JSON to client.
 exports.parseUrl = onCall({
   memory:    '256MiB',
-  secrets:   ['ANTHROPIC_API_KEY'],
+  secrets:   ['LLM_API_KEY'],
 }, async (request) => {
   if (!request.auth) throw new Error('Unauthenticated');
 
@@ -151,6 +231,6 @@ exports.parseUrl = onCall({
     catch (e) { pageText = `URL: ${url}`; }
   }
 
-  const extracted = await analyseOpportunity(url || 'user-upload', pageText);
+  const extracted = await analyseOpportunity(url || 'user-upload', 'User submitted opportunity', pageText);
   return extracted;
 });

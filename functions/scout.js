@@ -1,7 +1,6 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const Parser = require('rss-parser');
-const fetch = require('node-fetch');
 
 // ── 1. Static Sources (RSS) ────────────────────────────────────────────────
 // Priority order: RSS feeds are zero-cost and ToS-safe.
@@ -20,8 +19,9 @@ const BOOLEAN_QUERIES = [
   '("graduate trainee" OR "internship") AND "Nigeria" AND "apply now" AND (2025 OR 2026 -past)'
 ];
 
-// Daily cap: keeps Claude API costs predictable.
+// Daily cap: keeps LLM API costs predictable.
 const DAILY_NEW_OPP_CAP = 40;
+const FETCH_TIMEOUT_MS = 15000;
 
 exports.scout = onSchedule({
   schedule: 'every day 06:00',    // 06:00 UTC = 07:00 WAT
@@ -40,7 +40,7 @@ exports.scout = onSchedule({
     try {
       const feed = await parser.parseURL(source.url);
       for (const item of (feed.items || [])) {
-        if (item.link) {
+        if (item.link && isPublicHttpUrl(item.link)) {
           discoveredLinks.push({ 
             link: item.link.trim(), 
             title: item.title?.trim() || 'Untitled', 
@@ -63,13 +63,13 @@ exports.scout = onSchedule({
     for (const query of BOOLEAN_QUERIES) {
       try {
         const url = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCx}&q=${encodeURIComponent(query)}&num=5`;
-        const res = await fetch(url);
+        const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
         if (data.items) {
           for (const item of data.items) {
-            if (item.link) {
+            if (item.link && isPublicHttpUrl(item.link)) {
               discoveredLinks.push({ 
                 link: item.link.trim(), 
                 title: item.title?.trim() || 'Untitled', 
@@ -119,3 +119,21 @@ exports.scout = onSchedule({
 
   console.log(`Scout: discovered ${newCount} new opportunity stubs.`);
 });
+
+function isPublicHttpUrl(value) {
+  let parsed;
+  try { parsed = new URL(String(value || '')); }
+  catch (e) { return false; }
+  if (!['http:', 'https:'].includes(parsed.protocol)) return false;
+  const host = parsed.hostname.toLowerCase();
+  return !(
+    host === 'localhost' ||
+    host === '0.0.0.0' ||
+    host === '::1' ||
+    host.startsWith('127.') ||
+    host.startsWith('10.') ||
+    host.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(host) ||
+    host.startsWith('169.254.')
+  );
+}

@@ -34,8 +34,7 @@
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getFirestore, collection, getCountFromServer, query, where } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-  // Requires config initialization
-  const firebaseConfig = { /* Populate to match index.html */ };
+  const firebaseConfig = await resolveFirebaseConfig({});
   
   try {
     const app = initializeApp(firebaseConfig);
@@ -55,6 +54,18 @@
   } catch(e) {
     document.getElementById('s-opps').innerText = 'Err';
     document.getElementById('s-users').innerText = 'Err';
+  }
+
+  async function resolveFirebaseConfig(fallback) {
+    if (fallback.apiKey) return fallback;
+    try {
+      const res = await fetch('/__/firebase/init.json', timeoutOption());
+      if (res.ok) return await res.json();
+    } catch(e) {}
+    return fallback;
+  }
+  function timeoutOption() {
+    return typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? { signal: AbortSignal.timeout(5000) } : {};
   }
 </script>
 </body>

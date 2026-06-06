@@ -94,12 +94,24 @@ import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from
 import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, setDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js';
 
-const firebaseConfig = { apiKey:"...", authDomain:"...", projectId:"...", storageBucket:"...", messagingSenderId:"...", appId:"..." };
+const firebaseConfig = await resolveFirebaseConfig({ apiKey:"...", authDomain:"...", projectId:"...", storageBucket:"...", messagingSenderId:"...", appId:"..." });
 try {
   const app = initializeApp(firebaseConfig);
   window._admin = { auth:getAuth(app), db:getFirestore(app), functions:getFunctions(app, 'europe-west1'), collection, query, where, orderBy, onSnapshot, doc, setDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, httpsCallable, signInWithPopup, GoogleAuthProvider };
 } catch(e) { window._admin = null; }
 window.bootAdmin();
+
+async function resolveFirebaseConfig(fallback) {
+  if (fallback.apiKey && fallback.apiKey !== '...') return fallback;
+  try {
+    const res = await fetch('/__/firebase/init.json', timeoutOption());
+    if (res.ok) return await res.json();
+  } catch(e) {}
+  return fallback;
+}
+function timeoutOption() {
+  return typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? { signal: AbortSignal.timeout(5000) } : {};
+}
 </script>
 <script>
 let pending = [
@@ -111,12 +123,19 @@ function bootAdmin(){
   loginBtn.onclick = async () => { if(window._admin) await window._admin.signInWithPopup(window._admin.auth,new window._admin.GoogleAuthProvider()); };
   if(!window._admin || window._admin.auth.app.options.apiKey === '...'){ render(); return; }
   const a = window._admin;
-  a.onAuthStateChanged(a.auth, u => {
+  a.onAuthStateChanged(a.auth, async u => {
     loginBtn.textContent = u ? `Signed in: ${u.email}` : 'Sign in';
     if(!u) return;
-    a.onSnapshot(a.query(a.collection(a.db,'opportunities'),a.where('review_status','==','pending')), s => { pending=s.docs.map(d=>({id:d.id,...d.data()})); render(); });
-    a.onSnapshot(a.query(a.collection(a.db,'opportunities'),a.where('is_approved','==',true),a.orderBy('updated_at','desc')), s => { published=s.docs.map(d=>({id:d.id,...d.data()})); render(); });
+    await refreshAdminData();
   });
+}
+async function refreshAdminData(){
+  if(!window._admin || !window._admin.auth.currentUser) return;
+  const a = window._admin;
+  const result = await a.httpsCallable(a.functions,'adminProcess')({action:'list'});
+  pending = result.data.pending || [];
+  published = result.data.published || [];
+  render();
 }
 function showTab(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));}
 function render(){
@@ -127,18 +146,27 @@ function render(){
   manualCount.textContent = published.filter(o=>o.source_type==='admin_manual').length;
 }
 function oppCard(o, review){
-  return `<article class="card"><div class="meta"><span class="tag">${categoryLabel(o.category)}</span><span class="tag gold">${dateLabel(o.deadline)}</span><span class="tag source">${sourceLabel(o.source_type)}</span></div><h3>${o.title}</h3><p><b>${o.org||'Unknown org'}</b></p><p class="card-desc">${o.requirements||o.about||''}</p><a class="admin-link" href="${o.link||'#'}" target="_blank">${o.link||'No link'}</a>${review?`<div class="actions" style="margin-top:14px"><button class="primary" onclick="approve('${o.id}')">Approve</button><button class="ghost" onclick="editDraft('${o.id}')">Edit in form</button><button class="danger" onclick="reject('${o.id}')">Reject</button></div>`:''}</article>`;
+  return `<article class="card"><div class="meta"><span class="tag">${htmlSafe(categoryLabel(o.category))}</span><span class="tag gold">${htmlSafe(dateLabel(o.deadline))}</span><span class="tag source">${htmlSafe(sourceLabel(o.source_type))}</span></div><h3>${htmlSafe(o.title)}</h3><p><b>${htmlSafe(o.org||'Unknown org')}</b></p><p class="card-desc">${htmlSafe(o.requirements||o.about||'')}</p><a class="admin-link" href="${attrSafe(safeUrl(o.link))}" target="_blank" rel="noreferrer">${htmlSafe(o.link||'No link')}</a>${review?`<div class="actions" style="margin-top:14px"><button class="primary" onclick="approve(${jsArg(o.id)})">Approve</button><button class="ghost" onclick="editDraft(${jsArg(o.id)})">Edit in form</button><button class="danger" onclick="reject(${jsArg(o.id)})">Reject</button></div>`:''}</article>`;
 }
 function categoryLabel(category){return {job:'Job',fellowship:'Fellowship',internship:'Internship',scholarship:'Scholarship',event:'Event'}[category] || category || 'Opportunity'}
 function sourceLabel(source){return source === 'ai_scout' ? 'AI scout' : source === 'admin_manual' ? 'Admin upload' : source || 'Manual'}
 function dateLabel(d){if(!d || d === 'rolling') return 'Rolling'; const days=Math.ceil((new Date(d)-new Date())/86400000); return days<=0 ? 'Closing today' : `${days} day${days===1?'':'s'} left`}
+function htmlSafe(value){return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));}
+function attrSafe(value){return htmlSafe(value).replace(/`/g,'&#096;');}
+function jsArg(value){return attrSafe(JSON.stringify(String(value ?? '')));}
+function safeUrl(value){
+  try{
+    const url = new URL(String(value || ''), location.origin);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '#';
+  }catch(e){ return '#'; }
+}
 async function approve(id){
   const o = pending.find(x=>x.id===id); if(!o)return;
-  if(window._admin && window._admin.auth.currentUser){const a=window._admin;await a.httpsCallable(a.functions,'adminProcess')({oppId:id,action:'approve'});}
+  if(window._admin && window._admin.auth.currentUser){const a=window._admin;await a.httpsCallable(a.functions,'adminProcess')({oppId:id,action:'approve'}); await refreshAdminData();}
   else { published.unshift({...o,is_approved:true}); pending=pending.filter(x=>x.id!==id); render(); }
 }
 async function reject(id){
-  if(window._admin && window._admin.auth.currentUser){const a=window._admin;await a.httpsCallable(a.functions,'adminProcess')({oppId:id,action:'reject'});}
+  if(window._admin && window._admin.auth.currentUser){const a=window._admin;await a.httpsCallable(a.functions,'adminProcess')({oppId:id,action:'reject'}); await refreshAdminData();}
   else { pending=pending.filter(x=>x.id!==id); render(); }
 }
 function editDraft(id){
@@ -149,12 +177,12 @@ async function saveManual(e){
   e.preventDefault();
   const payload = {title:mTitle.value,org:mOrg.value,category:mCategory.value,industry:split(mIndustry.value),target_regions:split(mRegions.value),deadline:mDeadline.value||'rolling',funding_type:mFunding.value,link:mLink.value,about:mAbout.value,requirements:mReq.value,docs:mDocs.value.split('\n').filter(Boolean),steps:mSteps.value.split('\n').filter(Boolean),tags:split(`${mIndustry.value}, ${mCategory.value}, ${mRegions.value}`),is_active:true,is_approved:true,review_status:'approved',source_type:'admin_manual'};
   if(payload.deadline !== 'rolling') payload.deadline_timestamp = window._admin?.Timestamp?.fromDate(new Date(payload.deadline)) || new Date(payload.deadline);
-  if(window._admin && window._admin.auth.currentUser){const a=window._admin;await a.httpsCallable(a.functions,'adminProcess')({action:'create',opportunity:payload});}
+  if(window._admin && window._admin.auth.currentUser){const a=window._admin;await a.httpsCallable(a.functions,'adminProcess')({action:'create',opportunity:payload}); await refreshAdminData();}
   else published.unshift({...payload,id:Date.now().toString()});
   e.target.reset(); render(); alert('Opportunity published.');
 }
 function split(v){return v.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean)}
-window.bootAdmin=bootAdmin;window.showTab=showTab;window.approve=approve;window.reject=reject;window.editDraft=editDraft;window.saveManual=saveManual;
+window.bootAdmin=bootAdmin;window.showTab=showTab;window.approve=approve;window.reject=reject;window.editDraft=editDraft;window.saveManual=saveManual;window.refreshAdminData=refreshAdminData;
 </script>
 </body>
 </html>

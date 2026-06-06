@@ -2,32 +2,31 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper: is user an Admin? Hard check against token email if we synced it or we assume backend handles sensitive writes.
-    // Since we handle admin via Cloud Functions (or rely on UI hiding), we'll do a basic ruleset:
-    
-    // Public opportunities — anyone can read approved.
+    // Clients only read approved, active opportunities.
+    // Pending/rejected review data is available through admin Cloud Functions.
     match /opportunities/{oppId} {
-      allow read: if resource.data.is_approved == true || request.auth != null; // logged in users can see pending in backend
-      allow write: if false; // Cloud Functions use Admin SDK
+      allow read: if resource.data.is_approved == true && resource.data.is_active == true;
+      allow write: if false;
     }
 
-    // User profile — owner or public read if flag is set.
+    // User records are private to their owner. Users cannot grant themselves admin/public roles.
     match /users/{uid} {
-      allow read: if request.auth != null && (request.auth.uid == uid || resource.data.is_public == true);
-      allow write: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && !request.resource.data.keys().hasAny(['role', 'is_admin', 'admin', 'is_public']);
+      allow update: if request.auth != null
+        && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'is_admin', 'admin', 'is_public']);
+      allow delete: if false;
 
-      // Applications sub-collection — owner or public observer
       match /applications/{oppId} {
-        allow read: if request.auth != null && (
-          request.auth.uid == uid || 
-          get(/databases/$(database)/documents/users/$(uid)).data.is_public == true
-        );
-        allow write: if request.auth != null && request.auth.uid == uid;
-      }
-      
-      // Matches sub-collection
-      match /matches/{oppId} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      match /matches/{oppId} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow write: if false;
       }
     }
   }

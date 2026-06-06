@@ -1,59 +1,161 @@
 const { onCall } = require('firebase-functions/v2/https');
-const { getFirestore } = require('firebase-admin/firestore');
+const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 
 exports.adminProcess = onCall(async (request) => {
   if (!request.auth) throw new Error("Unauthenticated");
-  const email = request.auth.token.email;
-  const adminEmails = (process.env.ADMIN_EMAILS || "").split(",");
+  const email = String(request.auth.token.email || '').trim().toLowerCase();
+  const adminEmails = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map(e => e.trim().toLowerCase())
+    .filter(Boolean);
   
   // Clean checks
-  if (!adminEmails.map(e=>e.trim()).includes(email)) {
+  if (!adminEmails.includes(email)) {
     throw new Error("Unauthorized");
   }
 
   const { oppId, action, opportunity } = request.data;
   const db = getFirestore();
+
+  if (action === 'list') {
+    const [pendingSnap, publishedSnap] = await Promise.all([
+      db.collection('opportunities')
+        .where('review_status', '==', 'pending')
+        .limit(100)
+        .get(),
+      db.collection('opportunities')
+        .where('is_approved', '==', true)
+        .orderBy('updated_at', 'desc')
+        .limit(100)
+        .get(),
+    ]);
+
+    return {
+      success: true,
+      pending: pendingSnap.docs.map(doc => serializeDoc(doc)),
+      published: publishedSnap.docs.map(doc => serializeDoc(doc)),
+    };
+  }
   
   if (action === 'approve') {
+    if (!oppId) throw new Error("Missing opportunity id");
     await db.collection('opportunities').doc(oppId).update({
       is_approved: true,
       is_active: true,
       review_status: 'approved',
       approved_by: email,
-      approved_at: new Date(),
-      updated_at: new Date(),
+      approved_at: Timestamp.now(),
+      updated_at: Timestamp.now(),
     });
   } else if (action === 'reject') {
+    if (!oppId) throw new Error("Missing opportunity id");
     await db.collection('opportunities').doc(oppId).update({
       is_approved: false,
       is_active: false,
       review_status: 'rejected',
       rejected_by: email,
-      updated_at: new Date(),
+      updated_at: Timestamp.now(),
     });
   } else if (action === 'create') {
     if (!opportunity || !opportunity.title || !opportunity.link) {
       throw new Error("Missing opportunity title or link");
     }
     await db.collection('opportunities').add({
-      ...opportunity,
+      ...sanitizeOpportunity(opportunity),
       is_approved: true,
       is_active: true,
       review_status: 'approved',
       source_type: 'admin_manual',
       created_by: email,
-      created_at: new Date(),
-      updated_at: new Date(),
+      analyst_done: true,
+      analyst_version: 1,
+      created_at: Timestamp.now(),
+      updated_at: Timestamp.now(),
     });
   } else if (action === 'update') {
     if (!oppId || !opportunity) throw new Error("Missing opportunity update payload");
     await db.collection('opportunities').doc(oppId).update({
-      ...opportunity,
+      ...sanitizeOpportunity(opportunity),
       updated_by: email,
-      updated_at: new Date(),
+      updated_at: Timestamp.now(),
     });
   } else {
     throw new Error("Unsupported admin action");
   }
   return { success: true };
 });
+
+function text(value, fallback = '') {
+  return String(value || fallback).replace(/\s+/g, ' ').trim();
+}
+
+function list(value) {
+  if (Array.isArray(value)) return value.map(v => text(v)).filter(Boolean).slice(0, 20);
+  return String(value || '').split(/[,;\n]/).map(v => text(v)).filter(Boolean).slice(0, 20);
+}
+
+function steps(value) {
+  return list(value).map((title, index) => ({ step: index + 1, title, description: '' }));
+}
+
+function sanitizeOpportunity(opportunity) {
+  const deadline = text(opportunity.deadline, 'rolling');
+  const clean = {
+    title: text(opportunity.title).slice(0, 220),
+    org: text(opportunity.org, 'Unknown organisation').slice(0, 160),
+    category: text(opportunity.category, 'scholarship').toLowerCase(),
+    industry: list(opportunity.industry),
+    target_regions: list(opportunity.target_regions).length ? list(opportunity.target_regions) : ['Global'],
+    deadline: /^\d{4}-\d{2}-\d{2}$/.test(deadline) ? deadline : 'rolling',
+    funding_type: text(opportunity.funding_type, 'unknown').toLowerCase(),
+    link: publicHttpUrl(opportunity.link),
+    about: text(opportunity.about).slice(0, 2400),
+    requirements: text(opportunity.requirements).slice(0, 900),
+    docs: list(opportunity.docs),
+    steps: Array.isArray(opportunity.steps) && typeof opportunity.steps[0] === 'object' ? opportunity.steps.slice(0, 8) : steps(opportunity.steps),
+    tags: list(opportunity.tags),
+  };
+
+  if (!['scholarship', 'fellowship', 'internship', 'job', 'graduate', 'grant', 'event'].includes(clean.category)) clean.category = 'scholarship';
+  if (!['fully_funded', 'partial', 'stipend', 'unpaid', 'unknown', 'seed_capital', 'free'].includes(clean.funding_type)) clean.funding_type = 'unknown';
+  if (clean.deadline !== 'rolling') {
+    const parsedDeadline = new Date(clean.deadline);
+    if (!Number.isNaN(parsedDeadline.getTime())) clean.deadline_timestamp = Timestamp.fromDate(parsedDeadline);
+    else clean.deadline = 'rolling';
+  }
+  return clean;
+}
+
+function publicHttpUrl(value) {
+  let parsed;
+  try { parsed = new URL(String(value || '')); }
+  catch (e) { throw new Error('Invalid opportunity link'); }
+  if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('Only HTTP(S) opportunity links are allowed');
+  const host = parsed.hostname.toLowerCase();
+  if (
+    host === 'localhost' ||
+    host === '0.0.0.0' ||
+    host === '::1' ||
+    host.startsWith('127.') ||
+    host.startsWith('10.') ||
+    host.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(host) ||
+    host.startsWith('169.254.')
+  ) {
+    throw new Error('Private or local opportunity links are not allowed');
+  }
+  return parsed.href;
+}
+
+function serializeDoc(doc) {
+  return { id: doc.id, ...serializeValue(doc.data()) };
+}
+
+function serializeValue(value) {
+  if (value && typeof value.toDate === 'function') return value.toDate().toISOString();
+  if (Array.isArray(value)) return value.map(serializeValue);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, serializeValue(item)]));
+  }
+  return value;
+}

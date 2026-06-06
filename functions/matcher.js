@@ -15,7 +15,9 @@ exports.matcher = onDocumentUpdated({
 
   const db = getFirestore();
   const users = await db.collection('users').get();
-  const batch = db.batch();
+  const batches = [];
+  let batch = db.batch();
+  let writes = 0;
 
   users.forEach(userDoc => {
     const userData = userDoc.data();
@@ -32,9 +34,16 @@ exports.matcher = onDocumentUpdated({
       notified: false,
       created_at: new Date(),
     });
+    writes++;
+    if (writes === 450) {
+      batches.push(batch);
+      batch = db.batch();
+      writes = 0;
+    }
   });
 
-  await batch.commit();
+  if (writes > 0) batches.push(batch);
+  await Promise.all(batches.map(item => item.commit()));
   console.log(`Matcher: scored "${after.title}" against ${users.size} users.`);
 });
 

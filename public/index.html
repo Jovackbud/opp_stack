@@ -172,6 +172,7 @@ body[data-page="matches"] .stats{display:grid!important;margin:0 0 18px}
 .time-box{margin-top:16px;border:1px solid #ffd7cc;background:#fff4f1;border-radius:18px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}.time-big{font-size:42px;font-weight:950;letter-spacing:-.06em;line-height:.95;color:#ff5f45}.time-label{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#c4320a}.time-date{font-size:13px;color:#667085;font-weight:750}.detail-docs li{display:inline-flex;align-items:center;gap:6px}.detail-docs li:before{content:"";width:7px;height:7px;border-radius:50%;background:#ff5f45;box-shadow:0 0 0 3px #fff1ed}.toast-stack{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:120;display:grid;gap:8px;width:min(420px,calc(100% - 28px));pointer-events:none}.toast{background:#171a1f;color:#fff;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px 13px;box-shadow:0 18px 46px rgba(16,24,40,.24);display:flex;align-items:flex-start;gap:9px;font-size:13px;font-weight:750;animation:toastIn .22s ease both}.toast:before{content:"";width:9px;height:9px;border-radius:50%;background:#12b76a;margin-top:4px;flex:0 0 9px}.toast.error:before{background:#f04438}.toast.info:before{background:#ff5f45}@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.dark-mode .empty-title{color:#f4f6f8}.dark-mode .empty-copy,.dark-mode .time-date{color:#98a2b3}.dark-mode .time-box{background:#251712;border-color:#623225}.dark-mode .detail-docs li:before{box-shadow:0 0 0 3px #251712}
 .doc-progress-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 6px;color:#667085;font-size:11px;font-weight:850}.doc-progress-head b{color:#171a1f}.doc-progress{height:5px;background:#f2f4f7;border-radius:999px;overflow:hidden;margin-bottom:10px}.doc-progress span{display:block;height:100%;background:#ff5f45;border-radius:inherit}.stage-note-wrap{border-top:1px solid #eaecf0;margin-top:10px;padding-top:10px}.stage-note-label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#667085;margin-bottom:6px}.pipeline-note.stage-note{margin-top:0}.reminder-group-title{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#ff5f45;margin:7px 2px 0}.custom-reminder-row{display:grid;grid-template-columns:1fr 78px auto;gap:8px}.custom-reminder-row input{min-width:0;border:1px solid #d0d5dd;border-radius:10px;padding:9px;color:#171a1f;background:#fff}.custom-reminder-list{display:grid;gap:6px}.custom-reminder-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #e4e7ec;background:#f9fafb;border-radius:12px;padding:9px 10px;font-size:12px}.custom-reminder-item b{color:#171a1f}.custom-reminder-item span{color:#667085}.custom-reminder-item button{border:0;background:transparent;color:#f04438;font-weight:900}.dark-mode .doc-progress-head b,.dark-mode .custom-reminder-item b{color:#f4f6f8}.dark-mode .doc-progress,.dark-mode .stage-note-wrap{background:#29313a;border-color:#29313a}.dark-mode .custom-reminder-row input,.dark-mode .custom-reminder-item{background:#20262d;border-color:#343d48;color:#f4f6f8}.dark-mode .custom-reminder-item span{color:#98a2b3}
 @media(max-width:860px){body[data-page="matches"] .stats{display:flex!important}.stats{margin-top:0}.custom-reminder-row{grid-template-columns:1fr 70px}.custom-reminder-row button{grid-column:1/-1}.appbar-actions{gap:6px}.reminder-pill{display:none}.notif-btn{width:36px;height:36px;border-radius:13px}}
+.essay-output{margin-top:10px}.essay-output pre{white-space:pre-wrap;word-break:break-word;margin:0;border:1px solid #e4e7ec;background:#f9fafb;border-radius:14px;padding:12px;color:#344054;font:13px/1.55 Inter,system-ui,sans-serif}.dark-mode .essay-output pre{background:#20262d;border-color:#343d48;color:#d0d5dd}
 </style>
 </head>
 <body data-page="matches">
@@ -352,13 +353,41 @@ body[data-page="matches"] .stats{display:grid!important;margin:0 0 18px}
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, collection, query, where, orderBy, limit, onSnapshot, doc, setDoc, deleteDoc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js';
+import { getMessaging, getToken, onMessage, isSupported as isMessagingSupported } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
-const firebaseConfig = { apiKey:"...", authDomain:"...", projectId:"...", storageBucket:"...", messagingSenderId:"...", appId:"..." };
+const firebaseConfig = await resolveFirebaseConfig({ apiKey:"...", authDomain:"...", projectId:"...", storageBucket:"...", messagingSenderId:"...", appId:"..." });
 try {
+  firebaseConfig.webPushVapidKey = firebaseConfig.webPushVapidKey || firebaseConfig.vapidKey || await resolveWebPushVapidKey();
   const app = initializeApp(firebaseConfig);
-  window._fb = { auth:getAuth(app), db:getFirestore(app), collection, query, where, orderBy, limit, onSnapshot, doc, setDoc, deleteDoc, getDoc, updateDoc, serverTimestamp, signInWithPopup, GoogleAuthProvider, onAuthStateChanged };
+  const messagingSupported = await isMessagingSupported().catch(() => false);
+  const messaging = messagingSupported ? getMessaging(app) : null;
+  window._fb = { auth:getAuth(app), db:getFirestore(app), functions:getFunctions(app, 'europe-west1'), messaging, messagingSupported, webPushVapidKey:firebaseConfig.webPushVapidKey || firebaseConfig.vapidKey || '', collection, query, where, orderBy, limit, onSnapshot, doc, setDoc, deleteDoc, getDoc, updateDoc, serverTimestamp, httpsCallable, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, getToken, onMessage };
 } catch(e) { window._fb = null; }
 window.bootOppTrack();
+
+async function resolveFirebaseConfig(fallback) {
+  if (fallback.apiKey && fallback.apiKey !== '...') return fallback;
+  try {
+    const res = await fetch('/__/firebase/init.json', timeoutOption());
+    if (res.ok) return await res.json();
+  } catch(e) {}
+  return fallback;
+}
+function timeoutOption() {
+  return typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? { signal: AbortSignal.timeout(5000) } : {};
+}
+async function resolveWebPushVapidKey() {
+  try {
+    const res = await fetch('/vapid-key.txt', timeoutOption());
+    if (!res.ok) return '';
+    const value = (await res.text()).trim();
+    if (!value || value.startsWith('REPLACE_')) return '';
+    return value;
+  } catch(e) {
+    return '';
+  }
+}
 </script>
 
 <script>
@@ -417,7 +446,13 @@ function bootOppTrack(){
     if(!u){ hideSplash(); await fb.signInWithPopup(fb.auth, new fb.GoogleAuthProvider()); return; }
     user = u;
     const snap = await fb.getDoc(fb.doc(fb.db,'users',u.uid));
-    profile = snap.exists() ? (snap.data().profile || {}) : {};
+    const userData = snap.exists() ? snap.data() : {};
+    profile = userData.profile || {};
+    if(userData.reminders){
+      reminderSettings = {...reminderSettings, ...userData.reminders};
+      localStorage.setItem('oppReminderSettings', JSON.stringify(reminderSettings));
+    }
+    if(reminderSettings.push) registerPushNotifications({silent:true});
     buildProfileControls();
     fillProfile();
     fb.onSnapshot(fb.query(fb.collection(fb.db,'opportunities'),fb.where('is_approved','==',true),fb.where('is_active','==',true),fb.orderBy('deadline_timestamp','asc'),fb.limit(80)), s => { opps = s.docs.map(d=>({id:d.id,...d.data()})); renderAll(); hideSplash(); });
@@ -606,7 +641,7 @@ function card(o){
   const fit = fitInfo(score);
   const urgency = urgencyClass(o);
   const isTracked = !!tracked[o.id];
-  return `<article class="card ${urgency}" onclick="openDetail('${o.id}')"><div class="card-body"><div class="card-top"><div class="meta"><span class="tag">${o.type_label || categoryLabel(o.category)}</span><span class="tag verified">${uiIcon('shield')}<span>Verified</span></span><span class="tag urgency-chip ${urgency}">${urgencyLabel(o)}</span></div><div class="org-logo" title="${o.org}">${orgLogo(o)}</div></div><div class="card-title-row"><div><h3>${o.title}</h3><div class="org">${o.org}</div></div></div><p class="card-desc">${o.about||o.requirements||''}</p><div class="card-info-list"><div>${uiIcon('calendar')}<b class="deadline-badge ${urgency}">${urgencyText(o)}</b><span>${fmtDate(o.deadline)}</span></div><div>${uiIcon('map')}<span>${(o.target_regions||['Global']).join(', ')}</span></div><div>${uiIcon('wallet')}<span>${fundingLabel(o)}</span></div></div>${canShowFit()?`<div class="card-foot"><span class="fit-label ${fit.cls}">${fit.label}</span></div>`:''}<div class="need-list"><p>You need:</p><ul>${needItemsHtml(o)}</ul></div><div class="card-actions"><button class="primary track-btn ${isTracked?'tracked':''}" onclick="event.stopPropagation();trackOpp('${o.id}')">${isTracked?'Tracked':'+ Track This'}</button></div></div></article>`
+  return `<article class="card ${urgency}" onclick="openDetail(${jsArg(o.id)})"><div class="card-body"><div class="card-top"><div class="meta"><span class="tag">${htmlSafe(o.type_label || categoryLabel(o.category))}</span><span class="tag verified">${uiIcon('shield')}<span>Verified</span></span><span class="tag urgency-chip ${urgency}">${urgencyLabel(o)}</span></div><div class="org-logo" title="${attrSafe(o.org)}">${orgLogo(o)}</div></div><div class="card-title-row"><div><h3>${htmlSafe(o.title)}</h3><div class="org">${htmlSafe(o.org)}</div></div></div><p class="card-desc">${htmlSafe(o.about||o.requirements||'')}</p><div class="card-info-list"><div>${uiIcon('calendar')}<b class="deadline-badge ${urgency}">${urgencyText(o)}</b><span>${htmlSafe(fmtDate(o.deadline))}</span></div><div>${uiIcon('map')}<span>${htmlSafe((o.target_regions||['Global']).join(', '))}</span></div><div>${uiIcon('wallet')}<span>${htmlSafe(fundingLabel(o))}</span></div></div>${canShowFit()?`<div class="card-foot"><span class="fit-label ${fit.cls}">${fit.label}</span></div>`:''}<div class="need-list"><p>You need:</p><ul>${needItemsHtml(o)}</ul></div><div class="card-actions"><button class="primary track-btn ${isTracked?'tracked':''}" onclick="event.stopPropagation();trackOpp(${jsArg(o.id)})">${isTracked?'Tracked':'+ Track This'}</button></div></div></article>`;
 }
 function categoryLabel(category){
   return {job:'Job',fellowship:'Fellowship',internship:'Internship',scholarship:'Scholarship',event:'Events'}[category] || category || 'Opportunity';
@@ -614,8 +649,8 @@ function categoryLabel(category){
 function needItemsHtml(o){
   return needList(o).map(item=>{
     const text = String(item);
-    if(text.trim().startsWith('+')) return `<li><button class="more-req" onclick="event.stopPropagation();openDetail('${o.id}')">${text}</button></li>`;
-    return `<li>${text}</li>`;
+    if(text.trim().startsWith('+')) return `<li><button class="more-req" onclick="event.stopPropagation();openDetail(${jsArg(o.id)})">${htmlSafe(text)}</button></li>`;
+    return `<li>${htmlSafe(text)}</li>`;
   }).join('');
 }
 function needList(o){
@@ -632,6 +667,13 @@ function industryLabel(o){return (o.industry && o.industry.length ? o.industry[0
 function locationLabel(o){return (o.target_regions && o.target_regions.length ? o.target_regions.join(', ') : 'Global');}
 function htmlSafe(value){return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));}
 function attrSafe(value){return htmlSafe(value).replace(/`/g,'&#096;');}
+function jsArg(value){return attrSafe(JSON.stringify(String(value ?? '')));}
+function safeUrl(value){
+  try{
+    const url = new URL(String(value || ''), location.origin);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '#';
+  }catch(e){ return '#'; }
+}
 const trackerStatuses = [
   ['not_applied','Not applied'],
   ['applied','Applied'],
@@ -722,7 +764,7 @@ async function trackOpp(id){
     return;
   }
   if(!tracked[id]){
-    const app = {status:'tracked',current_stage:-1,docs:(o.docs||[]).map(name=>({name,checked:false})),stage_notes:{},learnings:'',tracked_at:new Date().toISOString()};
+    const app = {opp_id:id,status:'tracked',current_stage:-1,docs:(o.docs||[]).map(name=>({name,checked:false})),stage_notes:{},learnings:'',tracked_at:new Date().toISOString()};
     tracked[id]=app; localStorage.setItem('oppTracked',JSON.stringify(tracked));
     if(user&&window._fb){const fb=window._fb;await fb.setDoc(fb.doc(fb.db,'users',user.uid,'applications',id),{...app,tracked_at:fb.serverTimestamp(),updated_at:fb.serverTimestamp()});}
     showToast('Tracked. Reminders will help you apply before the deadline.');
@@ -754,16 +796,16 @@ function trackerRow(o){
   const status = trackerStatusValue(t);
   return `<tr>
     <td data-label="Organisation"><strong>${htmlSafe(o.org)}</strong></td>
-    <td data-label="Opportunity"><button class="tracker-title" onclick="openDetail('${o.id}')">${htmlSafe(o.title)}</button></td>
+    <td data-label="Opportunity"><button class="tracker-title" onclick="openDetail(${jsArg(o.id)})">${htmlSafe(o.title)}</button></td>
     <td data-label="Industry"><span class="tracker-pill industry">${htmlSafe(industryLabel(o))}</span></td>
     <td data-label="Location">${htmlSafe(locationLabel(o))}</td>
     <td data-label="Benefit">${htmlSafe(fundingLabel(o))}</td>
-    <td data-label="Application Status"><label class="status-select status-${status}"><span>${trackerStatusLabel(status)}</span><select onchange="setTrackerStatus('${o.id}',this.value)">${trackerStatuses.map(([id,label])=>`<option value="${id}" ${id===status?'selected':''}>${label}</option>`).join('')}</select></label></td>
-    <td data-label="Application Deadline"><span class="deadline-badge ${urgencyClass(o)}">${urgencyText(o)}</span><small>${fmtDate(o.deadline)}</small></td>
-    <td data-label="Next Action"><input class="tracker-cell-input" value="${attrSafe(t.next_action || '')}" onchange="saveTrackerField('${o.id}','next_action',this.value)" placeholder="e.g. Submit CV"></td>
-    <td data-label="Reminder Date"><input class="tracker-cell-input tracker-reminder" type="date" value="${attrSafe(t.reminder_date || '')}" onchange="saveTrackerField('${o.id}','reminder_date',this.value)"></td>
-    <td data-label="Application Link"><a class="tracker-link" href="${o.link||'#'}" target="_blank" rel="noreferrer">Apply</a></td>
-    <td data-label="Notes"><textarea class="tracker-note" rows="1" onchange="saveLearning('${o.id}',this.value)" placeholder="Add note">${htmlSafe(t.learnings || '')}</textarea></td>
+    <td data-label="Application Status"><label class="status-select status-${status}"><span>${trackerStatusLabel(status)}</span><select onchange="setTrackerStatus(${jsArg(o.id)},this.value)">${trackerStatuses.map(([id,label])=>`<option value="${id}" ${id===status?'selected':''}>${label}</option>`).join('')}</select></label></td>
+    <td data-label="Application Deadline"><span class="deadline-badge ${urgencyClass(o)}">${urgencyText(o)}</span><small>${htmlSafe(fmtDate(o.deadline))}</small></td>
+    <td data-label="Next Action"><input class="tracker-cell-input" value="${attrSafe(t.next_action || '')}" onchange="saveTrackerField(${jsArg(o.id)},'next_action',this.value)" placeholder="e.g. Submit CV"></td>
+    <td data-label="Reminder Date"><input class="tracker-cell-input tracker-reminder" type="date" value="${attrSafe(t.reminder_date || '')}" onchange="saveTrackerField(${jsArg(o.id)},'reminder_date',this.value)"></td>
+    <td data-label="Application Link"><a class="tracker-link" href="${attrSafe(safeUrl(o.link))}" target="_blank" rel="noreferrer">Apply</a></td>
+    <td data-label="Notes"><textarea class="tracker-note" rows="1" onchange="saveLearning(${jsArg(o.id)},this.value)" placeholder="Add note">${htmlSafe(t.learnings || '')}</textarea></td>
   </tr>`;
 }
 function renderTrackerPipeline(list){
@@ -785,17 +827,17 @@ function pipelineCard(o){
       <div class="org-logo">${orgLogo(o)}</div>
     </div>
     <div class="pipeline-stages">${pipelineStages.map(([id,label],index)=>pipelineStage(o.id,id,label,index,currentIndex,status)).join('')}</div>
-    <div class="pipeline-docs"><div class="pipeline-docs-title">Documents ${checkedCount}/${docs.length}</div><div class="doc-progress-head"><span>Readiness</span><b>${docProgress}%</b></div><div class="doc-progress" aria-label="Document completion"><span style="width:${docProgress}%"></span></div>${docs.map((doc,index)=>`<button class="pipeline-doc ${doc.checked?'checked':''}" onclick="toggleTrackDoc('${o.id}',${index})"><span class="doc-box">${doc.checked?'✓':''}</span><span>${htmlSafe(doc.name || doc)}</span></button>`).join('')}</div>
-    <div class="stage-note-wrap"><div class="stage-note-label">${htmlSafe(noteLabel)} notes</div><textarea class="pipeline-note stage-note" onchange="saveStageNote('${o.id}','${noteStage}',this.value)" placeholder="What happened at this stage? What did you learn?">${htmlSafe(stageNote)}</textarea></div>
-    <textarea class="pipeline-note" onchange="saveLearning('${o.id}',this.value)" placeholder="General application notes">${htmlSafe(t.learnings || '')}</textarea>
-    <div class="pipeline-actions"><a class="ghost" href="${o.link||'#'}" target="_blank" rel="noreferrer">Apply</a><button class="ghost" onclick="openDetail('${o.id}')">Details</button></div>
+    <div class="pipeline-docs"><div class="pipeline-docs-title">Documents ${checkedCount}/${docs.length}</div><div class="doc-progress-head"><span>Readiness</span><b>${docProgress}%</b></div><div class="doc-progress" aria-label="Document completion"><span style="width:${docProgress}%"></span></div>${docs.map((doc,index)=>`<button class="pipeline-doc ${doc.checked?'checked':''}" onclick="toggleTrackDoc(${jsArg(o.id)},${index})"><span class="doc-box">${doc.checked?'✓':''}</span><span>${htmlSafe(doc.name || doc)}</span></button>`).join('')}</div>
+    <div class="stage-note-wrap"><div class="stage-note-label">${htmlSafe(noteLabel)} notes</div><textarea class="pipeline-note stage-note" onchange="saveStageNote(${jsArg(o.id)},'${noteStage}',this.value)" placeholder="What happened at this stage? What did you learn?">${htmlSafe(stageNote)}</textarea></div>
+    <textarea class="pipeline-note" onchange="saveLearning(${jsArg(o.id)},this.value)" placeholder="General application notes">${htmlSafe(t.learnings || '')}</textarea>
+    <div class="pipeline-actions"><a class="ghost" href="${attrSafe(safeUrl(o.link))}" target="_blank" rel="noreferrer">Apply</a><button class="ghost" onclick="openDetail(${jsArg(o.id)})">Details</button></div>
   </article>`;
 }
 function pipelineStage(id,status,label,index,currentIndex,currentStatus){
   const cls = currentStatus === 'rejected' || currentIndex < 0 ? '' : index < currentIndex ? 'done' : index === currentIndex ? 'current' : '';
   const connector = index < pipelineStages.length - 1 ? `<span class="stage-line ${currentIndex >= 0 && index < currentIndex ? 'done' : ''}"></span>` : '';
   const mark = cls === 'done' ? '✓' : index + 1;
-  return `<button class="pipeline-stage ${cls}" onclick="setTrackerStatus('${id}','${status}')"><span class="stage-dot">${mark}</span><span class="stage-name">${label}</span></button>${connector}`;
+  return `<button class="pipeline-stage ${cls}" onclick="setTrackerStatus(${jsArg(id)},'${status}')"><span class="stage-dot">${mark}</span><span class="stage-name">${label}</span></button>${connector}`;
 }
 function currentPipelineIndex(status){return pipelineStages.findIndex(([id])=>id===status);}
 async function setStage(id,i){tracked[id].current_stage=i;tracked[id].status=stages[i].toLowerCase();await persistTrack(id);renderTracker();}
@@ -842,12 +884,14 @@ async function openNotificationSettings(){
   if('Notification' in window && Notification.permission === 'default'){
     try{
       const permission = await Notification.requestPermission();
+      if(permission === 'granted') await registerPushNotifications({silent:true});
       syncNotificationButton();
       showToast(permission === 'granted' ? 'Notifications enabled. We will use your reminder settings.' : 'Notification permission was not enabled.', permission === 'granted' ? 'success' : 'info');
     }catch(e){
       showToast('Could not request notifications in this browser.', 'error');
     }
   } else if('Notification' in window && Notification.permission === 'granted') {
+    await registerPushNotifications({silent:true});
     showToast('Notifications are already enabled.');
   } else if('Notification' in window && Notification.permission === 'denied') {
     showToast('Notifications are blocked. You can change this in browser settings.', 'error');
@@ -863,6 +907,50 @@ function syncNotificationButton(){
   if(!('Notification' in window)) return;
   if(Notification.permission === 'granted') btn.classList.add('granted');
   if(Notification.permission === 'denied') btn.classList.add('denied');
+}
+async function registerPushNotifications({silent=false}={}){
+  const fb = window._fb;
+  if(!user || !fb || !fb.messagingSupported || !fb.messaging || !fb.getToken) return false;
+  if(!('Notification' in window) || !('serviceWorker' in navigator)) {
+    if(!silent) showToast('This browser does not support push notifications yet.', 'info');
+    return false;
+  }
+  let permission = Notification.permission;
+  if(permission === 'default' && !silent) permission = await Notification.requestPermission();
+  if(permission !== 'granted') {
+    syncNotificationButton();
+    if(!silent && permission === 'denied') showToast('Notifications are blocked in browser settings.', 'error');
+    return false;
+  }
+  try{
+    const registration = await navigator.serviceWorker.register('/sw.js');
+    const tokenOptions = { serviceWorkerRegistration: registration };
+    if(fb.webPushVapidKey) tokenOptions.vapidKey = fb.webPushVapidKey;
+    const token = await fb.getToken(fb.messaging, tokenOptions);
+    if(!token) {
+      if(!silent) showToast('Could not create a push token yet.', 'error');
+      return false;
+    }
+    await fb.setDoc(fb.doc(fb.db,'users',user.uid),{
+      fcm_token: token,
+      fcm_token_updated_at: fb.serverTimestamp(),
+      fcm_token_provider: 'firebase_web',
+      updated_at: fb.serverTimestamp()
+    },{merge:true});
+    if(!window.__opptrackForegroundPushBound && fb.onMessage){
+      window.__opptrackForegroundPushBound = true;
+      fb.onMessage(fb.messaging, payload => {
+        const title = payload.notification?.title || payload.data?.title || 'OppTrack';
+        const body = payload.notification?.body || payload.data?.body || 'You have a new notification.';
+        showToast(`${title}: ${body}`, 'info');
+      });
+    }
+    syncNotificationButton();
+    return true;
+  }catch(e){
+    if(!silent) showToast('Push setup failed. Check browser notification settings.', 'error');
+    return false;
+  }
 }
 function toggleReminderSetting(key){reminderSettings[key] = !reminderSettings[key];syncReminderSettings();}
 function addCustomReminder(){
@@ -884,13 +972,28 @@ function removeCustomReminder(id){
 function renderCustomReminders(){
   if(!customReminderList) return;
   const items = Array.isArray(reminderSettings.custom) ? reminderSettings.custom : [];
-  customReminderList.innerHTML = items.length ? items.map(item=>`<div class="custom-reminder-item"><div><b>${htmlSafe(item.text)}</b><br><span>${Number(item.days)||0} day${Number(item.days)===1?'':'s'} before deadline</span></div><button onclick="removeCustomReminder('${item.id}')" aria-label="Remove custom reminder">Remove</button></div>`).join('') : '<div class="custom-reminder-item"><span>No custom reminders yet.</span></div>';
+  customReminderList.innerHTML = items.length ? items.map(item=>`<div class="custom-reminder-item"><div><b>${htmlSafe(item.text)}</b><br><span>${Number(item.days)||0} day${Number(item.days)===1?'':'s'} before deadline</span></div><button onclick="removeCustomReminder(${jsArg(item.id)})" aria-label="Remove custom reminder">Remove</button></div>`).join('') : '<div class="custom-reminder-item"><span>No custom reminders yet.</span></div>';
 }
-function saveReminderSettings(){
+async function saveReminderSettings(){
   reminderSettings.time = reminderTime?.value || '09:00';
   reminderSettings.email_address = reminderEmail?.value.trim() || '';
   reminderSettings.whatsapp_number = reminderWhatsapp?.value.trim() || '';
   localStorage.setItem('oppReminderSettings', JSON.stringify(reminderSettings));
+  if(reminderSettings.push) await registerPushNotifications({silent:false});
+  if(user&&window._fb){
+    const fb = window._fb;
+    const notifyChannels = ['push','email','whatsapp'].filter(key => reminderSettings[key]);
+    await fb.setDoc(fb.doc(fb.db,'users',user.uid),{
+      reminders: reminderSettings,
+      whatsapp_number: reminderSettings.whatsapp ? reminderSettings.whatsapp_number : '',
+      prefs: {
+        notify_channels: notifyChannels,
+        digest_time: reminderSettings.time || '09:00',
+        custom_reminders: Array.isArray(reminderSettings.custom) ? reminderSettings.custom : []
+      },
+      updated_at: fb.serverTimestamp()
+    },{merge:true});
+  }
   closeReminderSettings();
   showToast('Reminder settings saved.');
 }
@@ -940,20 +1043,24 @@ async function copyTrackerForDocs(){
 }
 function openDetail(id){
   const o=opps.find(x=>x.id===id); if(!o)return; const score=scoreOpp(o), isTracked=!!tracked[o.id], urgency=urgencyClass(o);
-  sheet.innerHTML = `<div class="sheet-head"><div class="opp-logo">${orgLogo(o)}</div><button class="close-icon" onclick="closeDetail()" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><div class="detail-hero"><div class="meta"><span class="tag">${o.type_label || categoryLabel(o.category)}</span><span class="tag verified">${uiIcon('shield')}<span>Verified</span></span><span class="tag urgency-chip ${urgency}">${urgencyLabel(o)}</span>${canShowFit()?`<span class="tag">${fitInfo(score).label}</span>`:''}</div><h2>${o.title}</h2><div class="org">${o.org}</div><div class="time-box"><div><div class="time-big">${timeBig(o)}</div><div class="time-label">${timeLabel(o)}</div></div><div class="time-date">${fmtDate(o.deadline)}</div></div></div><div class="sheet-body"><div class="sections"><div class="section"><h4>About</h4><p>${o.about||''}</p></div><div class="section"><h4>Requirements</h4><p>${o.requirements||''}</p></div><div class="section"><h4>Your readiness</h4>${requirementsChecklist(o)}</div><div class="section"><h4>Documents</h4><ul class="detail-docs">${(o.docs||[]).map(d=>`<li>${d}</li>`).join('')}</ul></div><div class="section"><h4>Application roadmap</h4><ul>${(o.steps||[]).map(s=>`<li>${typeof s==='string'?s:s.title||s.description}</li>`).join('')}</ul></div></div><div class="detail-actions"><button class="primary track-btn ${isTracked?'tracked':''}" onclick="trackOpp('${o.id}')">${isTracked?'Tracked':'+ Track This'}</button><button class="ghost share-btn" onclick="shareOpp('${o.id}')" title="Share"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path></svg></button><a class="ghost" href="${o.link||'#'}" target="_blank">Apply</a></div></div>`;
+  const stepsHtml = (o.steps||[]).map(s=>`<li>${htmlSafe(typeof s==='string'?s:s.title||s.description)}</li>`).join('');
+  const docsHtml = (o.docs||[]).map(d=>`<li>${htmlSafe(d)}</li>`).join('');
+  sheet.innerHTML = `<div class="sheet-head"><div class="opp-logo">${orgLogo(o)}</div><button class="close-icon" onclick="closeDetail()" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><div class="detail-hero"><div class="meta"><span class="tag">${htmlSafe(o.type_label || categoryLabel(o.category))}</span><span class="tag verified">${uiIcon('shield')}<span>Verified</span></span><span class="tag urgency-chip ${urgency}">${urgencyLabel(o)}</span>${canShowFit()?`<span class="tag">${fitInfo(score).label}</span>`:''}</div><h2>${htmlSafe(o.title)}</h2><div class="org">${htmlSafe(o.org)}</div><div class="time-box"><div><div class="time-big">${timeBig(o)}</div><div class="time-label">${timeLabel(o)}</div></div><div class="time-date">${htmlSafe(fmtDate(o.deadline))}</div></div></div><div class="sheet-body"><div class="sections"><div class="section"><h4>About</h4><p>${htmlSafe(o.about||'')}</p></div><div class="section"><h4>Requirements</h4><p>${htmlSafe(o.requirements||'')}</p></div><div class="section"><h4>Your readiness</h4>${requirementsChecklist(o)}</div><div class="section"><h4>Documents</h4><ul class="detail-docs">${docsHtml}</ul></div><div class="section"><h4>Application roadmap</h4><ul>${stepsHtml}</ul></div><div class="section"><h4>Essay assistance</h4><div class="field"><label>Scratch notes</label><textarea id="essayNotes" placeholder="Paste your rough ideas, achievements, or concerns."></textarea></div><button class="ghost" onclick="requestEssayAssist(${jsArg(o.id)})">Generate outline</button><div id="essayOutput" class="essay-output"></div></div></div><div class="detail-actions"><button class="primary track-btn ${isTracked?'tracked':''}" onclick="trackOpp(${jsArg(o.id)})">${isTracked?'Tracked':'+ Track This'}</button><button class="ghost share-btn" onclick="shareOpp(${jsArg(o.id)})" title="Share"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path></svg></button><a class="ghost" href="${attrSafe(safeUrl(o.link))}" target="_blank" rel="noreferrer">Apply</a></div></div>`;
   detail.classList.add('show');
 }
 function closeDetail(){detail.classList.remove('show')}
 function requirementsChecklist(o){
   const items = [...(o.needs||[]),...(o.docs||[])].slice(0,6);
-  return `<div>${items.map(item=>{const state=requirementState(item);return `<div class="req-item"><span class="req-dot ${state.cls}"></span><div><b>${item}</b><br><span>${state.text}</span></div></div>`}).join('')}</div>`;
+  return `<div>${items.map(item=>{const state=requirementState(item);return `<div class="req-item"><span class="req-dot ${state.cls}"></span><div><b>${htmlSafe(item)}</b><br><span>${htmlSafe(state.text)}</span></div></div>`}).join('')}</div>`;
 }
 async function shareOpp(id){
   const o=opps.find(x=>x.id===id); if(!o)return;
+  const localUrl = `${location.origin}${location.pathname}?opp=${encodeURIComponent(id)}`;
+  const applyUrl = safeUrl(o.link) || localUrl;
   const text = `${o.title}\n${o.org}\n${urgencyText(o)} · Deadline: ${fmtDate(o.deadline)}\nType: ${categoryLabel(o.category)}\nRequirements: ${o.requirements}\nDocuments: ${(o.docs||[]).join(', ')}\nOppTrack: ${location.origin}${location.pathname}?opp=${id}\nApply: ${o.link}`;
   try{
     if(navigator.share){
-      await navigator.share({title:o.title,text,url:o.link || `${location.origin}${location.pathname}?opp=${id}`});
+      await navigator.share({title:o.title,text,url:applyUrl});
       showToast('Opportunity shared.');
     } else {
       await navigator.clipboard?.writeText(text);
@@ -961,6 +1068,24 @@ async function shareOpp(id){
     }
   } catch(e) {
     if(e?.name !== 'AbortError') showToast('Could not share right now.', 'error');
+  }
+}
+async function requestEssayAssist(id){
+  const output = document.getElementById('essayOutput');
+  if(!output) return;
+  if(!user || !window._fb || !window._fb.functions){
+    showToast('Sign in and connect Firebase to use essay assistance.', 'error');
+    return;
+  }
+  const notes = document.getElementById('essayNotes')?.value || '';
+  output.innerHTML = '<div class="status">Generating outline...</div>';
+  try{
+    const fn = window._fb.httpsCallable(window._fb.functions, 'essayAssist');
+    const result = await fn({oppId:id, notes});
+    output.innerHTML = `<pre>${htmlSafe(result.data?.draft || 'No outline returned.')}</pre>`;
+  }catch(e){
+    output.innerHTML = '';
+    showToast('Essay assistance failed. Try again later.', 'error');
   }
 }
 function showToast(message,type='success'){
@@ -1024,10 +1149,10 @@ async function saveProfile(){
   profile.exam_results = collectExamRows();
   profile.documents = [...document.querySelectorAll('[data-doc]:checked')].map(box=>box.value);
   localStorage.setItem('oppProfile',JSON.stringify(profile));
-  if(user&&window._fb){const fb=window._fb;await fb.setDoc(fb.doc(fb.db,'users',user.uid),{role:'user',profile,updated_at:fb.serverTimestamp()},{merge:true});}
+  if(user&&window._fb){const fb=window._fb;await fb.setDoc(fb.doc(fb.db,'users',user.uid),{profile,updated_at:fb.serverTimestamp()},{merge:true});}
   renderAll(); showToast('Profile saved. Your ranking has been refreshed.');
 }
-window.bootOppTrack=bootOppTrack; window.showPage=showPage; window.renderSearch=renderSearch; window.setMatchFilter=setMatchFilter; window.setSortMode=setSortMode; window.setOppView=setOppView; window.setTrackerView=setTrackerView; window.setTheme=setTheme; window.toggleTheme=toggleTheme; window.toggleSidebar=toggleSidebar; window.setSidebarSize=setSidebarSize; window.toggleFilters=toggleFilters; window.toggleReq=toggleReq; window.openDetail=openDetail; window.closeDetail=closeDetail; window.trackOpp=trackOpp; window.untrack=untrack; window.setStage=setStage; window.setTrackerStatus=setTrackerStatus; window.toggleTrackDoc=toggleTrackDoc; window.saveTrackerField=saveTrackerField; window.exportTrackerCsv=exportTrackerCsv; window.copyTrackerForDocs=copyTrackerForDocs; window.saveLearning=saveLearning; window.saveStageNote=saveStageNote; window.shareOpp=shareOpp; window.showToast=showToast; window.openReminderSettings=openReminderSettings; window.openNotificationSettings=openNotificationSettings; window.closeReminderSettings=closeReminderSettings; window.toggleReminderSetting=toggleReminderSetting; window.addCustomReminder=addCustomReminder; window.removeCustomReminder=removeCustomReminder; window.saveReminderSettings=saveReminderSettings; window.saveProfile=saveProfile;
+window.bootOppTrack=bootOppTrack; window.showPage=showPage; window.renderSearch=renderSearch; window.setMatchFilter=setMatchFilter; window.setSortMode=setSortMode; window.setOppView=setOppView; window.setTrackerView=setTrackerView; window.setTheme=setTheme; window.toggleTheme=toggleTheme; window.toggleSidebar=toggleSidebar; window.setSidebarSize=setSidebarSize; window.toggleFilters=toggleFilters; window.toggleReq=toggleReq; window.openDetail=openDetail; window.closeDetail=closeDetail; window.trackOpp=trackOpp; window.untrack=untrack; window.setStage=setStage; window.setTrackerStatus=setTrackerStatus; window.toggleTrackDoc=toggleTrackDoc; window.saveTrackerField=saveTrackerField; window.exportTrackerCsv=exportTrackerCsv; window.copyTrackerForDocs=copyTrackerForDocs; window.saveLearning=saveLearning; window.saveStageNote=saveStageNote; window.shareOpp=shareOpp; window.requestEssayAssist=requestEssayAssist; window.showToast=showToast; window.openReminderSettings=openReminderSettings; window.openNotificationSettings=openNotificationSettings; window.closeReminderSettings=closeReminderSettings; window.toggleReminderSetting=toggleReminderSetting; window.addCustomReminder=addCustomReminder; window.removeCustomReminder=removeCustomReminder; window.saveReminderSettings=saveReminderSettings; window.saveProfile=saveProfile;
 </script>
 </body>
 </html>

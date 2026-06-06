@@ -1,6 +1,6 @@
 # OppTrack AI — Production README & Build Spec
 > **Civic Good Project** | Zero-to-production spec for an agentic IDE build.
-> Stack: Firebase (free tier) · Claude Sonnet API · Vanilla JS/HTML · Cloud Functions
+> Stack: Firebase (free tier) · Modular LLM provider · Vanilla JS/HTML · Cloud Functions
 
 ---
 
@@ -8,7 +8,7 @@
 
 OppTrack is a free, AI-powered opportunity companion for Nigerian and African students. It automatically discovers scholarships, fellowships, grants, and graduate programmes — extracts every requirement, deadline, and application step using AI — and gives each user a personalised tracker so nothing falls through the cracks.
 
-**Cost target:** Under $5/month at 1,000 active users. Firebase free tier + Claude API at ~$0.003 per opportunity analysed.
+**Cost target:** Under $5/month at 1,000 active users. Firebase free tier + low-cost LLM extraction at roughly cents-per-batch depending on provider.
 
 ---
 
@@ -27,13 +27,14 @@ opptrack/
 │   ├── index.html             ← main app shell (see Section 5)
 │   ├── manifest.json          ← PWA manifest
 │   ├── sw.js                  ← service worker (offline + push)
-│   └── icons/                 ← PWA icons (192, 512)
+│   ├── vapid-key.txt          ← public Firebase Web Push certificate key
+│   └── icons/                 ← PWA and notification icons
 │
 └── functions/                 ← Firebase Cloud Functions (Node 20)
     ├── package.json
     ├── index.js               ← exports all functions
     ├── scout.js               ← The Scout: RSS crawler + dedup
-    ├── analyst.js             ← The Analyst: Claude Sonnet extractor
+    ├── analyst.js             ← The Analyst: modular LLM extractor
     ├── matcher.js             ← The Matcher: user-opportunity scoring
     └── notifier.js            ← The Nudge Engine: FCM push + digest
 ```
@@ -45,10 +46,19 @@ opptrack/
 Create `.env` in `functions/` (never commit):
 
 ```env
+LLM_PROVIDER=anthropic
+LLM_MODEL=
+LLM_ANALYST_MODEL=
+LLM_ESSAY_MODEL=
+
+LLM_API_KEY=your-active-provider-key-or-local
 ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=...
+LLM_BASE_URL=http://127.0.0.1:11434/v1
 ```
 
-All Firebase config goes in `public/index.html` via the Firebase SDK config object (safe to expose — secured by Firestore rules).
+Firebase Hosting injects the web SDK config through `/__/firebase/init.json`. For push notifications, replace `public/vapid-key.txt` with the Firebase Cloud Messaging Web Push certificate public key. This VAPID public key is safe to expose; never put private server credentials in `public/`.
 
 ---
 
@@ -187,9 +197,7 @@ service cloud.firestore {
   "dependencies": {
     "firebase-admin": "^12.0.0",
     "firebase-functions": "^4.0.0",
-    "@anthropic-ai/sdk": "^0.24.0",
     "rss-parser": "^3.13.0",
-    "node-fetch": "^3.3.2",
     "cheerio": "^1.0.0-rc.12"
   }
 }
@@ -216,7 +224,6 @@ exports.parseUrl = require('./analyst').parseUrl;  // callable: on-demand URL pa
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const Parser = require('rss-parser');
-const fetch = require('node-fetch');
 
 // ── Sources (RSS-first, then light scrape) ──────────────────────────────────
 // Priority order: RSS feeds are zero-cost and ToS-safe.
@@ -229,7 +236,7 @@ const RSS_SOURCES = [
   { name: 'AfterSchoolAfrica',        url: 'https://www.afterschoolafrica.com/feed/' },
 ];
 
-// Daily cap: keeps Claude API costs predictable.
+// Daily cap: keeps LLM API costs predictable.
 // At $0.003/opp, 40 new opps/day = ~$0.12/day = ~$3.60/month.
 const DAILY_NEW_OPP_CAP = 40;
 
@@ -286,19 +293,16 @@ exports.scout = onSchedule({
 
 ### 4d. `analyst.js` — The Analyst
 
-**Role:** Reads each raw stub written by the Scout. Fetches the full page. Calls Claude Sonnet with a structured JSON prompt. Writes the enriched opportunity back. Runs *once per opportunity* (idempotent via `analyst_done` flag).
+**Role:** Reads each raw stub written by the Scout. Fetches the full page. Calls the configured LLM provider with a structured JSON prompt. Writes the enriched opportunity back. Runs *once per opportunity* (idempotent via `analyst_done` flag).
 
-**Cost note:** Claude `claude-sonnet-4-5` (Haiku is even cheaper — swap model string if budget is tight). Input: ~2,000 tokens page text. Output: ~600 tokens JSON. At Haiku pricing this is ~$0.0003/opp.
+**Cost note:** Use a cheap/fast model for extraction first. Input is roughly ~2,000 tokens page text and output ~600 tokens JSON. Upgrade task-specific models only if extraction quality fails.
 
 ```javascript
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { onCall }            = require('firebase-functions/v2/https');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
-const Anthropic = require('@anthropic-ai/sdk');
-const fetch     = require('node-fetch');
 const cheerio   = require('cheerio');
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const { generateText } = require('./llm');
 
 // ── Shared extraction logic ─────────────────────────────────────────────────
 async function fetchPageText(url) {
@@ -363,13 +367,12 @@ async function analyseOpportunity(link, title) {
     pageText = `Opportunity title: ${title}. Full page could not be fetched.`;
   }
 
-  const message = await anthropic.messages.create({
-    model:      'claude-haiku-4-5-20251001',  // cheapest model; swap to sonnet for quality
-    max_tokens: 1000,
-    messages: [{ role: 'user', content: ANALYST_PROMPT(pageText, link) }],
-  });
-
-  const raw = message.content[0].text.replace(/```json|```/g, '').trim();
+  const raw = (await generateText({
+    task: 'analyst',
+    prompt: ANALYST_PROMPT(pageText, link),
+    maxTokens: 1000,
+    json: true,
+  })).replace(/```json|```/g, '').trim();
   const parsed = JSON.parse(raw);
   return parsed;
 }
@@ -379,7 +382,7 @@ exports.analyst = onDocumentCreated({
   document:        'opportunities/{oppId}',
   memory:          '256MiB',
   timeoutSeconds:  120,
-  secrets:         ['ANTHROPIC_API_KEY'],
+  secrets:         ['LLM_API_KEY'],
 }, async (event) => {
   const snap = event.data;
   const data = snap.data();
@@ -397,12 +400,12 @@ exports.analyst = onDocumentCreated({
   try {
     extracted = await analyseOpportunity(data.link, data.title);
   } catch (err) {
-    console.error(`Analyst: Claude failed for ${data.link}:`, err.message);
+    console.error(`Analyst: LLM failed for ${data.link}:`, err.message);
     await ref.update({ analyst_error: err.message });
     return;
   }
 
-  // If Claude says skip (irrelevant page), mark inactive and bail
+  // If the model says skip (irrelevant page), mark inactive and bail
   if (extracted.skip) {
     await ref.update({ is_active: false, analyst_done: true });
     return;
@@ -430,7 +433,7 @@ exports.analyst = onDocumentCreated({
 // Called from the frontend Upload page. Same logic, returns JSON to client.
 exports.parseUrl = onCall({
   memory:    '256MiB',
-  secrets:   ['ANTHROPIC_API_KEY'],
+  secrets:   ['LLM_API_KEY'],
 }, async (request) => {
   if (!request.auth) throw new Error('Unauthenticated');
 
@@ -526,7 +529,7 @@ function scoreMatch(opp, prefs) {
 
 ```javascript
 const { onSchedule }   = require('firebase-functions/v2/scheduler');
-const { getFirestore, Timestamp } = require('firebase-admin/firestore');
+const { getFirestore, Timestamp, FieldPath } = require('firebase-admin/firestore');
 const { getMessaging } = require('firebase-admin/messaging');
 
 exports.notifier = onSchedule({
@@ -537,7 +540,6 @@ exports.notifier = onSchedule({
 }, async () => {
   const db  = getFirestore();
   const fcm = getMessaging();
-  const now = Timestamp.now();
 
   // ── 1. New match notifications ────────────────────────────────────────────
   const users = await db.collection('users').get();
@@ -608,16 +610,11 @@ exports.notifier = onSchedule({
       const oppData = oppDoc.data();
       // Find users tracking this opportunity
       const trackers = await db.collectionGroup('applications')
-        .where('__name__', '>=', `users/`)
-        .limit(500) // safety limit
+        .where(FieldPath.documentId(), '==', oppDoc.id)
+        .limit(500)
         .get();
 
-      // Filter to only users tracking this oppId
-      const relevantTrackers = trackers.docs.filter(d =>
-        d.ref.path.includes(`/applications/${oppDoc.id}`)
-      );
-
-      for (const appDoc of relevantTrackers) {
+      for (const appDoc of trackers.docs) {
         const uid      = appDoc.ref.path.split('/')[1];
         const userDoc  = await db.collection('users').doc(uid).get();
         const token    = userDoc.data()?.fcm_token;
@@ -942,8 +939,7 @@ Add this screen between `#splash` and `#app` in the HTML:
   "background_color": "#0a1628",
   "theme_color": "#0a1628",
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }
 ```
@@ -971,8 +967,8 @@ self.addEventListener('push', e => {
   e.waitUntil(
     self.registration.showNotification(data.title || 'OppTrack', {
       body:  data.body  || 'You have a new notification',
-      icon:  '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
+      icon:  '/icons/icon.svg',
+      badge: '/icons/badge.svg',
       data:  data.data  || {},
     })
   );
@@ -999,8 +995,8 @@ firebase init
 # 3. Install function dependencies
 cd functions && npm install && cd ..
 
-# 4. Set secret
-firebase functions:secrets:set ANTHROPIC_API_KEY
+# 4. Set active model provider secret
+firebase functions:secrets:set LLM_API_KEY
 
 # 5. Deploy everything
 firebase deploy
@@ -1021,17 +1017,17 @@ firebase deploy
 | Firestore writes | ~1,200/day (40 opps × 30 days) | **$0** (free tier: 20K/day) |
 | Cloud Functions | ~60 invocations/day | **$0** (free tier: 2M/month) |
 | FCM Push | Unlimited | **$0** |
-| Claude Haiku API | 40 opps/day × 2,600 tokens | **~$1.50/month** |
+| LLM extraction | 40 opps/day × ~2,600 tokens | provider-dependent |
 | **Total** | | **~$1.50/month** |
 
-Switch to Claude Sonnet only if extraction quality needs improvement. Haiku is sufficient for structured JSON extraction with a strong prompt.
+Use the cheapest reliable extraction model first. Upgrade only if structured extraction quality needs improvement.
 
 ---
 
 ## 9. Post-MVP Roadmap (do not build on day one)
 
 1. **WhatsApp digest** — Twilio WhatsApp API or WATI (free tier). Send weekly digest to opted-in users.
-2. **Essay assistant** — In-tracker "Help me draft" button that calls Claude with the opportunity's `about` and `requirements` as context.
+2. **Essay assistant** — In-tracker "Help me draft" button that calls the configured LLM with the opportunity's `about` and `requirements` as context.
 3. **Community moderation queue** — User-uploaded opportunities go to a simple `/admin` page for one-tap approve/reject before publishing.
 4. **Collaborative tracker** — Share your tracker board with a mentor or parent via a read-only link.
 5. **Analytics dashboard** — Track which opportunity types get the most traction (Firestore aggregation queries).
@@ -1043,7 +1039,7 @@ Switch to Claude Sonnet only if extraction quality needs improvement. Haiku is s
 | Decision | Why |
 |---|---|
 | Vanilla JS, no framework | Zero build step, instant deploy, works offline. Firebase SDK is the only dependency. |
-| Claude Haiku over GPT | Cheaper, faster for structured extraction. Same quality with a tight prompt. |
+| Modular LLM adapter | Keeps the app provider-independent; choose Claude, Gemini, OpenAI, or local Gemma by configuration. |
 | RSS-first scraping | Zero ToS risk, no Puppeteer/Playwright needed, free, fast. |
 | Process once, serve many | The "Master Blueprint" pattern: Analyst runs once per opp, all users share the result. Keeps costs flat regardless of user count. |
 | Firestore free tier | At 40 new opps/day with 1,000 users, read/write counts stay well inside free limits. |
@@ -1053,3 +1049,25 @@ Switch to Claude Sonnet only if extraction quality needs improvement. Haiku is s
 ---
 
 *Built with care for students who deserve better tools. Every line of this system exists to lower the barrier between a young person and their next opportunity.*
+
+---
+
+## LLM Provider Switching
+
+All model calls go through `functions/llm.js`.
+
+Current LLM call sites:
+- `functions/analyst.js`: opportunity extraction into structured JSON.
+- `functions/essay_assist.js`: essay outline and application-writing guidance.
+
+Provider selection:
+```env
+LLM_PROVIDER=anthropic
+LLM_PROVIDER=openai
+LLM_PROVIDER=gemini
+LLM_PROVIDER=openai_compatible
+```
+
+Use `openai_compatible` for local/self-hosted Gemma through Ollama, llama.cpp, vLLM, or any compatible `/chat/completions` server.
+
+For deployed Firebase Functions, set one Secret Manager secret named `LLM_API_KEY` to the active provider key. Provider-specific names are still supported for local `.env` use.
