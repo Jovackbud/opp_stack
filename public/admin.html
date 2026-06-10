@@ -150,7 +150,22 @@ function oppCard(o, review){
 }
 function categoryLabel(category){return {job:'Job',fellowship:'Fellowship',internship:'Internship',scholarship:'Scholarship',event:'Event'}[category] || category || 'Opportunity'}
 function sourceLabel(source){return source === 'ai_scout' ? 'AI scout' : source === 'admin_manual' ? 'Admin upload' : source || 'Manual'}
-function dateLabel(d){if(!d || d === 'rolling') return 'Rolling'; const days=Math.ceil((new Date(d)-new Date())/86400000); return days<=0 ? 'Closing today' : `${days} day${days===1?'':'s'} left`}
+function deadlineDate(d){
+  if(!d || d === 'rolling') return null;
+  const parts = String(d).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(parts) return new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+  const parsed = new Date(d);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+function daysLeft(d){
+  const date = deadlineDate(d);
+  if(!date) return 9999;
+  date.setHours(0,0,0,0);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return Math.round((date - today) / 86400000);
+}
+function dateLabel(d){const days=daysLeft(d);if(days>9000)return'Rolling';if(days<0)return'Expired';if(days===0)return'Closing today';return`${days} day${days===1?'':'s'} left`}
 function htmlSafe(value){return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));}
 function attrSafe(value){return htmlSafe(value).replace(/`/g,'&#096;');}
 function jsArg(value){return attrSafe(JSON.stringify(String(value ?? '')));}
