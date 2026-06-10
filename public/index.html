@@ -173,6 +173,7 @@ body[data-page="matches"] .stats{display:grid!important;margin:0 0 18px}
 .doc-progress-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 6px;color:#667085;font-size:11px;font-weight:850}.doc-progress-head b{color:#171a1f}.doc-progress{height:5px;background:#f2f4f7;border-radius:999px;overflow:hidden;margin-bottom:10px}.doc-progress span{display:block;height:100%;background:#ff5f45;border-radius:inherit}.stage-note-wrap{border-top:1px solid #eaecf0;margin-top:10px;padding-top:10px}.stage-note-label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#667085;margin-bottom:6px}.pipeline-note.stage-note{margin-top:0}.reminder-group-title{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#ff5f45;margin:7px 2px 0}.custom-reminder-row{display:grid;grid-template-columns:1fr 78px auto;gap:8px}.custom-reminder-row input{min-width:0;border:1px solid #d0d5dd;border-radius:10px;padding:9px;color:#171a1f;background:#fff}.custom-reminder-list{display:grid;gap:6px}.custom-reminder-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #e4e7ec;background:#f9fafb;border-radius:12px;padding:9px 10px;font-size:12px}.custom-reminder-item b{color:#171a1f}.custom-reminder-item span{color:#667085}.custom-reminder-item button{border:0;background:transparent;color:#f04438;font-weight:900}.dark-mode .doc-progress-head b,.dark-mode .custom-reminder-item b{color:#f4f6f8}.dark-mode .doc-progress,.dark-mode .stage-note-wrap{background:#29313a;border-color:#29313a}.dark-mode .custom-reminder-row input,.dark-mode .custom-reminder-item{background:#20262d;border-color:#343d48;color:#f4f6f8}.dark-mode .custom-reminder-item span{color:#98a2b3}
 @media(max-width:860px){body[data-page="matches"] .stats{display:flex!important}.stats{margin-top:0}.custom-reminder-row{grid-template-columns:1fr 70px}.custom-reminder-row button{grid-column:1/-1}.appbar-actions{gap:6px}.reminder-pill{display:none}.notif-btn{width:36px;height:36px;border-radius:13px}}
 .essay-output{margin-top:10px}.essay-output pre{white-space:pre-wrap;word-break:break-word;margin:0;border:1px solid #e4e7ec;background:#f9fafb;border-radius:14px;padding:12px;color:#344054;font:13px/1.55 Inter,system-ui,sans-serif}.dark-mode .essay-output pre{background:#20262d;border-color:#343d48;color:#d0d5dd}
+.tg-connect-btn{height:32px;border:1px solid #d0d5dd;background:#fff;color:#344054;border-radius:10px;padding:0 12px;font-size:12px;font-weight:850}.tg-connect-btn:disabled{border-color:#abefc6;background:#ecfdf3;color:#067647;cursor:default}.dark-mode .tg-connect-btn{background:#20262d;border-color:#343d48;color:#f4f6f8}.dark-mode .tg-connect-btn:disabled{background:#1b2c22;border-color:#315f42;color:#75e0a7}
 </style>
 </head>
 <body data-page="matches">
@@ -334,8 +335,13 @@ body[data-page="matches"] .stats{display:grid!important;margin:0 0 18px}
       <button class="reminder-row" data-reminder="push" onclick="toggleReminderSetting('push')"><span><b>Push notification</b><small>Browser/app notification when supported</small></span><i></i></button>
       <button class="reminder-row" data-reminder="email" onclick="toggleReminderSetting('email')"><span><b>Email</b><small>Use my account email for reminder messages</small></span><i></i></button>
       <button class="reminder-row" data-reminder="whatsapp" onclick="toggleReminderSetting('whatsapp')"><span><b>WhatsApp</b><small>Send reminder prompts to WhatsApp later</small></span><i></i></button>
+      <button class="reminder-row" data-reminder="telegram" onclick="toggleReminderSetting('telegram')"><span><b>Telegram</b><small>Deadline alerts and new matches on Telegram</small></span><i></i></button>
       <label class="reminder-time"><span>Preferred time</span><input id="reminderTime" type="time" value="09:00"></label>
       <label class="reminder-time"><span>WhatsApp number</span><input id="reminderWhatsapp" inputmode="tel" placeholder="+234..."></label>
+      <div class="reminder-time" id="telegramConnectWrap" style="display:none">
+        <span>Telegram bot</span>
+        <button class="tg-connect-btn" id="telegramConnectBtn" onclick="connectTelegramBot()">Connect bot</button>
+      </div>
       <label class="reminder-time"><span>Email address</span><input id="reminderEmail" type="email" placeholder="you@example.com"></label>
       <div class="reminder-group-title">Custom reminders</div>
       <div class="custom-reminder-row">
@@ -363,7 +369,8 @@ try {
   const messagingSupported = await isMessagingSupported().catch(() => false);
   const messaging = messagingSupported ? getMessaging(app) : null;
   window._fb = { auth:getAuth(app), db:getFirestore(app), functions:getFunctions(app, 'europe-west1'), messaging, messagingSupported, webPushVapidKey:firebaseConfig.webPushVapidKey || firebaseConfig.vapidKey || '', collection, query, where, orderBy, limit, onSnapshot, doc, setDoc, deleteDoc, getDoc, updateDoc, serverTimestamp, httpsCallable, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, getToken, onMessage };
-} catch(e) { window._fb = null; }
+  window._telegramBotUsername = (firebaseConfig.telegramBotUsername || '').replace(/^@/, '');
+} catch(e) { window._fb = null; window._telegramBotUsername = ''; }
 window.bootOppTrack();
 
 async function resolveFirebaseConfig(fallback) {
@@ -414,10 +421,11 @@ let sortMode = 'relevance';
 let oppView = localStorage.getItem('oppView') || 'tile';
 let trackerView = localStorage.getItem('trackerView') || 'sheet';
 let user = null;
+let tgChatIdStored = false;
 let opps = [];
 let tracked = {};
 let profile = {};
-let reminderSettings = JSON.parse(localStorage.getItem('oppReminderSettings') || '{"seven_day":true,"three_day":true,"one_day":true,"push":true,"email":false,"whatsapp":false,"time":"09:00","email_address":"","whatsapp_number":"","custom":[]}');
+let reminderSettings = JSON.parse(localStorage.getItem('oppReminderSettings') || '{"seven_day":true,"three_day":true,"one_day":true,"push":true,"email":false,"whatsapp":false,"telegram":false,"time":"09:00","email_address":"","whatsapp_number":"","custom":[]}');
 const demoOpps = [
  {id:'mastercard-2026',title:'Mastercard Foundation Scholars Program 2026',org:'Mastercard Foundation',category:'scholarship',industry:['STEM','Leadership','Social Impact'],deadline:'2026-06-08',posted_at:'2026-05-20',target_regions:['Africa'],funding_type:'fully_funded',funding_label:'Fully funded',link:'https://mastercardfdn.org/all/scholars/',about:'Fully funded scholarship support for high-potential African students with leadership promise and community commitment.',requirements:'Strong academics, leadership potential, financial need, and African citizenship.',needs:['Strong academics','Leadership record','+ 2 more requirements'],docs:['Transcript','Personal statement','Recommendation letter','Proof of identity'],steps:['Confirm partner university eligibility','Prepare documents','Submit online application','Watch email for interview updates'],tags:['undergraduate','postgraduate','africa','stem','leadership','scholarship']},
  {id:'unilever-grad',title:'Unilever Future Leaders Graduate Programme',org:'Unilever Nigeria',category:'job',industry:['Business','Marketing','Supply Chain'],deadline:'2026-06-22',posted_at:'2026-05-23',target_regions:['Nigeria'],funding_type:'stipend',funding_label:'Paid graduate programme',link:'https://careers.unilever.com/',about:'A rotational graduate programme for young professionals who want commercial training, mentorship, and real business exposure.',requirements:'Recent graduate, strong communication, analytical ability, and interest in FMCG.',needs:['Recent graduate','NYSC ready or completed','+ 2 more requirements'],docs:['CV','Degree certificate','NYSC certificate','Cover letter'],steps:['Create candidate profile','Complete assessments','Prepare for interviews'],tags:['nigeria','graduate','business','marketing','supply chain','nysc']},
@@ -452,11 +460,13 @@ function bootOppTrack(){
       reminderSettings = {...reminderSettings, ...userData.reminders};
       localStorage.setItem('oppReminderSettings', JSON.stringify(reminderSettings));
     }
+    tgChatIdStored = !!userData.telegram_chat_id;
     if(reminderSettings.push) registerPushNotifications({silent:true});
     buildProfileControls();
     fillProfile();
     fb.onSnapshot(fb.query(fb.collection(fb.db,'opportunities'),fb.where('is_approved','==',true),fb.where('is_active','==',true),fb.orderBy('deadline_timestamp','asc'),fb.limit(80)), s => { opps = s.docs.map(d=>({id:d.id,...d.data()})); renderAll(); hideSplash(); });
     fb.onSnapshot(fb.collection(fb.db,'users',u.uid,'applications'), s => { tracked={}; s.docs.forEach(d=>tracked[d.id]={id:d.id,...d.data()}); renderAll(); });
+    fb.onSnapshot(fb.doc(fb.db,'users',u.uid), snap => { tgChatIdStored = !!(snap.data()||{}).telegram_chat_id; syncReminderSettings(); }, ()=>{});
   });
 }
 function hideSplash(){setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),900);}
@@ -872,10 +882,14 @@ async function toggleTrackDoc(id,index){
 async function untrack(id){delete tracked[id];localStorage.setItem('oppTracked',JSON.stringify(tracked));if(user&&window._fb){const fb=window._fb;await fb.deleteDoc(fb.doc(fb.db,'users',user.uid,'applications',id));}showToast('Removed from tracker.', 'info');renderAll();}
 async function persistTrack(id){localStorage.setItem('oppTracked',JSON.stringify(tracked));if(user&&window._fb){const fb=window._fb;await fb.setDoc(fb.doc(fb.db,'users',user.uid,'applications',id),{...tracked[id],updated_at:fb.serverTimestamp()},{merge:true});}}
 function syncReminderSettings(){
-  ['seven_day','three_day','one_day','push','email','whatsapp'].forEach(key=>document.querySelector(`[data-reminder="${key}"]`)?.classList.toggle('on', !!reminderSettings[key]));
+  ['seven_day','three_day','one_day','push','email','whatsapp','telegram'].forEach(key=>document.querySelector(`[data-reminder="${key}"]`)?.classList.toggle('on', !!reminderSettings[key]));
   if(reminderTime) reminderTime.value = reminderSettings.time || '09:00';
   if(reminderEmail) reminderEmail.value = reminderSettings.email_address || '';
   if(reminderWhatsapp) reminderWhatsapp.value = reminderSettings.whatsapp_number || '';
+  const tgWrap = document.getElementById('telegramConnectWrap');
+  const tgBtn  = document.getElementById('telegramConnectBtn');
+  if(tgWrap) tgWrap.style.display = reminderSettings.telegram ? '' : 'none';
+  if(tgBtn){ tgBtn.textContent = tgChatIdStored ? '\u2705 Connected' : 'Connect bot'; tgBtn.disabled = tgChatIdStored; }
   renderCustomReminders();
 }
 function openReminderSettings(){syncReminderSettings();document.getElementById('reminderModal')?.classList.add('show');}
@@ -982,7 +996,7 @@ async function saveReminderSettings(){
   if(reminderSettings.push) await registerPushNotifications({silent:false});
   if(user&&window._fb){
     const fb = window._fb;
-    const notifyChannels = ['push','email','whatsapp'].filter(key => reminderSettings[key]);
+    const notifyChannels = ['push','email','whatsapp','telegram'].filter(key => reminderSettings[key]);
     await fb.setDoc(fb.doc(fb.db,'users',user.uid),{
       reminders: reminderSettings,
       whatsapp_number: reminderSettings.whatsapp ? reminderSettings.whatsapp_number : '',
@@ -996,6 +1010,14 @@ async function saveReminderSettings(){
   }
   closeReminderSettings();
   showToast('Reminder settings saved.');
+}
+function connectTelegramBot(){
+  if(!user){ showToast('Sign in to connect Telegram.','error'); return; }
+  const bot = window._telegramBotUsername;
+  if(!bot){ showToast('Telegram bot not configured yet — contact support.','info'); return; }
+  const url = 'https://t.me/' + bot + '?start=' + encodeURIComponent(user.uid);
+  window.open(url,'_blank','noopener,noreferrer');
+  showToast('Telegram opening — send the /start message in the chat to link your account.','info');
 }
 function trackerRows(){
   return Object.keys(tracked).map(id=> {

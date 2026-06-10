@@ -8,6 +8,7 @@ exports.notifier       = require('./notifier').notifier;
 exports.parseUrl       = require('./analyst').parseUrl;
 
 // New Post-MVP Features
-exports.whatsappDigest = require('./whatsapp_digest').whatsappDigest;
-exports.essayAssist    = require('./essay_assist').essayAssist;
-exports.adminProcess   = require('./admin_config').adminProcess;
+exports.whatsappDigest  = require('./whatsapp_digest').whatsappDigest;
+exports.essayAssist     = require('./essay_assist').essayAssist;
+exports.adminProcess    = require('./admin_config').adminProcess;
+exports.telegramWebhook = require('./telegram').telegramWebhook;

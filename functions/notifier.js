@@ -1,12 +1,14 @@
 const { onSchedule }   = require('firebase-functions/v2/scheduler');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const { getMessaging } = require('firebase-admin/messaging');
+const { sendTelegram }  = require('./telegram');
 
 exports.notifier = onSchedule({
   schedule:    'every day 07:00',   // 07:00 UTC = 08:00 WAT
   timeZone:    'Africa/Lagos',
   memory:      '256MiB',
   timeoutSeconds: 120,
+  secrets: ['TELEGRAM_BOT_TOKEN'],
 }, async () => {
   const db  = getFirestore();
   const fcm = getMessaging();
@@ -15,9 +17,10 @@ exports.notifier = onSchedule({
   const users = await db.collection('users').get();
 
   for (const userDoc of users.docs) {
-    const uid   = userDoc.id;
-    const token = userDoc.data().fcm_token;
-    if (!token) continue;
+    const uid      = userDoc.id;
+    const userData = userDoc.data();
+    const token    = userData.fcm_token;
+    const channels = userData.prefs?.notify_channels || userData.reminders?.notify_channels || ['push'];
 
     // Get unnotified matches for this user
     const matches = await db.collection('users').doc(uid)
@@ -29,27 +32,46 @@ exports.notifier = onSchedule({
 
     if (matches.empty) continue;
 
-    const count = matches.size;
-    const top   = matches.docs[0].data();
-    const opp   = await db.collection('opportunities').doc(top.opp_id).get();
+    const count   = matches.size;
+    const top     = matches.docs[0].data();
+    const opp     = await db.collection('opportunities').doc(top.opp_id).get();
     const oppData = opp.data() || {};
 
-    try {
-      await fcm.send({
-        token,
-        notification: {
-          title: `${count} new match${count > 1 ? 'es' : ''} for you`,
-          body:  `Top pick: ${oppData.title || 'New opportunity'} — tap to view`,
-        },
-        data: { type: 'new_matches', opp_id: top.opp_id },
-        android: { priority: 'high' },
-        apns:    { payload: { aps: { badge: count } } },
-      });
-    } catch (e) {
-      console.warn('Notifier: FCM send failed:', e.code || e.message);
-      // Token expired — clean it up
-      if (isDeadFcmToken(e)) {
-        await db.collection('users').doc(uid).update({ fcm_token: null });
+    // ── Push ──
+    if (channels.includes('push') && token) {
+      try {
+        await fcm.send({
+          token,
+          notification: {
+            title: `${count} new match${count > 1 ? 'es' : ''} for you`,
+            body:  `Top pick: ${oppData.title || 'New opportunity'} — tap to view`,
+          },
+          data: { type: 'new_matches', opp_id: top.opp_id },
+          android: { priority: 'high' },
+          apns:    { payload: { aps: { badge: count } } },
+        });
+      } catch (e) {
+        console.warn('Notifier: FCM send failed:', e.code || e.message);
+        if (isDeadFcmToken(e)) {
+          await db.collection('users').doc(uid).update({ fcm_token: null });
+        }
+      }
+    }
+
+    // ── Telegram ──
+    if (channels.includes('telegram') && userData.telegram_chat_id) {
+      const msg = `🔔 <b>${count} new match${count > 1 ? 'es' : ''} for you</b>\n\n` +
+                  `Top pick: <b>${oppData.title || 'New opportunity'}</b>\n` +
+                  (oppData.org ? `🏢 ${oppData.org}\n` : '') +
+                  (oppData.deadline ? `⏳ Deadline: ${oppData.deadline}\n` : '') +
+                  `\nOpen OppTrack to view all matches.`;
+      try {
+        await sendTelegram(userData.telegram_chat_id, msg);
+      } catch (e) {
+        console.warn('Notifier: Telegram send failed:', e.message);
+        if (e.code === 'telegram/dead-chat') {
+          await db.collection('users').doc(uid).update({ telegram_chat_id: null });
+        }
       }
     }
 
@@ -71,7 +93,7 @@ exports.notifier = onSchedule({
     const dayEnd   = Timestamp.fromDate(new Date(targetDate.getTime() + 86400000));
 
     const dueSoon = await db.collection('opportunities')
-      .where('is_active',        '==', true)
+      .where('is_active',          '==', true)
       .where('deadline_timestamp', '>=', dayStart)
       .where('deadline_timestamp', '<',  dayEnd)
       .get();
@@ -88,31 +110,48 @@ exports.notifier = onSchedule({
         const uid      = appDoc.ref.path.split('/')[1];
         const userDoc  = await db.collection('users').doc(uid).get();
         const userData = userDoc.data() || {};
-        const token    = userData.fcm_token;
         const channels = userData.prefs?.notify_channels || userData.reminders?.notify_channels || ['push'];
-        if (!channels.includes('push')) continue;
-        if (!token) continue;
 
         // Check doc readiness for smart nudge
-        const appData  = appDoc.data();
-        const missing  = (appData.docs || []).filter(d => !d.checked).length;
-        const nudge    = missing > 0
+        const appData = appDoc.data();
+        const missing = (appData.docs || []).filter(d => !d.checked).length;
+        const nudge   = missing > 0
           ? `${missing} document${missing > 1 ? 's' : ''} still missing`
           : 'All documents ready — submit now';
 
-        try {
-          await fcm.send({
-            token,
-            notification: {
-              title: `⏰ ${days} day${days > 1 ? 's' : ''} left — ${oppData.org}`,
-              body:  `${oppData.title} · ${nudge}`,
-            },
-            data: { type: 'deadline_alert', opp_id: oppDoc.id, days: String(days) },
-          });
-        } catch (e) {
-          console.warn('Notifier: deadline alert failed:', e.code || e.message);
-          if (isDeadFcmToken(e)) {
-            await db.collection('users').doc(uid).update({ fcm_token: null });
+        // ── Push ──
+        if (channels.includes('push') && userData.fcm_token) {
+          try {
+            await fcm.send({
+              token: userData.fcm_token,
+              notification: {
+                title: `⏰ ${days} day${days > 1 ? 's' : ''} left — ${oppData.org}`,
+                body:  `${oppData.title} · ${nudge}`,
+              },
+              data: { type: 'deadline_alert', opp_id: oppDoc.id, days: String(days) },
+            });
+          } catch (e) {
+            console.warn('Notifier: deadline alert FCM failed:', e.code || e.message);
+            if (isDeadFcmToken(e)) {
+              await db.collection('users').doc(uid).update({ fcm_token: null });
+            }
+          }
+        }
+
+        // ── Telegram ──
+        if (channels.includes('telegram') && userData.telegram_chat_id) {
+          const msg = `⏰ <b>${days} day${days > 1 ? 's' : ''} left!</b>\n\n` +
+                      `<b>${oppData.title}</b>\n` +
+                      `🏢 ${oppData.org}\n\n` +
+                      `📋 ${nudge}\n\n` +
+                      `Open OppTrack to review your application.`;
+          try {
+            await sendTelegram(userData.telegram_chat_id, msg);
+          } catch (e) {
+            console.warn('Notifier: deadline alert Telegram failed:', e.message);
+            if (e.code === 'telegram/dead-chat') {
+              await db.collection('users').doc(uid).update({ telegram_chat_id: null });
+            }
           }
         }
       }
