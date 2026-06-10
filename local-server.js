@@ -15,11 +15,20 @@ const types = {
 };
 
 http.createServer((req, res) => {
-  const urlPath = decodeURIComponent(req.url.split('?')[0]);
+  let urlPath;
+  try {
+    urlPath = decodeURIComponent(req.url.split('?')[0]);
+  } catch (err) {
+    res.writeHead(400);
+    res.end('Bad request');
+    return;
+  }
   const rel = urlPath === '/' ? '/index.html' : urlPath;
-  const filePath = path.join(root, rel);
+  const filePath = path.resolve(root, '.' + rel);
+  const relative = path.relative(root, filePath);
 
-  if (!filePath.startsWith(root)) {
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    console.warn('OppTrack preview blocked path traversal:', urlPath);
     res.writeHead(403);
     res.end('Forbidden');
     return;
@@ -27,6 +36,7 @@ http.createServer((req, res) => {
 
   fs.readFile(filePath, (err, body) => {
     if (err) {
+      console.warn('OppTrack preview missing file:', urlPath);
       res.writeHead(404);
       res.end('Not found');
       return;

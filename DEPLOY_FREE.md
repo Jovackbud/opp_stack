@@ -1,37 +1,50 @@
-# OppTrack Free Deployment Guide
+# OppTrack Deployment Guide
 
-This guide deploys OppTrack with the lowest-cost path first, then shows how to enable the full automated backend when you are ready.
+This is the first-time deployment path for OppTrack.
 
-Important reality check: Firebase has a no-cost Spark plan for Hosting, Auth, Firestore, Storage, and Cloud Messaging. Cloud Functions deployment typically requires the Blaze pay-as-you-go plan, even when your usage remains inside free quotas. So there are two deployment modes:
+Start with **Path A** if you want the app online without billing. Move to **Path B** only when you are ready to deploy Cloud Functions for discovery, AI extraction, matching, notifications, admin review, essay assistance, Telegram, and WhatsApp.
 
-1. **Free core launch:** Hosting + Auth + Firestore + Storage + FCM client setup. No scheduled crawler, analyst, matcher, notifier, essay assistance, admin callable, or WhatsApp digest.
-2. **Full product launch:** Everything above plus Cloud Functions. This is still designed for near-zero spend at low usage, but it requires billing to be enabled.
+Firebase reality check:
 
-Use the free core launch to get the public app online safely. Upgrade only when you are ready for automation.
+- Hosting, Auth, Firestore, Storage, and Cloud Messaging can run on the no-cost Spark plan.
+- Deploying Cloud Functions requires the Blaze pay-as-you-go plan.
+- The app code expects Cloud Functions in `europe-west1`.
+- Firebase Hosting provides the frontend Firebase config through `/__/firebase/init.json`, so do not paste private keys into frontend files.
+
+Official references:
+
+- Firebase Functions deployment requires Blaze: https://firebase.google.com/docs/functions/get-started
+- Firebase Functions environment variables and secrets: https://firebase.google.com/docs/functions/config-env
+- Firebase Hosting reserved config URL: https://firebase.google.com/docs/hosting/reserved-urls
 
 ---
 
 ## 1. What You Are Deploying
 
-The repository contains:
+Repo surface:
 
-- `public/`: vanilla HTML/CSS/JS frontend, service worker, manifest, icons, VAPID public key file.
-- `functions/`: Firebase Cloud Functions for discovery, AI extraction, matching, notifications, admin review, essay assistance, and WhatsApp digest.
-- `firestore.rules`: client data access rules.
-- `storage.rules`: owner-only file access rules.
-- `firestore.indexes.json`: required Firestore query indexes.
-- `firebase.json`: deploy configuration.
+- `public/`: the web app, service worker, manifest, icons, and public VAPID key file.
+- `functions/`: Firebase Cloud Functions running on Node 20.
+- `firestore.rules`: Firestore client access rules.
+- `storage.rules`: Storage owner-only file rules with upload limits.
+- `firestore.indexes.json`: required Firestore indexes.
+- `firebase.json`: Firebase deploy configuration.
 
-The app is production-oriented but intentionally lean: no frontend framework, no server framework, no extra hosting layer.
+Production posture:
+
+- No frontend framework or build step.
+- No secrets in `public/`.
+- Public users can only read approved, active opportunities.
+- Backend automation stays behind Cloud Functions and Admin SDK.
 
 ---
 
-## 2. Prerequisites
+## 2. Install Local Tools
 
-Install these locally:
+Install:
 
 1. Node.js 20 or newer.
-2. npm.
+2. npm, bundled with Node.
 3. Firebase CLI.
 4. A Google account.
 
@@ -41,7 +54,7 @@ Install Firebase CLI:
 npm install -g firebase-tools
 ```
 
-Confirm tools:
+Check the tools:
 
 ```powershell
 node --version
@@ -51,28 +64,34 @@ firebase --version
 
 Expected:
 
-- Node should be `20.x` or newer.
-- Firebase CLI should print a version number.
+- `node --version` prints `v20.x` or newer.
+- `firebase --version` prints a version number.
+
+Windows note: if PowerShell blocks `npm`, use `npm.cmd` for local commands:
+
+```powershell
+npm.cmd --version
+```
 
 ---
 
 ## 3. Create The Firebase Project
 
-1. Go to the Firebase Console.
-2. Click **Add project**.
-3. Name it, for example: `opptrack-prod`.
-4. Disable Google Analytics unless you truly need it.
-5. Create the project.
+In the Firebase Console:
 
-Keep the Firebase project ID. You will use it in CLI commands.
+1. Click **Add project**.
+2. Name it, for example `opptrack-prod`.
+3. Disable Google Analytics unless you need it.
+4. Create the project.
+5. Copy the Firebase project ID. You will use it in the CLI.
 
-Privacy note: do not add secrets to frontend files. Firebase web config and the Web Push VAPID public key are safe to expose. API keys for LLMs, WhatsApp, and Google Search are not safe to expose.
+Do not create or share service account keys for this deployment.
 
 ---
 
 ## 4. Enable Firebase Services
 
-In the Firebase Console, enable these services.
+Enable these services in this order.
 
 ### 4.1 Authentication
 
@@ -82,19 +101,13 @@ In the Firebase Console, enable these services.
 4. Add your support email.
 5. Save.
 
-Optional:
-
-- Enable Email/Password later if you want non-Google login.
-
 ### 4.2 Firestore
 
 1. Open **Build > Firestore Database**.
 2. Click **Create database**.
 3. Choose **Production mode**.
-4. Select a region close to users. For Nigeria/Africa, use a Europe region if available for your project.
+4. Choose a Europe region if available for your project.
 5. Create.
-
-The repo rules will be deployed later, so production mode is correct.
 
 ### 4.3 Storage
 
@@ -103,91 +116,64 @@ The repo rules will be deployed later, so production mode is correct.
 3. Choose production rules.
 4. Use the same general region family as Firestore when possible.
 
-The repo storage rules will be deployed later.
-
 ### 4.4 Cloud Messaging
 
-1. Open **Project settings**.
-2. Open the **Cloud Messaging** tab.
-3. In **Web Push certificates**, generate a key pair if one does not exist.
-4. Copy the public key.
-5. Replace the placeholder in:
+1. Open **Project settings > Cloud Messaging**.
+2. Under **Web Push certificates**, generate a key pair if one does not exist.
+3. Copy only the public key.
+4. Replace the contents of `public/vapid-key.txt` with that public key.
 
-```text
-public/vapid-key.txt
-```
-
-The file must contain only the public key text, for example:
-
-```text
-BKxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-Do not place private server keys in `public/`.
+The VAPID public key is safe in `public/`. Private keys, LLM keys, WhatsApp tokens, Telegram bot tokens, and Google Search keys are not safe in `public/`.
 
 ---
 
-## 5. Connect The Local Repo To Firebase
-
-Login:
-
-```powershell
-firebase login
-```
+## 5. Connect This Repo To Firebase
 
 From the repo root:
 
 ```powershell
+firebase login
 firebase use --add
 ```
 
-Choose the Firebase project you created.
+When prompted:
 
-Alias it:
+1. Choose the Firebase project you created.
+2. Use alias `prod`.
 
-```text
-prod
-```
-
-After that, this repo should know which Firebase project to deploy to.
-
-Check:
+Confirm the active project:
 
 ```powershell
-firebase projects:list
 firebase use
 ```
 
+Expected: the active project points to your production Firebase project.
+
 ---
 
-## 6. Install Function Dependencies
+## 6. Validate Locally Before Deploying
 
-Even if you start with the free core launch, install and validate Functions now so mistakes are caught early.
+Install Functions dependencies:
 
 ```powershell
-npm --prefix functions install
+npm.cmd --prefix functions install
+```
+
+Run code checks:
+
+```powershell
 npm.cmd --prefix functions run lint
+node -c public\sw.js
+node -c local-server.js
+node -e "const fs=require('fs'); for (const f of ['functions/package.json','firestore.indexes.json','public/manifest.json','firebase.json']) { JSON.parse(fs.readFileSync(f,'utf8')); console.log(f + ' ok'); }"
 ```
 
 Expected:
 
-```text
-node -c index.js ...
-```
+- No syntax errors.
+- JSON files print `ok`.
 
-No syntax errors should appear.
-
-Compatibility notes:
-
-- `functions/package.json` targets Node 20.
-- The code uses native `fetch`, so Node 20 is required.
-- No `node-fetch` or provider-specific LLM SDK is required.
-
----
-
-## 7. Validate Static Files Locally
-
-Run the preview server:
+Run the local preview:
 
 ```powershell
 node local-server.js
@@ -202,170 +188,57 @@ http://127.0.0.1:4173/
 Check:
 
 1. The app loads.
-2. `/manifest.json` loads.
-3. `/sw.js` loads.
-4. `/vapid-key.txt` loads and no longer contains `REPLACE_WITH_FIREBASE_WEB_PUSH_VAPID_KEY`.
-5. `/icons/icon.svg` loads.
-6. `/icons/badge.svg` loads.
+2. Cards render in local/demo mode.
+3. Reminder settings open and save.
+4. `/manifest.json` opens.
+5. `/sw.js` opens.
+6. `/vapid-key.txt` opens and contains your real public VAPID key.
 
-Stop the server with `Ctrl+C`.
+Stop the preview server with `Ctrl+C`.
+
+Do not deploy if any of these checks fail.
 
 ---
 
-## 8. Free Core Launch
+## 7. Path A: Free Core Launch
 
-This deploys the frontend, Firestore rules, Firestore indexes, and Storage rules. It does not deploy Cloud Functions.
+Use this path first if you want a safe public launch without billing.
 
-Use this when you want the app online without enabling billing.
+Deploy Hosting, Firestore rules, Firestore indexes, and Storage rules:
 
 ```powershell
 firebase deploy --only hosting,firestore:rules,firestore:indexes,storage
 ```
 
-Expected output:
-
-- Firebase deploys Hosting.
-- Firebase deploys Firestore rules.
-- Firebase deploys Firestore indexes.
-- Firebase deploys Storage rules.
-- Firebase prints a Hosting URL.
-
-Open the Hosting URL.
+Open the Hosting URL printed by Firebase.
 
 Smoke test:
 
-1. Load the app.
-2. Sign in with Google.
-3. Open reminder settings.
-4. Enable push notifications.
-5. Save reminders.
-6. Confirm the browser asks for notification permission.
-7. Confirm no obvious frontend errors appear.
+1. App opens on the Hosting URL.
+2. Google sign-in works.
+3. Reminder settings open.
+4. Push permission prompt appears when push is enabled and saved.
+5. Firestore creates or updates only your own `users/{uid}` document.
+6. No obvious browser console errors.
 
-Limitations in free core launch:
+Free core limitations:
 
 - No scheduled opportunity discovery.
-- No AI extraction.
-- No matching cron.
-- No scheduled push notifications.
+- No AI opportunity extraction.
+- No admin callable actions.
 - No essay assistance.
-- No admin callable review actions.
+- No scheduled match/deadline notifications.
+- No Telegram webhook.
 - No WhatsApp digest.
 
-The frontend can load approved data if data exists, but backend automation will not run until Functions are deployed.
-
----
-
-## 9. Full Product Launch
-
-Use this only when you are ready to enable billing.
-
-### 9.1 Upgrade To Blaze With Guardrails
-
-Firebase Functions generally require the Blaze plan. Blaze is pay-as-you-go, but this app is designed to stay tiny at early usage.
-
-Before upgrading:
-
-1. Set a Google Cloud budget alert.
-2. Set alerts at small thresholds, for example 50%, 90%, and 100% of your monthly comfort limit.
-3. Keep scheduled jobs conservative.
-4. Do not enable expensive LLM providers without rate and cost awareness.
-
-### 9.2 Configure Function Secrets And Environment
-
-Do not commit `.env` files.
-
-For local reference, use:
-
-```text
-functions/.env.example
-```
-
-Required for admin:
-
-```text
-ADMIN_EMAILS=you@example.com
-```
-
-Required for LLM features:
-
-```text
-LLM_PROVIDER=anthropic | openai | gemini | openai_compatible
-LLM_API_KEY=...
-LLM_MODEL=...
-LLM_ANALYST_MODEL=...
-LLM_ESSAY_MODEL=...
-```
-
-Provider-specific fallback keys are supported:
-
-```text
-ANTHROPIC_API_KEY=...
-OPENAI_API_KEY=...
-GEMINI_API_KEY=...
-LLM_BASE_URL=http://127.0.0.1:11434/v1
-```
-
-Required for Google Search scout, if using Google Custom Search:
-
-```text
-GOOGLE_SEARCH_API_KEY=...
-GOOGLE_SEARCH_CX=...
-```
-
-Required for WhatsApp digest:
-
-```text
-WHATSAPP_TOKEN=...
-WHATSAPP_PHONE_ID=...
-```
-
-Recommended Firebase secret setup:
-
-```powershell
-firebase functions:secrets:set LLM_API_KEY
-firebase functions:secrets:set WHATSAPP_TOKEN
-firebase functions:secrets:set WHATSAPP_PHONE_ID
-```
-
-For non-secret environment values, use Firebase environment configuration or your deployment environment. Keep private credentials out of `public/`.
-
-### 9.3 Deploy Everything
-
-```powershell
-firebase deploy
-```
-
-Or deploy in safer stages:
-
-```powershell
-firebase deploy --only firestore:rules,firestore:indexes,storage
-firebase deploy --only functions
-firebase deploy --only hosting
-```
-
-If Functions fail, do not loosen rules to compensate. Fix the function configuration and redeploy.
-
----
-
-## 10. Seed Or Create Initial Opportunities
-
-The public client can only read opportunities where:
+The frontend can show approved opportunities if you add them manually in Firestore. Each visible opportunity must have:
 
 ```text
 is_approved == true
 is_active == true
 ```
 
-For the app to show real production data, opportunities must exist with those fields.
-
-Options:
-
-1. Use the admin review flow after Functions are deployed.
-2. Manually create approved opportunities in Firestore for initial launch.
-3. Let `scout` and `analyst` populate pending opportunities, then approve them.
-
-Minimum opportunity fields:
+Minimum Firestore opportunity document:
 
 ```json
 {
@@ -390,91 +263,43 @@ Minimum opportunity fields:
 }
 ```
 
-Do not add private/local links. The backend rejects private network URLs for safety.
+Use public HTTPS links only. The backend rejects local/private network URLs.
 
 ---
 
-## 11. Verify Push Notifications
+## 8. Path B: Full Product Launch
 
-Push has three required parts:
+Use this path only after Path A works and you are ready to enable billing.
 
-1. Browser permission.
-2. FCM token stored on the user document.
-3. Backend notifier sending to that token.
+### 8.1 Enable Billing With Guardrails
 
-### 11.1 Browser Verification
+1. Upgrade the Firebase project to Blaze.
+2. In Google Cloud Billing, create a budget alert.
+3. Set alerts at small thresholds you are comfortable with.
+4. Keep scheduled jobs conservative.
 
-In production Hosting:
+Do not deploy Functions before budget alerts exist.
 
-1. Sign in.
-2. Open reminder settings.
-3. Enable push.
-4. Save.
-5. Accept browser permission.
+### 8.2 Configure Runtime Environment
 
-Then check Firestore:
+Create `functions/.env` locally. This file is ignored by Git.
 
-```text
-users/{uid}.fcm_token
-users/{uid}.fcm_token_updated_at
-users/{uid}.fcm_token_provider
+Required for admin:
+
+```env
+ADMIN_EMAILS=you@example.com
 ```
 
-If `fcm_token` is missing:
+Required for LLM features:
 
-- Confirm `public/vapid-key.txt` contains the real public key.
-- Confirm the browser supports push.
-- Confirm the app is served from HTTPS Firebase Hosting, not a plain HTTP domain.
-- Confirm service worker registration is not blocked.
+```env
+LLM_PROVIDER=anthropic
+LLM_MODEL=
+LLM_ANALYST_MODEL=
+LLM_ESSAY_MODEL=
+```
 
-### 11.2 Backend Verification
-
-The scheduled `notifier` sends:
-
-- New match notifications.
-- Deadline alerts for tracked applications.
-
-To verify end to end:
-
-1. Ensure Functions are deployed.
-2. Ensure a user has `fcm_token`.
-3. Ensure the user has tracked applications.
-4. Ensure matching documents exist with `notified == false`, or an opportunity has a deadline in 1, 3, or 7 days.
-5. Run or wait for the scheduled notifier.
-
-The notifier removes expired/invalid tokens automatically.
-
----
-
-## 12. Verify Admin
-
-Admin access is not controlled by frontend code. It is controlled by the callable function checking `ADMIN_EMAILS`.
-
-To verify:
-
-1. Deploy Functions.
-2. Set `ADMIN_EMAILS` to your Google account email.
-3. Open `/admin.html`.
-4. Sign in with that Google account.
-5. Confirm pending and published lists load.
-6. Test approve/reject on a non-critical test opportunity.
-
-If unauthorized:
-
-- Check exact email spelling.
-- Check lowercase/uppercase is not the issue; the backend normalizes case.
-- Confirm Functions are deployed to the same Firebase project as Hosting.
-
----
-
-## 13. Verify LLM Features
-
-There are two LLM call sites:
-
-1. Analyst extraction.
-2. Essay assistance.
-
-Supported providers:
+Supported `LLM_PROVIDER` values:
 
 ```text
 anthropic
@@ -483,138 +308,183 @@ gemini
 openai_compatible
 ```
 
-For lowest lock-in, start with the provider you trust and keep `LLM_PROVIDER` as the switch point.
-
-Smoke test essay assistance:
-
-1. Sign in.
-2. Open an opportunity detail sheet.
-3. Enter scratch notes.
-4. Click **Generate outline**.
-5. Confirm an outline appears.
-
-If it fails:
-
-- Check `LLM_PROVIDER`.
-- Check `LLM_API_KEY` or provider-specific key.
-- Check model name.
-- Check Functions logs.
-
-Privacy rule: do not send unnecessary personal data to hosted LLMs. Use local/openai-compatible mode if sovereignty matters more than convenience.
-
----
-
-## 14. Verify WhatsApp Digest
-
-WhatsApp digest should stay disabled unless you have real Meta Cloud API credentials and user opt-in.
-
-Before launch:
-
-1. Confirm `WHATSAPP_TOKEN`.
-2. Confirm `WHATSAPP_PHONE_ID`.
-3. Confirm users explicitly opted into WhatsApp.
-4. Confirm phone numbers are valid for your target region.
-5. Test with one internal account first.
-
-The function now checks Meta API errors and timeouts. Do not silently assume delivery.
-
----
-
-## 15. Production Smoke Checklist
-
-Run this after every deployment.
-
-### Frontend
-
-1. Hosting URL opens.
-2. App does not show Firebase placeholder mode.
-3. Google sign-in works.
-4. Main opportunity list loads.
-5. Explore page loads.
-6. Tracker page loads.
-7. Profile save works.
-8. Reminder modal opens.
-9. Push permission prompt works.
-10. Service worker registers.
-
-### Firestore Rules
-
-1. Signed-out users can only read approved active opportunities.
-2. Users can read/write only their own profile and applications.
-3. Users cannot write their own `role`, `admin`, `is_admin`, or `is_public` fields.
-4. Users cannot write their own matches.
-5. Public clients cannot create opportunities.
-
-### Storage Rules
-
-1. User can upload/read under `/users/{uid}/...`.
-2. User cannot read/write another user's path.
-3. All other paths are denied.
-
-### Functions
-
-1. `adminProcess` rejects non-admin.
-2. `essayAssist` rejects signed-out users.
-3. `analyst` rejects private/local URLs.
-4. `matcher` completes without Firestore batch limit errors.
-5. `notifier` sends only to users with push enabled and valid token.
-6. `whatsappDigest` skips users without WhatsApp opt-in/number.
-
----
-
-## 16. Useful Commands
-
-Validate Functions syntax:
+Use Firebase Secret Manager for secret values that are bound in code:
 
 ```powershell
-npm.cmd --prefix functions run lint
+firebase functions:secrets:set LLM_API_KEY
+firebase functions:secrets:set GOOGLE_SEARCH_API_KEY
+firebase functions:secrets:set GOOGLE_SEARCH_CX
+firebase functions:secrets:set TELEGRAM_BOT_TOKEN
+firebase functions:secrets:set WHATSAPP_TOKEN
+firebase functions:secrets:set WHATSAPP_PHONE_ID
 ```
 
-Validate service worker:
+Only set secrets for features you will actually use. If you skip optional secrets, the related function should degrade gracefully or skip that channel.
 
-```powershell
-node -c public\sw.js
+Optional local-only/provider-specific values can go in `functions/.env`:
+
+```env
+ANTHROPIC_API_KEY=
+OPENAI_API_KEY=
+GEMINI_API_KEY=
+LLM_BASE_URL=http://127.0.0.1:11434/v1
+TELEGRAM_BOT_USERNAME=YourBotUsername
 ```
 
-Validate local preview server:
+Privacy rule: never put any value from `functions/.env` into `public/`.
 
-```powershell
-node -c local-server.js
-```
+### 8.3 Deploy Functions First
 
-Validate JSON:
-
-```powershell
-node -e "const fs=require('fs'); for (const f of ['functions/package.json','firestore.indexes.json','public/manifest.json']) { JSON.parse(fs.readFileSync(f,'utf8')); console.log(f + ' ok'); }"
-```
-
-Deploy free core:
-
-```powershell
-firebase deploy --only hosting,firestore:rules,firestore:indexes,storage
-```
-
-Deploy full product:
-
-```powershell
-firebase deploy
-```
-
-Deploy only Functions:
+Run:
 
 ```powershell
 firebase deploy --only functions
 ```
 
-View logs:
+Expected:
+
+- Predeploy lint runs successfully.
+- Functions deploy to `europe-west1`.
+- Firebase reports successful deployment.
+
+If this fails, fix Functions first. Do not loosen Firestore or Storage rules to work around a backend failure.
+
+### 8.4 Deploy Everything
+
+After Functions deploy successfully:
+
+```powershell
+firebase deploy --only firestore:rules,firestore:indexes,storage,hosting
+```
+
+Or deploy all configured targets:
+
+```powershell
+firebase deploy
+```
+
+---
+
+## 9. Full Product Verification
+
+Run this after Path B.
+
+### 9.1 Admin
+
+1. Open `/admin.html` on the Hosting URL.
+2. Sign in with an email listed in `ADMIN_EMAILS`.
+3. Confirm pending and published lists load.
+4. Create one test opportunity.
+5. Approve or reject one non-critical draft.
+
+If unauthorized:
+
+- Check exact email spelling in `ADMIN_EMAILS`.
+- Confirm Functions and Hosting are deployed to the same Firebase project.
+
+### 9.2 LLM
+
+1. Open an approved opportunity.
+2. Use **Generate outline** in the detail sheet.
+3. Confirm an outline appears.
+4. Check Functions logs if it fails:
 
 ```powershell
 firebase functions:log
 ```
 
+Do not paste private applicant data into LLM notes during testing.
+
+### 9.3 Push Notifications
+
+1. Sign in on the Hosting URL.
+2. Open reminder settings.
+3. Enable push.
+4. Save.
+5. Accept browser permission.
+6. Confirm Firestore has:
+
+```text
+users/{uid}.fcm_token
+users/{uid}.fcm_token_updated_at
+users/{uid}.fcm_token_provider
+```
+
+If missing:
+
+- Confirm `public/vapid-key.txt` contains the real public VAPID key.
+- Confirm the app is served over HTTPS.
+- Confirm the browser supports notifications.
+- Confirm service worker registration is not blocked.
+
+### 9.4 Telegram
+
+Telegram requires two values:
+
+- Secret: `TELEGRAM_BOT_TOKEN`
+- Public bot username exposed to the frontend configuration if you want the Connect button to work.
+
+After Functions deploy, register the webhook with Telegram:
+
+```powershell
+curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://europe-west1-<PROJECT_ID>.cloudfunctions.net/telegramWebhook"
+```
+
+Then:
+
+1. Open reminder settings.
+2. Enable Telegram.
+3. Click **Connect bot**.
+4. Send the `/start` message in Telegram.
+5. Confirm `users/{uid}.telegram_chat_id` is set.
+
+### 9.5 WhatsApp
+
+Only enable WhatsApp after you have real Meta Cloud API credentials and explicit user opt-in.
+
+Verify:
+
+1. `WHATSAPP_TOKEN` is set.
+2. `WHATSAPP_PHONE_ID` is set.
+3. A test user opted into WhatsApp.
+4. The test user has a valid WhatsApp number.
+5. The digest is tested on one internal account first.
+
+Do not assume delivery without checking logs.
+
 ---
 
-## 17. Rollback
+## 10. Production Launch Gate
+
+Do not call the launch production-ready until every item below is true.
+
+Core:
+
+- Firebase project is selected with `firebase use`.
+- Auth Google provider is enabled.
+- Firestore database exists.
+- Storage bucket exists.
+- `public/vapid-key.txt` contains the real public VAPID key.
+- Local checks in Section 6 pass.
+- Hosting, Firestore rules, Firestore indexes, and Storage rules deploy successfully.
+- Google sign-in works on the Hosting URL.
+- Users can only read/write their own private data.
+- Public clients cannot create opportunities.
+
+Full backend:
+
+- Blaze billing is enabled only after budget alerts are configured.
+- Functions deploy to `europe-west1`.
+- `ADMIN_EMAILS` is configured before admin use.
+- LLM provider and `LLM_API_KEY` are configured before AI features are tested.
+- Push token is written to Firestore.
+- Telegram webhook is registered before Telegram is advertised.
+- WhatsApp is tested with one internal opt-in user before wider use.
+- `firebase functions:log` is checked after deploy.
+
+---
+
+## 11. Rollback
 
 If Hosting breaks:
 
@@ -623,69 +493,50 @@ If Hosting breaks:
 3. Open release history.
 4. Roll back to the previous working release.
 
-If Firestore rules break clients:
-
-1. Fix `firestore.rules`.
-2. Deploy only rules:
+If Firestore or Storage rules break clients:
 
 ```powershell
-firebase deploy --only firestore:rules
+firebase deploy --only firestore:rules,storage
 ```
 
 If Functions break:
 
-1. Check logs:
+```powershell
+firebase functions:log
+firebase deploy --only functions
+```
+
+Do not open client writes to compensate for broken Functions. That turns a deployment bug into a data breach.
+
+---
+
+## 12. Command Reference
+
+Local validation:
+
+```powershell
+npm.cmd --prefix functions install
+npm.cmd --prefix functions run lint
+node -c public\sw.js
+node -c local-server.js
+```
+
+Free core deploy:
+
+```powershell
+firebase deploy --only hosting,firestore:rules,firestore:indexes,storage
+```
+
+Full backend deploy:
+
+```powershell
+firebase deploy --only functions
+firebase deploy
+```
+
+Logs:
 
 ```powershell
 firebase functions:log
 ```
-
-2. Fix the function.
-3. Redeploy only Functions:
-
-```powershell
-firebase deploy --only functions
-```
-
-Do not temporarily open Firestore writes to work around broken Functions. That trades a deployment bug for a data breach.
-
----
-
-## 18. Cost Controls
-
-To keep deployment free or near-free:
-
-1. Start with the free core launch.
-2. Keep Firestore reads low by limiting public query sizes.
-3. Avoid broad unauthenticated reads.
-4. Do not run scheduled functions too frequently.
-5. Keep LLM calls only in analyst and essay assistance.
-6. Use small/cheap models for extraction.
-7. Avoid sending full user profiles to LLMs unless required.
-8. Set budget alerts before enabling Blaze.
-9. Keep WhatsApp digest opt-in only.
-10. Watch Functions logs after every deploy.
-
-Free is not just pricing. Free also means no surprise lock-in, no exposed secrets, and no expensive work happening invisibly.
-
----
-
-## 19. Final Launch Gate
-
-Do not call the deployment production-ready until all of these are true:
-
-- `public/vapid-key.txt` contains the real Firebase Web Push public key.
-- Firebase Auth provider is enabled.
-- Firestore rules deployed.
-- Storage rules deployed.
-- Firestore indexes deployed.
-- Hosting deployed.
-- Google sign-in works.
-- Push token is written to `users/{uid}.fcm_token`.
-- Admin email is configured before using admin actions.
-- LLM provider is configured before enabling AI features.
-- WhatsApp credentials and consent flow are verified before enabling WhatsApp digest.
-- Budget alerts exist before deploying Functions on Blaze.
-
-If you follow the free core path, the app can go online without billing. If you need discovery, AI extraction, matching, scheduled reminders, admin callables, essay assistance, and WhatsApp digest, deploy the full product with billing enabled and strict budget alerts.
 

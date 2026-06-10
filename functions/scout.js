@@ -1,6 +1,7 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const Parser = require('rss-parser');
+const { withRegion, logInfo, logWarn, logError } = require('./ops');
 
 // ── 1. Static Sources (RSS) ────────────────────────────────────────────────
 // Priority order: RSS feeds are zero-cost and ToS-safe.
@@ -23,16 +24,17 @@ const BOOLEAN_QUERIES = [
 const DAILY_NEW_OPP_CAP = 40;
 const FETCH_TIMEOUT_MS = 15000;
 
-exports.scout = onSchedule({
+exports.scout = onSchedule(withRegion({
   schedule: 'every day 06:00',    // 06:00 UTC = 07:00 WAT
   timeZone: 'Africa/Lagos',
   memory: '256MiB',
   timeoutSeconds: 300,
   secrets: ['GOOGLE_SEARCH_API_KEY', 'GOOGLE_SEARCH_CX'] // Fetched if defined
-}, async () => {
+}), async () => {
   const db = getFirestore();
   let newCount = 0;
   let discoveredLinks = []; 
+  logInfo('scout_run_started', { rssSourceCount: RSS_SOURCES.length, dailyCap: DAILY_NEW_OPP_CAP });
 
   // --- A. RSS FEEDS PROCESSING ---
   const parser = new Parser({ timeout: 10000 });
@@ -50,7 +52,7 @@ exports.scout = onSchedule({
         }
       }
     } catch (err) {
-      console.warn(`Scout: failed to fetch RSS [${source.name}]:`, err.message);
+      logWarn('scout_rss_fetch_failed', { source: source.name, error: err.message });
     }
   }
 
@@ -80,11 +82,11 @@ exports.scout = onSchedule({
           }
         }
       } catch (err) {
-        console.warn(`Scout: failed to search query [${query}]:`, err.message);
+        logWarn('scout_google_search_failed', { queryHash: hashQuery(query), error: err.message });
       }
     }
   } else {
-    console.log("Scout: Skipping boolean search - missing GOOGLE_SEARCH_API_KEY or GOOGLE_SEARCH_CX configs.");
+    logInfo('scout_google_search_skipped', { reason: 'missing_config' });
   }
 
   // --- C. DEDUPLICATION & WRITING STUBS ---
@@ -101,23 +103,27 @@ exports.scout = onSchedule({
       
     if (!existing.empty) continue;
 
-    await db.collection('opportunities').add({
-      title:           opp.title,
-      link:            opp.link,
-      source:          opp.source,
-      source_name:     opp.source_name,
-      is_active:       false,
-      is_approved:     false,
-      review_status:   'pending',
-      source_type:     'ai_scout',
-      analyst_done:    false,
-      discovered_at:   Timestamp.now(),
-      analyst_version: 0,
-    });
-    newCount++;
+    try {
+      await db.collection('opportunities').add({
+        title:           opp.title,
+        link:            opp.link,
+        source:          opp.source,
+        source_name:     opp.source_name,
+        is_active:       false,
+        is_approved:     false,
+        review_status:   'pending',
+        source_type:     'ai_scout',
+        analyst_done:    false,
+        discovered_at:   Timestamp.now(),
+        analyst_version: 0,
+      });
+      newCount++;
+    } catch (err) {
+      logError('scout_write_failed', err, { sourceName: opp.source_name });
+    }
   }
 
-  console.log(`Scout: discovered ${newCount} new opportunity stubs.`);
+  logInfo('scout_run_completed', { discoveredCount: newCount, candidateCount: discoveredLinks.length });
 });
 
 function isPublicHttpUrl(value) {
@@ -136,4 +142,10 @@ function isPublicHttpUrl(value) {
     /^172\.(1[6-9]|2\d|3[0-1])\./.test(host) ||
     host.startsWith('169.254.')
   );
+}
+
+function hashQuery(query) {
+  let hash = 0;
+  for (let i = 0; i < query.length; i++) hash = ((hash << 5) - hash) + query.charCodeAt(i) | 0;
+  return String(hash);
 }

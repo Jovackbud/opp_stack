@@ -1,19 +1,24 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { getFirestore } = require('firebase-admin/firestore');
+const { withRegion, hashIdentifier, logInfo, logWarn } = require('./ops');
 
-exports.whatsappDigest = onSchedule({
+exports.whatsappDigest = onSchedule(withRegion({
   schedule: 'every friday 09:00',
   timeZone: 'Africa/Lagos',
   secrets: ['WHATSAPP_TOKEN', 'WHATSAPP_PHONE_ID']
-}, async () => {
+}), async () => {
   const db = getFirestore();
   const token = process.env.WHATSAPP_TOKEN;
   const phoneId = process.env.WHATSAPP_PHONE_ID;
-  if (!token || !phoneId) return console.warn("WhatsApp secrets missing");
+  if (!token || !phoneId) {
+    logWarn('whatsapp_digest_skipped', { reason: 'missing_config' });
+    return;
+  }
 
   // Fetch users opted into whatsapp
   const users = await db.collection('users').where('prefs.notify_channels', 'array-contains', 'whatsapp').get();
   
+  let delivered = 0;
   for (const user of users.docs) {
     const data = user.data();
     const channels = data.prefs?.notify_channels || data.reminders?.notify_channels || [];
@@ -48,6 +53,10 @@ exports.whatsappDigest = onSchedule({
         const body = await res.text().catch(() => '');
         throw new Error(`Meta API ${res.status}: ${body.slice(0, 180)}`);
       }
-    } catch(e) { console.warn("WhatsApp send failed:", e.message); }
+      delivered++;
+    } catch(e) {
+      logWarn('whatsapp_digest_send_failed', { uidHash: hashIdentifier(user.id), error: e.message });
+    }
   }
+  logInfo('whatsapp_digest_completed', { userCount: users.size, delivered });
 });

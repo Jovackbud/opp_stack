@@ -1,10 +1,11 @@
 const { onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { getFirestore } = require('firebase-admin/firestore');
+const { withRegion, logInfo, logError } = require('./ops');
 
-exports.matcher = onDocumentUpdated({
+exports.matcher = onDocumentUpdated(withRegion({
   document: 'opportunities/{oppId}',
   memory: '256MiB',
-}, async (event) => {
+}), async (event) => {
   const after = event.data.after.data();
   const before = event.data.before.data();
 
@@ -43,8 +44,13 @@ exports.matcher = onDocumentUpdated({
   });
 
   if (writes > 0) batches.push(batch);
-  await Promise.all(batches.map(item => item.commit()));
-  console.log(`Matcher: scored "${after.title}" against ${users.size} users.`);
+  try {
+    await Promise.all(batches.map(item => item.commit()));
+  } catch (err) {
+    logError('matcher_commit_failed', err, { oppId: event.params.oppId, userCount: users.size, batchCount: batches.length });
+    throw err;
+  }
+  logInfo('matcher_completed', { oppId: event.params.oppId, userCount: users.size, batchCount: batches.length });
 });
 
 function splitList(value) {

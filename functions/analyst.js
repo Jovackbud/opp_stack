@@ -3,6 +3,7 @@ const { onCall }            = require('firebase-functions/v2/https');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const cheerio   = require('cheerio');
 const { generateText } = require('./llm');
+const { withRegion, requireAuth, publicError, hashIdentifier, errorMessage, logInfo, logWarn, logError } = require('./ops');
 
 // ── Shared extraction logic ─────────────────────────────────────────────────
 async function fetchPageText(url) {
@@ -85,7 +86,7 @@ async function analyseOpportunity(link, title, suppliedText = '') {
     try {
       pageText = await fetchPageText(link);
     } catch (err) {
-      console.warn(`Analyst: could not fetch ${link}:`, err.message);
+      logWarn('analyst_fetch_failed', { linkHost: safeHost(link), error: err.message });
       // Fall back to title-only analysis (lower quality but doesn't block)
       pageText = `Opportunity title: ${title}. Full page could not be fetched.`;
     }
@@ -148,32 +149,36 @@ function normalizeOpportunity(parsed) {
 }
 
 // ── Firestore trigger: fires when Scout writes a new opportunity stub ────────
-exports.analyst = onDocumentCreated({
+exports.analyst = onDocumentCreated(withRegion({
   document:        'opportunities/{oppId}',
   memory:          '256MiB',
   timeoutSeconds:  120,
   secrets:         ['LLM_API_KEY'],
-}, async (event) => {
+}), async (event) => {
   const snap = event.data;
   const data = snap.data();
 
   // Only process stubs not yet analysed
-  if (data.analyst_done) return;
+  if (data.analyst_done) {
+    logInfo('analyst_skip_already_done', { oppId: event.params.oppId });
+    return;
+  }
 
   const db = getFirestore();
   const ref = snap.ref;
 
   // Lock immediately to prevent double-processing
   await ref.update({ analyst_started_at: Timestamp.now(), analyst_error: null });
+  logInfo('analyst_started', { oppId: event.params.oppId, linkHost: safeHost(data.link) });
 
   let extracted;
   try {
     extracted = await analyseOpportunity(data.link, data.title);
   } catch (err) {
-    console.error(`Analyst: LLM failed for ${data.link}:`, err.message);
+    logError('analyst_failed', err, { oppId: event.params.oppId, linkHost: safeHost(data.link) });
     await ref.update({
       analyst_done: false,
-      analyst_error: String(err.message || err).slice(0, 500),
+      analyst_error: errorMessage(err),
       analyst_failed_at: Timestamp.now(),
     });
     return;
@@ -189,6 +194,7 @@ exports.analyst = onDocumentCreated({
       analyst_version: 1,
       updated_at: Timestamp.now(),
     });
+    logInfo('analyst_rejected_skip', { oppId: event.params.oppId });
     return;
   }
 
@@ -210,27 +216,41 @@ exports.analyst = onDocumentCreated({
     updated_at:      Timestamp.now(),
   });
 
-  console.log(`Analyst: enriched "${extracted.title}"`);
+  logInfo('analyst_completed', { oppId: event.params.oppId, category: extracted.category, deadline: extracted.deadline });
 });
 
 // ── Callable function: on-demand parse for user-uploaded URLs ───────────────
 // Called from the frontend Upload page. Same logic, returns JSON to client.
-exports.parseUrl = onCall({
+exports.parseUrl = onCall(withRegion({
   memory:    '256MiB',
   secrets:   ['LLM_API_KEY'],
-}, async (request) => {
-  if (!request.auth) throw new Error('Unauthenticated');
+}), async (request) => {
+  const auth = requireAuth(request);
 
   const { url, text } = request.data;
   const input = text || url;
-  if (!input) throw new Error('Provide a URL or text.');
+  if (!input) throw publicError('invalid-argument', 'Provide a URL or text.');
 
   let pageText = text || '';
   if (url && !text) {
     try { pageText = await fetchPageText(url); }
-    catch (e) { pageText = `URL: ${url}`; }
+    catch (e) {
+      logWarn('parse_url_fetch_failed', { uidHash: hashIdentifier(auth.uid), linkHost: safeHost(url), error: e.message });
+      pageText = `URL: ${url}`;
+    }
   }
 
-  const extracted = await analyseOpportunity(url || 'user-upload', 'User submitted opportunity', pageText);
-  return extracted;
+  try {
+    const extracted = await analyseOpportunity(url || 'user-upload', 'User submitted opportunity', pageText);
+    logInfo('parse_url_completed', { uidHash: hashIdentifier(auth.uid), hasUrl: !!url, hasText: !!text });
+    return extracted;
+  } catch (err) {
+    logError('parse_url_failed', err, { uidHash: hashIdentifier(auth.uid), hasUrl: !!url, hasText: !!text });
+    throw publicError('internal', 'Could not parse the opportunity right now.');
+  }
 });
+
+function safeHost(value) {
+  try { return new URL(String(value || '')).hostname; }
+  catch (e) { return 'invalid'; }
+}

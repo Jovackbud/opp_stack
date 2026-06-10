@@ -1,3 +1,5 @@
+const { logInfo, logError } = require('./ops');
+
 const DEFAULT_MODELS = {
   anthropic: 'claude-haiku-4-5-20251001',
   openai: 'gpt-5-mini',
@@ -23,21 +25,27 @@ async function generateText({ prompt, maxTokens = 1000, task = 'default', json =
   if (!prompt || typeof prompt !== 'string') throw new Error('LLM prompt must be a non-empty string');
   const provider = providerName();
   const model = modelFor(task);
+  const startedAt = Date.now();
 
-  if (provider === 'anthropic' || provider === 'claude') {
-    return callAnthropic({ prompt, maxTokens, model });
+  try {
+    let output;
+    if (provider === 'anthropic' || provider === 'claude') {
+      output = await callAnthropic({ prompt, maxTokens, model });
+    } else if (provider === 'openai') {
+      output = await callOpenAI({ prompt, maxTokens, model, json });
+    } else if (provider === 'gemini') {
+      output = await callGemini({ prompt, maxTokens, model, json });
+    } else if (provider === 'openai_compatible' || provider === 'gemma' || provider === 'local') {
+      output = await callOpenAICompatible({ prompt, maxTokens, model, json });
+    } else {
+      throw new Error(`Unsupported LLM_PROVIDER "${provider}"`);
+    }
+    logInfo('llm_request_completed', { provider, model, task, json, elapsedMs: Date.now() - startedAt });
+    return output;
+  } catch (err) {
+    logError('llm_request_failed', err, { provider, model, task, json, elapsedMs: Date.now() - startedAt });
+    throw err;
   }
-  if (provider === 'openai') {
-    return callOpenAI({ prompt, maxTokens, model, json });
-  }
-  if (provider === 'gemini') {
-    return callGemini({ prompt, maxTokens, model, json });
-  }
-  if (provider === 'openai_compatible' || provider === 'gemma' || provider === 'local') {
-    return callOpenAICompatible({ prompt, maxTokens, model, json });
-  }
-
-  throw new Error(`Unsupported LLM_PROVIDER "${provider}"`);
 }
 
 async function callAnthropic({ prompt, maxTokens, model }) {

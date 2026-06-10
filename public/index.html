@@ -372,7 +372,10 @@ try {
   const messaging = messagingSupported ? getMessaging(app) : null;
   window._fb = { auth:getAuth(app), db:getFirestore(app), functions:getFunctions(app, 'europe-west1'), messaging, messagingSupported, webPushVapidKey:firebaseConfig.webPushVapidKey || firebaseConfig.vapidKey || '', collection, query, where, orderBy, limit, onSnapshot, doc, setDoc, deleteDoc, getDoc, updateDoc, serverTimestamp, httpsCallable, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, getToken, onMessage };
   window._telegramBotUsername = (firebaseConfig.telegramBotUsername || '').replace(/^@/, '');
-} catch(e) { window._fb = null; window._telegramBotUsername = ''; }
+} catch(e) {
+  console.warn('opptrack_firebase_init_failed', { message: e?.message || String(e) });
+  window._fb = null; window._telegramBotUsername = '';
+}
 window.bootOppTrack();
 
 async function resolveFirebaseConfig(fallback) {
@@ -380,7 +383,9 @@ async function resolveFirebaseConfig(fallback) {
   try {
     const res = await fetch('/__/firebase/init.json', timeoutOption());
     if (res.ok) return await res.json();
-  } catch(e) {}
+  } catch(e) {
+    console.warn('opptrack_firebase_config_fetch_failed', { message: e?.message || String(e) });
+  }
   return fallback;
 }
 function timeoutOption() {
@@ -394,12 +399,19 @@ async function resolveWebPushVapidKey() {
     if (!value || value.startsWith('REPLACE_')) return '';
     return value;
   } catch(e) {
+    console.warn('opptrack_vapid_key_fetch_failed', { message: e?.message || String(e) });
     return '';
   }
 }
 </script>
 
 <script>
+function clientLog(event, details = {}) {
+  console.warn(event, details);
+}
+window.addEventListener('error', event => clientLog('opptrack_client_error', { message: event.message, source: event.filename, line: event.lineno }));
+window.addEventListener('unhandledrejection', event => clientLog('opptrack_unhandled_rejection', { message: event.reason?.message || String(event.reason || '') }));
+
 const pages = {
   matches:['For you','Recommended opportunities','Opportunities selected and ranked around your profile.'],
   search:['Explore','Search opportunities','Browse all verified opportunities and refine with filters.'],
@@ -466,9 +478,9 @@ function bootOppTrack(){
     if(reminderSettings.push) registerPushNotifications({silent:true});
     buildProfileControls();
     fillProfile();
-    fb.onSnapshot(fb.query(fb.collection(fb.db,'opportunities'),fb.where('is_approved','==',true),fb.where('is_active','==',true),fb.orderBy('deadline_timestamp','asc'),fb.limit(80)), s => { opps = s.docs.map(d=>({id:d.id,...d.data()})); renderAll(); hideSplash(); });
-    fb.onSnapshot(fb.collection(fb.db,'users',u.uid,'applications'), s => { tracked={}; s.docs.forEach(d=>tracked[d.id]={id:d.id,...d.data()}); renderAll(); });
-    fb.onSnapshot(fb.doc(fb.db,'users',u.uid), snap => { tgChatIdStored = !!(snap.data()||{}).telegram_chat_id; syncReminderSettings(); }, ()=>{});
+    fb.onSnapshot(fb.query(fb.collection(fb.db,'opportunities'),fb.where('is_approved','==',true),fb.where('is_active','==',true),fb.orderBy('deadline_timestamp','asc'),fb.limit(80)), s => { opps = s.docs.map(d=>({id:d.id,...d.data()})); renderAll(); hideSplash(); }, e => { clientLog('opptrack_opportunities_snapshot_failed', { code:e.code, message:e.message }); opps = demoOpps; renderAll(); hideSplash(); });
+    fb.onSnapshot(fb.collection(fb.db,'users',u.uid,'applications'), s => { tracked={}; s.docs.forEach(d=>tracked[d.id]={id:d.id,...d.data()}); renderAll(); }, e => clientLog('opptrack_applications_snapshot_failed', { code:e.code, message:e.message }));
+    fb.onSnapshot(fb.doc(fb.db,'users',u.uid), snap => { tgChatIdStored = !!(snap.data()||{}).telegram_chat_id; syncReminderSettings(); }, e => clientLog('opptrack_user_snapshot_failed', { code:e.code, message:e.message }));
   });
 }
 function hideSplash(){setTimeout(()=>document.getElementById('splashScreen')?.classList.add('hide'),4000);}
@@ -1005,7 +1017,6 @@ async function saveReminderSettings(){
   reminderSettings.time = reminderTime?.value || '09:00';
   reminderSettings.email_address = reminderEmail?.value.trim() || '';
   reminderSettings.whatsapp_number = reminderWhatsapp?.value.trim() || '';
-  reminderSettings.telegram_number = reminderTelegram?.value.trim() || '';
   localStorage.setItem('oppReminderSettings', JSON.stringify(reminderSettings));
   if(reminderSettings.push) await registerPushNotifications({silent:false});
   if(user&&window._fb){

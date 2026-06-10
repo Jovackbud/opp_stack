@@ -4,7 +4,7 @@
   "engines": { "node": "20" },
   "main": "index.js",
   "scripts": {
-    "lint": "node -c index.js && node -c scout.js && node -c analyst.js && node -c matcher.js && node -c notifier.js && node -c admin_config.js && node -c essay_assist.js && node -c whatsapp_digest.js && node -c llm.js && node -c telegram.js"
+    "lint": "node -c index.js && node -c ops.js && node -c scout.js && node -c analyst.js && node -c matcher.js && node -c notifier.js && node -c admin_config.js && node -c essay_assist.js && node -c whatsapp_digest.js && node -c llm.js && node -c telegram.js"
   },
   "dependencies": {
     "firebase-admin": "^12.0.0",

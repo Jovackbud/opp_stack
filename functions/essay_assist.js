@@ -1,20 +1,21 @@
 const { onCall } = require('firebase-functions/v2/https');
 const { getFirestore } = require('firebase-admin/firestore');
 const { generateText } = require('./llm');
+const { withRegion, requireAuth, publicError, hashIdentifier, logInfo, logError } = require('./ops');
 
-exports.essayAssist = onCall({
+exports.essayAssist = onCall(withRegion({
   memory: '256MiB',
   secrets: ['LLM_API_KEY']
-}, async (request) => {
-  if (!request.auth) throw new Error("Unauthenticated");
+}), async (request) => {
+  const auth = requireAuth(request);
   const { oppId, notes } = request.data;
-  if (!oppId || typeof oppId !== 'string') throw new Error("Missing opportunity id");
+  if (!oppId || typeof oppId !== 'string') throw publicError('invalid-argument', 'Missing opportunity id.');
   
   const db = getFirestore();
   const opp = await db.collection('opportunities').doc(oppId).get();
-  if(!opp.exists) throw new Error("Not found");
+  if(!opp.exists) throw publicError('not-found', 'Opportunity was not found.');
   const oppData = opp.data();
-  if (!oppData.is_approved || !oppData.is_active) throw new Error("Opportunity is not available");
+  if (!oppData.is_approved || !oppData.is_active) throw publicError('permission-denied', 'Opportunity is not available.');
   
   const safeNotes = String(notes || "None").replace(/\s+/g, ' ').trim().slice(0, 2000);
   const prompt = `You are a highly capable writing assistant and mentor for a Nigerian applicant.
@@ -32,11 +33,18 @@ Please provide:
 
 Do not invent personal achievements. Return only clean markdown. Keep it encouraging, analytical, and specific to this opportunity.`;
 
-  const draft = await generateText({
-    task: 'essay',
-    prompt,
-    maxTokens: 800,
-  });
+  let draft;
+  try {
+    draft = await generateText({
+      task: 'essay',
+      prompt,
+      maxTokens: 800,
+    });
+  } catch (err) {
+    logError('essay_assist_failed', err, { uidHash: hashIdentifier(auth.uid), oppId });
+    throw publicError('internal', 'Essay assistance is temporarily unavailable.');
+  }
   
+  logInfo('essay_assist_completed', { uidHash: hashIdentifier(auth.uid), oppId });
   return { draft };
 });

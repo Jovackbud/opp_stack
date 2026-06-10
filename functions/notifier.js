@@ -2,16 +2,20 @@ const { onSchedule }   = require('firebase-functions/v2/scheduler');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const { getMessaging } = require('firebase-admin/messaging');
 const { sendTelegram }  = require('./telegram');
+const { withRegion, hashIdentifier, logInfo, logWarn } = require('./ops');
 
-exports.notifier = onSchedule({
+exports.notifier = onSchedule(withRegion({
   schedule:    'every day 07:00',   // 07:00 UTC = 08:00 WAT
   timeZone:    'Africa/Lagos',
   memory:      '256MiB',
   timeoutSeconds: 120,
   secrets: ['TELEGRAM_BOT_TOKEN'],
-}, async () => {
+}), async () => {
   const db  = getFirestore();
   const fcm = getMessaging();
+  let matchUsers = 0;
+  let matchDeliveries = 0;
+  let deadlineDeliveries = 0;
 
   // ── 1. New match notifications ────────────────────────────────────────────
   const users = await db.collection('users').get();
@@ -36,9 +40,12 @@ exports.notifier = onSchedule({
     const top     = matches.docs[0].data();
     const opp     = await db.collection('opportunities').doc(top.opp_id).get();
     const oppData = opp.data() || {};
+    let attempted = false;
+    let delivered = false;
 
     // ── Push ──
     if (channels.includes('push') && token) {
+      attempted = true;
       try {
         await fcm.send({
           token,
@@ -50,8 +57,10 @@ exports.notifier = onSchedule({
           android: { priority: 'high' },
           apns:    { payload: { aps: { badge: count } } },
         });
+        delivered = true;
+        matchDeliveries++;
       } catch (e) {
-        console.warn('Notifier: FCM send failed:', e.code || e.message);
+        logWarn('notifier_match_fcm_failed', { uidHash: hashIdentifier(uid), code: e.code || null, error: e.message });
         if (isDeadFcmToken(e)) {
           await db.collection('users').doc(uid).update({ fcm_token: null });
         }
@@ -60,6 +69,7 @@ exports.notifier = onSchedule({
 
     // ── Telegram ──
     if (channels.includes('telegram') && userData.telegram_chat_id) {
+      attempted = true;
       const msg = `🔔 <b>${count} new match${count > 1 ? 'es' : ''} for you</b>\n\n` +
                   `Top pick: <b>${oppData.title || 'New opportunity'}</b>\n` +
                   (oppData.org ? `🏢 ${oppData.org}\n` : '') +
@@ -67,18 +77,28 @@ exports.notifier = onSchedule({
                   `\nOpen OppTrack to view all matches.`;
       try {
         await sendTelegram(userData.telegram_chat_id, msg);
+        delivered = true;
+        matchDeliveries++;
       } catch (e) {
-        console.warn('Notifier: Telegram send failed:', e.message);
+        logWarn('notifier_match_telegram_failed', { uidHash: hashIdentifier(uid), code: e.code || null, error: e.message });
         if (e.code === 'telegram/dead-chat') {
           await db.collection('users').doc(uid).update({ telegram_chat_id: null });
         }
       }
     }
 
-    // Mark all as notified
-    const batch = db.batch();
-    matches.docs.forEach(m => batch.update(m.ref, { notified: true }));
-    await batch.commit();
+    if (!attempted || delivered) {
+      const batch = db.batch();
+      matches.docs.forEach(m => batch.update(m.ref, {
+        notified: true,
+        notified_at: Timestamp.now(),
+        notification_status: delivered ? 'delivered' : 'no_channel',
+      }));
+      await batch.commit();
+      matchUsers++;
+    } else {
+      logWarn('notifier_match_retry_left_pending', { uidHash: hashIdentifier(uid), matchCount: count });
+    }
   }
 
   // ── 2. Deadline alerts for tracked applications ───────────────────────────
@@ -130,8 +150,9 @@ exports.notifier = onSchedule({
               },
               data: { type: 'deadline_alert', opp_id: oppDoc.id, days: String(days) },
             });
+            deadlineDeliveries++;
           } catch (e) {
-            console.warn('Notifier: deadline alert FCM failed:', e.code || e.message);
+            logWarn('notifier_deadline_fcm_failed', { uidHash: hashIdentifier(uid), oppId: oppDoc.id, days, code: e.code || null, error: e.message });
             if (isDeadFcmToken(e)) {
               await db.collection('users').doc(uid).update({ fcm_token: null });
             }
@@ -147,8 +168,9 @@ exports.notifier = onSchedule({
                       `Open OppTrack to review your application.`;
           try {
             await sendTelegram(userData.telegram_chat_id, msg);
+            deadlineDeliveries++;
           } catch (e) {
-            console.warn('Notifier: deadline alert Telegram failed:', e.message);
+            logWarn('notifier_deadline_telegram_failed', { uidHash: hashIdentifier(uid), oppId: oppDoc.id, days, code: e.code || null, error: e.message });
             if (e.code === 'telegram/dead-chat') {
               await db.collection('users').doc(uid).update({ telegram_chat_id: null });
             }
@@ -158,7 +180,7 @@ exports.notifier = onSchedule({
     }
   }
 
-  console.log('Notifier: run complete.');
+  logInfo('notifier_run_completed', { userCount: users.size, matchUsers, matchDeliveries, deadlineDeliveries });
 });
 
 function isDeadFcmToken(error) {

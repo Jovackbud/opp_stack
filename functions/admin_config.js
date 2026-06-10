@@ -1,8 +1,9 @@
 const { onCall } = require('firebase-functions/v2/https');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
+const { withRegion, requireAuth, publicError, hashIdentifier, logInfo, logWarn } = require('./ops');
 
-exports.adminProcess = onCall(async (request) => {
-  if (!request.auth) throw new Error("Unauthenticated");
+exports.adminProcess = onCall(withRegion(), async (request) => {
+  const auth = requireAuth(request);
   const email = String(request.auth.token.email || '').trim().toLowerCase();
   const adminEmails = (process.env.ADMIN_EMAILS || "")
     .split(",")
@@ -11,11 +12,13 @@ exports.adminProcess = onCall(async (request) => {
   
   // Clean checks
   if (!adminEmails.includes(email)) {
-    throw new Error("Unauthorized");
+    logWarn('admin_access_denied', { uidHash: hashIdentifier(auth.uid) });
+    throw publicError('permission-denied', 'Admin access is required.');
   }
 
   const { oppId, action, opportunity } = request.data;
   const db = getFirestore();
+  logInfo('admin_action_started', { action, oppId: oppId || null, uidHash: hashIdentifier(auth.uid) });
 
   if (action === 'list') {
     const [pendingSnap, publishedSnap] = await Promise.all([
@@ -38,7 +41,7 @@ exports.adminProcess = onCall(async (request) => {
   }
   
   if (action === 'approve') {
-    if (!oppId) throw new Error("Missing opportunity id");
+    if (!oppId) throw publicError('invalid-argument', 'Missing opportunity id.');
     await db.collection('opportunities').doc(oppId).update({
       is_approved: true,
       is_active: true,
@@ -48,7 +51,7 @@ exports.adminProcess = onCall(async (request) => {
       updated_at: Timestamp.now(),
     });
   } else if (action === 'reject') {
-    if (!oppId) throw new Error("Missing opportunity id");
+    if (!oppId) throw publicError('invalid-argument', 'Missing opportunity id.');
     await db.collection('opportunities').doc(oppId).update({
       is_approved: false,
       is_active: false,
@@ -58,7 +61,7 @@ exports.adminProcess = onCall(async (request) => {
     });
   } else if (action === 'create') {
     if (!opportunity || !opportunity.title || !opportunity.link) {
-      throw new Error("Missing opportunity title or link");
+      throw publicError('invalid-argument', 'Missing opportunity title or link.');
     }
     await db.collection('opportunities').add({
       ...sanitizeOpportunity(opportunity),
@@ -73,15 +76,16 @@ exports.adminProcess = onCall(async (request) => {
       updated_at: Timestamp.now(),
     });
   } else if (action === 'update') {
-    if (!oppId || !opportunity) throw new Error("Missing opportunity update payload");
+    if (!oppId || !opportunity) throw publicError('invalid-argument', 'Missing opportunity update payload.');
     await db.collection('opportunities').doc(oppId).update({
       ...sanitizeOpportunity(opportunity),
       updated_by: email,
       updated_at: Timestamp.now(),
     });
   } else {
-    throw new Error("Unsupported admin action");
+    throw publicError('invalid-argument', 'Unsupported admin action.');
   }
+  logInfo('admin_action_completed', { action, oppId: oppId || null, uidHash: hashIdentifier(auth.uid) });
   return { success: true };
 });
 
@@ -129,8 +133,8 @@ function sanitizeOpportunity(opportunity) {
 function publicHttpUrl(value) {
   let parsed;
   try { parsed = new URL(String(value || '')); }
-  catch (e) { throw new Error('Invalid opportunity link'); }
-  if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('Only HTTP(S) opportunity links are allowed');
+  catch (e) { throw publicError('invalid-argument', 'Invalid opportunity link.'); }
+  if (!['http:', 'https:'].includes(parsed.protocol)) throw publicError('invalid-argument', 'Only HTTP(S) opportunity links are allowed.');
   const host = parsed.hostname.toLowerCase();
   if (
     host === 'localhost' ||
@@ -142,7 +146,7 @@ function publicHttpUrl(value) {
     /^172\.(1[6-9]|2\d|3[0-1])\./.test(host) ||
     host.startsWith('169.254.')
   ) {
-    throw new Error('Private or local opportunity links are not allowed');
+    throw publicError('invalid-argument', 'Private or local opportunity links are not allowed.');
   }
   return parsed.href;
 }

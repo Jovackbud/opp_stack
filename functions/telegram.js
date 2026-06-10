@@ -1,5 +1,6 @@
 const { onRequest }   = require('firebase-functions/v2/https');
 const { getFirestore } = require('firebase-admin/firestore');
+const { withRegion, hashIdentifier, logInfo, logWarn, logError } = require('./ops');
 
 // ── Telegram Bot API sender ───────────────────────────────────────────────────
 /**
@@ -13,7 +14,7 @@ const { getFirestore } = require('firebase-admin/firestore');
 async function sendTelegram(chatId, text) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
-    console.warn('Telegram: TELEGRAM_BOT_TOKEN not set — skipping send.');
+    logWarn('telegram_send_skipped', { reason: 'missing_config' });
     return;
   }
 
@@ -54,9 +55,9 @@ async function sendTelegram(chatId, text) {
  *   3. This handler writes telegram_chat_id → users/<uid> in Firestore.
  *   4. Replies with a confirmation so the user sees immediate feedback.
  */
-exports.telegramWebhook = onRequest({
+exports.telegramWebhook = onRequest(withRegion({
   secrets: ['TELEGRAM_BOT_TOKEN'],
-}, async (req, res) => {
+}), async (req, res) => {
   // Only accept POST from Telegram
   if (req.method !== 'POST') {
     res.status(405).send('Method Not Allowed');
@@ -73,6 +74,10 @@ exports.telegramWebhook = onRequest({
 
   const chatId = message.chat?.id;
   const text   = (message.text || '').trim();
+  if (!chatId) {
+    res.sendStatus(200);
+    return;
+  }
 
   // Only handle /start <uid> commands
   if (!text.startsWith('/start')) {
@@ -98,7 +103,7 @@ exports.telegramWebhook = onRequest({
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
-      console.warn(`Telegram webhook: unknown uid "${uid}" from chat ${chatId}`);
+      logWarn('telegram_webhook_unknown_uid', { uidHash: hashIdentifier(uid), chatHash: hashIdentifier(chatId) });
       await sendTelegram(chatId,
         '❌ Could not link your account. Please try again from the OppTrack app.'
       ).catch(() => {});
@@ -107,14 +112,14 @@ exports.telegramWebhook = onRequest({
     }
 
     await userRef.update({ telegram_chat_id: String(chatId) });
-    console.log(`Telegram: linked chat_id ${chatId} → uid ${uid}`);
+    logInfo('telegram_webhook_linked', { uidHash: hashIdentifier(uid), chatHash: hashIdentifier(chatId) });
 
     await sendTelegram(chatId,
       '✅ <b>Telegram connected!</b>\n\nYou\'ll now receive OppTrack reminders and match alerts here. You can manage your notification settings in the app at any time.'
     ).catch(() => {});
 
   } catch (e) {
-    console.error('Telegram webhook error:', e.message);
+    logError('telegram_webhook_failed', e, { uidHash: hashIdentifier(uid), chatHash: hashIdentifier(chatId) });
   }
 
   // Always 200 — prevents Telegram from retrying
